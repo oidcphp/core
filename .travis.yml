@@ -1,0 +1,23 @@
+sudo: false
+os: linux
+language: php
+
+php:
+  - 7.1
+  - 7.2
+  - 7.3
+
+install:
+  - composer install --prefer-dist
+
+script:
+  - make test
+  - make analyse
+
+after_success:
+  - if [[ "7.2" == "${TRAVIS_PHP_VERSION}" ]]; then travis_retry php vendor/bin/php-coveralls -v ; fi
+
+cache:
+  directories:
+    - $HOME/.composer/cache/files
+    - vendor
