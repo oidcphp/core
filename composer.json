@@ -1,10 +1,11 @@
 {
-    "name": "mileschou/composer-template",
-    "description": "The template for create Composer project",
+    "name": "oidc/client",
+    "description": "OpenID Connect Relying Party (RP, Client) implementation for PHP",
     "type": "library",
     "license": "MIT",
     "keywords": [
-        "template"
+        "oidc",
+        "openid connect"
     ],
     "authors": [
         {
@@ -23,12 +24,16 @@
     },
     "autoload": {
         "psr-4": {
-            "MilesChou\\Template\\": "src"
+            "OpenIDConnect\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
             "Tests\\": "tests"
         }
+    },
+    "config": {
+        "preferred-install": "dist",
+        "sort-packages": true
     }
 }
