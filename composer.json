@@ -1,6 +1,6 @@
 {
-    "name": "oidc/client",
-    "description": "OpenID Connect Relying Party (RP, Client) implementation for PHP",
+    "name": "oidc/core",
+    "description": "OpenID Connect Core Library implementation for PHP",
     "type": "library",
     "license": "MIT",
     "keywords": [
