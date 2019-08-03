@@ -4,6 +4,7 @@ namespace OpenIDConnect\Client;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface as HttpClientInterface;
+use GuzzleHttp\Exception\GuzzleException;
 use Psr\Http\Message\ResponseInterface;
 use function GuzzleHttp\json_decode;
 
@@ -57,7 +58,7 @@ class Discoverer
      * @param ResponseInterface $response
      * @return array
      */
-    private function processResponse(ResponseInterface $response)
+    private function processResponse(ResponseInterface $response): array
     {
         if (200 !== $response->getStatusCode()) {
             throw new \RuntimeException('Server Error');
