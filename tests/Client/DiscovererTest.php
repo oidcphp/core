@@ -3,6 +3,7 @@
 namespace Tests\Client;
 
 use OpenIDConnect\Client\Discoverer;
+use OpenIDConnect\Client\Provider;
 use Tests\TestCase;
 
 class DiscovererTest extends TestCase
@@ -72,5 +73,31 @@ class DiscovererTest extends TestCase
         $actual = $target->discover('http://somewhere');
 
         $this->assertArrayHasKey('issuer', $actual);
+    }
+
+    /**
+     * @test
+     */
+    public function shouldGetAllConfigWhenUsingGoogleConfig(): void
+    {
+        $target = new Provider(self::GOOGLE_OPENID_CONNECT_CONFIG);
+
+        $this->assertSame('https://accounts.google.com', $target->issuer());
+        $this->assertSame('https://accounts.google.com/o/oauth2/v2/auth', $target->authorizationEndpoint());
+        $this->assertSame('https://oauth2.googleapis.com/token', $target->tokenEndpoint());
+        $this->assertSame('https://www.googleapis.com/oauth2/v3/certs', $target->jwksUri());
+        $this->assertSame([
+            'code',
+            'token',
+            'id_token',
+            'code token',
+            'code id_token',
+            'token id_token',
+            'code token id_token',
+            'none',
+        ], $target->responseTypesSupported());
+
+        $this->assertSame(['public'], $target->subjectTypesSupported());
+        $this->assertSame(['RS256'], $target->idTokenSigningAlgValuesSupported());
     }
 }
