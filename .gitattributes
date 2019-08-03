@@ -2,6 +2,8 @@
 * text=lf
 
 # Exclude unused files
+/app export-ignore
+/bin export-ignore
 /tests export-ignore
 /.coveralls.yml export-ignore
 /.gitattributes export-ignore
