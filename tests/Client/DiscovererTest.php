@@ -64,7 +64,7 @@ class DiscovererTest extends TestCase
     /**
      * @test
      */
-    public function shouldGotResponseArrayWhenDiscover(): void
+    public function shouldProviderMetadataWhenDiscover(): void
     {
         $target = new Discoverer($this->createHttpMockOption(
             $this->createHttpJsonResponse(self::GOOGLE_OPENID_CONNECT_CONFIG)
@@ -72,20 +72,12 @@ class DiscovererTest extends TestCase
 
         $actual = $target->discover('http://somewhere');
 
-        $this->assertArrayHasKey('issuer', $actual);
-    }
+        $this->assertInstanceOf(ProviderMetadata::class, $actual);
 
-    /**
-     * @test
-     */
-    public function shouldGetAllConfigWhenUsingGoogleConfig(): void
-    {
-        $target = new ProviderMetadata(self::GOOGLE_OPENID_CONNECT_CONFIG);
-
-        $this->assertSame('https://accounts.google.com', $target->issuer());
-        $this->assertSame('https://accounts.google.com/o/oauth2/v2/auth', $target->authorizationEndpoint());
-        $this->assertSame('https://oauth2.googleapis.com/token', $target->tokenEndpoint());
-        $this->assertSame('https://www.googleapis.com/oauth2/v3/certs', $target->jwksUri());
+        $this->assertSame('https://accounts.google.com', $actual->issuer());
+        $this->assertSame('https://accounts.google.com/o/oauth2/v2/auth', $actual->authorizationEndpoint());
+        $this->assertSame('https://oauth2.googleapis.com/token', $actual->tokenEndpoint());
+        $this->assertSame('https://www.googleapis.com/oauth2/v3/certs', $actual->jwksUri());
         $this->assertSame([
             'code',
             'token',
@@ -95,9 +87,9 @@ class DiscovererTest extends TestCase
             'token id_token',
             'code token id_token',
             'none',
-        ], $target->responseTypesSupported());
+        ], $actual->responseTypesSupported());
 
-        $this->assertSame(['public'], $target->subjectTypesSupported());
-        $this->assertSame(['RS256'], $target->idTokenSigningAlgValuesSupported());
+        $this->assertSame(['public'], $actual->subjectTypesSupported());
+        $this->assertSame(['RS256'], $actual->idTokenSigningAlgValuesSupported());
     }
 }

@@ -35,15 +35,15 @@ class Discoverer
      * Discover the OpenID Connect provider
      *
      * @param string $url
-     * @return array
+     * @return ProviderMetadata
      */
-    public function discover(string $url): array
+    public function discover(string $url): ProviderMetadata
     {
         $discoveryUri = $url . self::OPENID_CONNECT_DISCOVERY;
 
         $response = $this->httpClient->request('GET', $discoveryUri);
 
-        return $this->processResponse($response);
+        return ProviderMetadata::create($this->processResponse($response));
     }
 
     /**

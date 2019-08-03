@@ -2,13 +2,15 @@
 
 namespace OpenIDConnect;
 
+use ArrayAccess;
+use BadMethodCallException;
 use Illuminate\Support\Collection;
 use OutOfBoundsException;
 
 /**
  * @see https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata
  */
-class ProviderMetadata
+class ProviderMetadata implements ArrayAccess
 {
     public const REQUIRED_METADATA = [
         'authorization_endpoint',
@@ -100,5 +102,25 @@ class ProviderMetadata
     public function tokenEndpoint(): string
     {
         return $this->metadata['token_endpoint'];
+    }
+
+    public function offsetExists($key)
+    {
+        return $this->metadata->offsetExists($key);
+    }
+
+    public function offsetGet($key)
+    {
+        return $this->metadata->offsetGet($key);
+    }
+
+    public function offsetSet($key, $value)
+    {
+        throw new BadMethodCallException('Cannot set any value on a ProviderMetadata instance');
+    }
+
+    public function offsetUnset($key)
+    {
+        throw new BadMethodCallException('Cannot unset any value on a ProviderMetadata instance');
     }
 }
