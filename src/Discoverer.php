@@ -1,6 +1,6 @@
 <?php
 
-namespace OpenIDConnect\Client;
+namespace OpenIDConnect;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface as HttpClientInterface;

@@ -1,6 +1,6 @@
 <?php
 
-namespace OpenIDConnect\Client;
+namespace OpenIDConnect;
 
 use Illuminate\Support\Collection;
 use OutOfBoundsException;
@@ -8,7 +8,7 @@ use OutOfBoundsException;
 /**
  * @see https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata
  */
-class Provider
+class ProviderMetadata
 {
     public const REQUIRED_METADATA = [
         'authorization_endpoint',

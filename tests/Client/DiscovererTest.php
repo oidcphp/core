@@ -2,8 +2,8 @@
 
 namespace Tests\Client;
 
-use OpenIDConnect\Client\Discoverer;
-use OpenIDConnect\Client\Provider;
+use OpenIDConnect\Discoverer;
+use OpenIDConnect\ProviderMetadata;
 use Tests\TestCase;
 
 class DiscovererTest extends TestCase
@@ -80,7 +80,7 @@ class DiscovererTest extends TestCase
      */
     public function shouldGetAllConfigWhenUsingGoogleConfig(): void
     {
-        $target = new Provider(self::GOOGLE_OPENID_CONNECT_CONFIG);
+        $target = new ProviderMetadata(self::GOOGLE_OPENID_CONNECT_CONFIG);
 
         $this->assertSame('https://accounts.google.com', $target->issuer());
         $this->assertSame('https://accounts.google.com/o/oauth2/v2/auth', $target->authorizationEndpoint());
