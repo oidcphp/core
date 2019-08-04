@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Client;
+namespace Tests\Core;
 
 use BadMethodCallException;
 use OpenIDConnect\ProviderMetadata;
@@ -31,7 +31,7 @@ class ProviderMetadataTest extends TestCase
      * @expectedException OutOfBoundsException
      * @test
      */
-    public function shouldThrowExceptionReturnAndCanUseIssetWithProviderMetadataInstance($missingField): void
+    public function shouldThrowExceptionReturnAndCanUseIssetWithInstance($missingField): void
     {
         $data = self::TEST_WORK_DATA;
         unset($data[$missingField]);
@@ -42,7 +42,7 @@ class ProviderMetadataTest extends TestCase
     /**
      * @test
      */
-    public function shouldReturnAndCanUseIssetWithProviderMetadataInstance(): void
+    public function shouldReturnAndCanUseIssetWithInstance(): void
     {
         $target = new ProviderMetadata(self::TEST_WORK_DATA);
 
@@ -54,7 +54,7 @@ class ProviderMetadataTest extends TestCase
      * @expectedException BadMethodCallException
      * @test
      */
-    public function shouldThrowExceptionWhenSetValueOnProviderMetadataInstance(): void
+    public function shouldThrowExceptionWhenSetValueOnInstance(): void
     {
         $target = new ProviderMetadata(self::TEST_WORK_DATA);
 
@@ -65,7 +65,7 @@ class ProviderMetadataTest extends TestCase
      * @expectedException BadMethodCallException
      * @test
      */
-    public function shouldThrowExceptionWhenUnsetValueOnProviderMetadataInstance(): void
+    public function shouldThrowExceptionWhenUnsetValueOnInstance(): void
     {
         $target = new ProviderMetadata(self::TEST_WORK_DATA);
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Client;
+namespace Tests\Core;
 
 use OpenIDConnect\Discoverer;
 use OpenIDConnect\ProviderMetadata;

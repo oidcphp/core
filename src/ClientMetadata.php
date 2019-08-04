@@ -8,18 +8,15 @@ use Illuminate\Support\Collection;
 use OutOfBoundsException;
 
 /**
- * @see https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata
+ * The metadata of client registration
+ *
+ * @see https://tools.ietf.org/html/rfc6749#section-2
  */
-class ProviderMetadata implements ArrayAccess
+class ClientMetadata implements ArrayAccess
 {
     public const REQUIRED_METADATA = [
-        'authorization_endpoint',
-        'id_token_signing_alg_values_supported',
-        'issuer',
-        'jwks_uri',
-        'response_types_supported',
-        'subject_types_supported',
-        'token_endpoint',
+        'client_id',
+        'client_secret',
     ];
 
     /**
@@ -51,49 +48,17 @@ class ProviderMetadata implements ArrayAccess
     /**
      * @return string
      */
-    public function authorizationEndpoint(): string
+    public function id(): string
     {
-        return $this->metadata['authorization_endpoint'];
-    }
-
-    /**
-     * @return array
-     */
-    public function idTokenSigningAlgValuesSupported(): array
-    {
-        return $this->metadata['id_token_signing_alg_values_supported'];
+        return $this->metadata['client_id'];
     }
 
     /**
      * @return string
      */
-    public function issuer(): string
+    public function secret(): string
     {
-        return $this->metadata['issuer'];
-    }
-
-    /**
-     * @return string
-     */
-    public function jwksUri(): string
-    {
-        return $this->metadata['jwks_uri'];
-    }
-
-    /**
-     * @return array
-     */
-    public function responseTypesSupported(): array
-    {
-        return $this->metadata['response_types_supported'];
-    }
-
-    /**
-     * @return array
-     */
-    public function subjectTypesSupported(): array
-    {
-        return $this->metadata['subject_types_supported'];
+        return $this->metadata['client_secret'];
     }
 
     /**
@@ -102,14 +67,6 @@ class ProviderMetadata implements ArrayAccess
     public function toArray(): array
     {
         return $this->metadata->toArray();
-    }
-
-    /**
-     * @return string
-     */
-    public function tokenEndpoint(): string
-    {
-        return $this->metadata['token_endpoint'];
     }
 
     public function offsetExists($key)
