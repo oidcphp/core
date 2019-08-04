@@ -30,11 +30,15 @@ Desktop.ini
 /.classpath
 
 # SVN files
-.svn/
+.svn
 
 # Compoesr files
 /vendor
 /composer.lock
+
+# Config files
+/phpcs.xml
+/phpunit.xml
 
 # Artifacts files
 /build
