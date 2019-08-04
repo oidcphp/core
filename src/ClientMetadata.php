@@ -3,8 +3,7 @@
 namespace OpenIDConnect;
 
 use ArrayAccess;
-use BadMethodCallException;
-use Illuminate\Support\Collection;
+use OpenIDConnect\Traits\MetadataAwareTraits;
 use OutOfBoundsException;
 
 /**
@@ -14,16 +13,13 @@ use OutOfBoundsException;
  */
 class ClientMetadata implements ArrayAccess
 {
+    use MetadataAwareTraits;
+
     public const REQUIRED_METADATA = [
         'client_id',
         'client_secret',
         'redirect_uri',
     ];
-
-    /**
-     * @var Collection
-     */
-    private $metadata;
 
     /**
      * @param array $metadata
@@ -68,33 +64,5 @@ class ClientMetadata implements ArrayAccess
     public function secret(): string
     {
         return $this->metadata['client_secret'];
-    }
-
-    /**
-     * @return array
-     */
-    public function toArray(): array
-    {
-        return $this->metadata->toArray();
-    }
-
-    public function offsetExists($key)
-    {
-        return $this->metadata->offsetExists($key);
-    }
-
-    public function offsetGet($key)
-    {
-        return $this->metadata->offsetGet($key);
-    }
-
-    public function offsetSet($key, $value)
-    {
-        throw new BadMethodCallException('Cannot set any value on a ProviderMetadata instance');
-    }
-
-    public function offsetUnset($key)
-    {
-        throw new BadMethodCallException('Cannot unset any value on a ProviderMetadata instance');
     }
 }

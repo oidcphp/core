@@ -3,8 +3,7 @@
 namespace OpenIDConnect;
 
 use ArrayAccess;
-use BadMethodCallException;
-use Illuminate\Support\Collection;
+use OpenIDConnect\Traits\MetadataAwareTraits;
 use OutOfBoundsException;
 
 /**
@@ -12,6 +11,8 @@ use OutOfBoundsException;
  */
 class ProviderMetadata implements ArrayAccess
 {
+    use MetadataAwareTraits;
+
     public const REQUIRED_METADATA = [
         'authorization_endpoint',
         'id_token_signing_alg_values_supported',
@@ -21,11 +22,6 @@ class ProviderMetadata implements ArrayAccess
         'subject_types_supported',
         'token_endpoint',
     ];
-
-    /**
-     * @var Collection
-     */
-    private $metadata;
 
     /**
      * @param array $metadata
@@ -97,38 +93,10 @@ class ProviderMetadata implements ArrayAccess
     }
 
     /**
-     * @return array
-     */
-    public function toArray(): array
-    {
-        return $this->metadata->toArray();
-    }
-
-    /**
      * @return string
      */
     public function tokenEndpoint(): string
     {
         return $this->metadata['token_endpoint'];
-    }
-
-    public function offsetExists($key)
-    {
-        return $this->metadata->offsetExists($key);
-    }
-
-    public function offsetGet($key)
-    {
-        return $this->metadata->offsetGet($key);
-    }
-
-    public function offsetSet($key, $value)
-    {
-        throw new BadMethodCallException('Cannot set any value on a ProviderMetadata instance');
-    }
-
-    public function offsetUnset($key)
-    {
-        throw new BadMethodCallException('Cannot unset any value on a ProviderMetadata instance');
     }
 }
