@@ -2,65 +2,29 @@
 
 namespace OpenIDConnect;
 
-use GuzzleHttp\Psr7\Response;
-use GuzzleHttp\Psr7\Uri;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\UriInterface;
+use League\OAuth2\Client\Provider\AbstractProvider;
 
 class Client
 {
     /**
-     * @var ProviderMetadata
+     * @var AbstractProvider
      */
-    private $providerMetadata;
+    private $leagueOAuth2Client;
 
     /**
-     * @var ClientMetadata
+     * @param AbstractProvider $leagueOAuth2Client
      */
-    private $clientMetadata;
-
-    /**
-     * @param ProviderMetadata $providerMetadata
-     * @param ClientMetadata $clientMetadata
-     */
-    public function __construct(ProviderMetadata $providerMetadata, ClientMetadata $clientMetadata)
+    public function __construct(AbstractProvider $leagueOAuth2Client)
     {
-        $this->providerMetadata = $providerMetadata;
-        $this->clientMetadata = $clientMetadata;
+        $this->leagueOAuth2Client = $leagueOAuth2Client;
     }
 
     /**
-     * @param array $params
-     * @return UriInterface
+     * @param array $options
+     * @return string
      */
-    public function authorizationUrl(array $params = []): UriInterface
+    public function authorizationUrl(array $options = []): string
     {
-        $endpoint = $this->providerMetadata->authorizationEndpoint();
-
-        $params = array_merge([
-            'client_id' => $this->clientMetadata->id(),
-            'scope' => 'openid',
-            'response_type' => 'code',
-        ], $params);
-
-        return Uri::withQueryValues(new Uri($endpoint), $params);
-    }
-
-    /**
-     * @param array $params
-     * @param int $status
-     * @return ResponseInterface
-     */
-    public function authorizationResponse(array $params = [], int $status = 302): ResponseInterface
-    {
-        $uri = $this->authorizationUrl($params);
-
-        $response = new Response($status);
-
-        if (302 === $status) {
-            return $response->withHeader('Location', (string)$uri);
-        }
-
-        return $response;
+        return $this->leagueOAuth2Client->getAuthorizationUrl($options);
     }
 }

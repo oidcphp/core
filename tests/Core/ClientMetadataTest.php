@@ -12,6 +12,7 @@ class ClientMetadataTest extends TestCase
     private const TEST_WORK_DATA = [
         'client_id' => 'some_id',
         'client_secret' => 'some_secret',
+        'redirect_uri' => 'https://someredirect',
     ];
 
     public function missionRequiredField()

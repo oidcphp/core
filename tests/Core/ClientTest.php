@@ -16,8 +16,10 @@ class ClientTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->target = new Client(
-            ProviderMetadata::create([
+        parent::setUp();
+
+        $this->app->singleton(ProviderMetadata::class, function () {
+            return ProviderMetadata::create([
                 'issuer' => 'https://somewhere',
                 'authorization_endpoint' => 'https://somewhere/auth',
                 'token_endpoint' => 'https://somewhere/token',
@@ -25,12 +27,18 @@ class ClientTest extends TestCase
                 'response_types_supported' => ['code'],
                 'subject_types_supported' => ['public'],
                 'id_token_signing_alg_values_supported' => ['RS256'],
-            ]),
-            ClientMetadata::create([
+            ]);
+        });
+
+        $this->app->singleton(ClientMetadata::class, function () {
+            return ClientMetadata::create([
                 'client_id' => 'some_id',
                 'client_secret' => 'some_secret',
-            ])
-        );
+                'redirect_uri' => 'https://someredirect',
+            ]);
+        });
+
+        $this->target = $this->app->make(Client::class);
     }
 
     protected function tearDown(): void
@@ -43,23 +51,9 @@ class ClientTest extends TestCase
      */
     public function shouldReturnAuthorizationUrlWhenCallSame(): void
     {
-        $expected = 'https://somewhere/auth?client_id=some_id&scope=openid&response_type=code';
-
         $actual = $this->target->authorizationUrl();
 
-        $this->assertSame($expected, (string)$actual);
-    }
-
-    /**
-     * @test
-     */
-    public function shouldReturnAuthorizationResponseWhenCallSame(): void
-    {
-        $expected = 'https://somewhere/auth?client_id=some_id&scope=openid&response_type=code';
-
-        $actual = $this->target->authorizationResponse();
-
-        $this->assertSame(302, $actual->getStatusCode());
-        $this->assertSame($expected, (string)$actual->getHeaderLine('Location'));
+        $this->assertContains('response_type=code', $actual);
+        $this->assertContains('client_id=some_id', $actual);
     }
 }

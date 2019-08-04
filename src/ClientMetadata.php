@@ -17,6 +17,7 @@ class ClientMetadata implements ArrayAccess
     public const REQUIRED_METADATA = [
         'client_id',
         'client_secret',
+        'redirect_uri',
     ];
 
     /**
@@ -51,6 +52,14 @@ class ClientMetadata implements ArrayAccess
     public function id(): string
     {
         return $this->metadata['client_id'];
+    }
+
+    /**
+     * @return string
+     */
+    public function redirectUri(): string
+    {
+        return $this->metadata['redirect_uri'];
     }
 
     /**

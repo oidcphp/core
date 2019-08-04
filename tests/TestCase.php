@@ -7,11 +7,30 @@ use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response as HttpResponse;
+use Illuminate\Container\Container;
+use OpenIDConnect\ServiceProvider\Laravel;
 use Psr\Http\Message\ResponseInterface;
 use function GuzzleHttp\json_encode;
 
 class TestCase extends \PHPUnit\Framework\TestCase
 {
+    /**
+     * @var Container
+     */
+    protected $app;
+
+    protected function setUp(): void
+    {
+        $this->app = new Container();
+
+        (new Laravel($this->app))->register();
+    }
+
+    protected function tearDown(): void
+    {
+        $this->app = null;
+    }
+
     /**
      * Creates HTTP client.
      *
