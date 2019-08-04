@@ -6,6 +6,12 @@
 
 OpenID Connect Core Library implementation for PHP.
 
+## Required Packages
+
+* `guzzlehttp/guzzle=^6.0` for send HTTP request
+* `league/oauth2-client=^2.4` for execute the OAuth 2.0 flow
+* `web-token/jwt-framework=^1.3` for verify JWT
+
 ## References
 
 ### OpenID Connect Discovery examples
