@@ -26,6 +26,10 @@ class Discover extends Command
 
         dump($config);
 
+        $jwks = (new Discoverer())->keystore($config->jwksUri());
+
+        dump($jwks);
+
         return 0;
     }
 }

@@ -4,6 +4,7 @@ namespace OpenIDConnect;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface as HttpClientInterface;
+use Jose\Component\Core\JWKSet;
 use Psr\Http\Message\ResponseInterface;
 use UnexpectedValueException;
 use function GuzzleHttp\json_decode;
@@ -34,16 +35,27 @@ class Discoverer
     /**
      * Discover the OpenID Connect provider
      *
-     * @param string $url
+     * @param string $uri
      * @return ProviderMetadata
      */
-    public function discover(string $url): ProviderMetadata
+    public function discover(string $uri): ProviderMetadata
     {
-        $discoveryUri = $url . self::OPENID_CONNECT_DISCOVERY;
+        $discoveryUri = $uri . self::OPENID_CONNECT_DISCOVERY;
 
         $response = $this->httpClient->request('GET', $discoveryUri);
 
         return ProviderMetadata::create($this->processResponse($response));
+    }
+
+    /**
+     * @param string $uri
+     * @return JWKSet
+     */
+    public function keystore(string $uri): JWKSet
+    {
+        $jwksArray = $this->processResponse($this->httpClient->request('GET', $uri));
+
+        return JWKSet::createFromKeyData($jwksArray);
     }
 
     /**
