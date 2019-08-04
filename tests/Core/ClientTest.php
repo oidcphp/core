@@ -19,23 +19,11 @@ class ClientTest extends TestCase
         parent::setUp();
 
         $this->app->singleton(ProviderMetadata::class, function () {
-            return ProviderMetadata::create([
-                'issuer' => 'https://somewhere',
-                'authorization_endpoint' => 'https://somewhere/auth',
-                'token_endpoint' => 'https://somewhere/token',
-                'jwks_uri' => 'https://somewhere/certs',
-                'response_types_supported' => ['code'],
-                'subject_types_supported' => ['public'],
-                'id_token_signing_alg_values_supported' => ['RS256'],
-            ]);
+            return ProviderMetadata::create($this->createProviderMetadataConfig());
         });
 
         $this->app->singleton(ClientMetadata::class, function () {
-            return ClientMetadata::create([
-                'client_id' => 'some_id',
-                'client_secret' => 'some_secret',
-                'redirect_uri' => 'https://someredirect',
-            ]);
+            return ClientMetadata::create($this->createClientMetadataConfig());
         });
 
         $this->target = $this->app->make(Client::class);

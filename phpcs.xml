@@ -13,6 +13,11 @@
     <!-- inherit rules from: -->
     <rule ref="PSR2"/>
 
+    <!-- specific and just exclude rules in some file -->
+    <rule ref="Generic.Files.LineLength.TooLong">
+        <exclude-pattern>tests</exclude-pattern>
+    </rule>
+
     <!-- Paths and file to check -->
     <file>src</file>
     <file>tests</file>

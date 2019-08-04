@@ -32,13 +32,26 @@ class TestCase extends \PHPUnit\Framework\TestCase
     }
 
     /**
+     * @param array $overwrite
+     * @return array
+     */
+    protected function createClientMetadataConfig($overwrite = []): array
+    {
+        return array_merge([
+            'client_id' => 'some_id',
+            'client_secret' => 'some_secret',
+            'redirect_uri' => 'https://someredirect',
+        ], $overwrite);
+    }
+
+    /**
      * Creates HTTP client.
      *
      * @param ResponseInterface|ResponseInterface[] $responses
      * @param array $history
      * @return HandlerStack
      */
-    public function createHandlerStack($responses = [], &$history = []): HandlerStack
+    protected function createHandlerStack($responses = [], &$history = []): HandlerStack
     {
         if (!is_array($responses)) {
             $responses = [$responses];
@@ -57,7 +70,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
      * @param array $history
      * @return HttpClient
      */
-    public function createHttpClient($responses = [], &$history = []): HttpClient
+    protected function createHttpClient($responses = [], &$history = []): HttpClient
     {
         return new HttpClient($this->createHttpMockOption($responses, $history));
     }
@@ -68,7 +81,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
      * @param array $headers
      * @return ResponseInterface
      */
-    public function createHttpJsonResponse(array $data = [], int $status = 200, array $headers = []): ResponseInterface
+    protected function createHttpJsonResponse(array $data = [], int $status = 200, array $headers = []): ResponseInterface
     {
         return new HttpResponse($status, $headers, json_encode($data));
     }
@@ -78,10 +91,27 @@ class TestCase extends \PHPUnit\Framework\TestCase
      * @param array $history
      * @return array
      */
-    public function createHttpMockOption($responses = [], &$history = []): array
+    protected function createHttpMockOption($responses = [], &$history = []): array
     {
         return [
             'handler' => $this->createHandlerStack($responses, $history),
         ];
+    }
+
+    /**
+     * @param array $overwrite
+     * @return array
+     */
+    protected function createProviderMetadataConfig($overwrite = []): array
+    {
+        return array_merge([
+            'issuer' => 'https://somewhere',
+            'authorization_endpoint' => 'https://somewhere/auth',
+            'token_endpoint' => 'https://somewhere/token',
+            'jwks_uri' => 'https://somewhere/certs',
+            'response_types_supported' => ['code'],
+            'subject_types_supported' => ['public'],
+            'id_token_signing_alg_values_supported' => ['RS256'],
+        ], $overwrite);
     }
 }
