@@ -4,6 +4,7 @@ namespace OpenIDConnect\Traits;
 
 use BadMethodCallException;
 use Illuminate\Support\Collection;
+use OutOfBoundsException;
 
 trait MetadataAwareTraits
 {
@@ -11,6 +12,16 @@ trait MetadataAwareTraits
      * @var Collection
      */
     private $metadata;
+
+    /**
+     * @param string $key
+     */
+    public function assertConfiguration(string $key): void
+    {
+        if (!$this->metadata->has($key)) {
+            throw new OutOfBoundsException("{$key} must be configured on the provider");
+        }
+    }
 
     /**
      * @return array

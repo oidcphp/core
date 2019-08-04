@@ -55,10 +55,21 @@ class ClientMetadataTest extends TestCase
      * @expectedException BadMethodCallException
      * @test
      */
-    public function shouldThrowExceptionWhenUnsetValueOnProviderMetadataInstance(): void
+    public function shouldThrowExceptionWhenUnsetValueOnInstance(): void
     {
         $target = new ClientMetadata($this->createClientMetadataConfig());
 
         unset($target['client_id']);
+    }
+
+    /**
+     * @expectedException OutOfBoundsException
+     * @test
+     */
+    public function shouldThrowExceptionWhenAssertNotExistConfig(): void
+    {
+        $target = new ClientMetadata($this->createClientMetadataConfig());
+
+        $target->assertConfiguration('not-exist');
     }
 }
