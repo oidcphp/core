@@ -18,11 +18,12 @@ class ProviderMetadataTest extends TestCase
 
     /**
      * @dataProvider missionRequiredField
-     * @expectedException OutOfBoundsException
      * @test
      */
     public function shouldThrowExceptionReturnAndCanUseIssetWithInstance($missingField): void
     {
+        $this->expectException(OutOfBoundsException::class);
+
         $data = $this->createProviderMetadataConfig();
         unset($data[$missingField]);
 
@@ -41,22 +42,24 @@ class ProviderMetadataTest extends TestCase
     }
 
     /**
-     * @expectedException BadMethodCallException
      * @test
      */
     public function shouldThrowExceptionWhenSetValueOnInstance(): void
     {
+        $this->expectException(BadMethodCallException::class);
+
         $target = new ProviderMetadata($this->createProviderMetadataConfig());
 
         $target['issuer'] = 'whatever';
     }
 
     /**
-     * @expectedException BadMethodCallException
      * @test
      */
     public function shouldThrowExceptionWhenUnsetValueOnInstance(): void
     {
+        $this->expectException(BadMethodCallException::class);
+
         $target = new ProviderMetadata($this->createProviderMetadataConfig());
 
         unset($target['issuer']);

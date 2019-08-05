@@ -18,11 +18,12 @@ class ClientMetadataTest extends TestCase
 
     /**
      * @dataProvider missionRequiredField
-     * @expectedException OutOfBoundsException
      * @test
      */
     public function shouldThrowExceptionReturnAndCanUseIssetWithInstance($missingField): void
     {
+        $this->expectException(OutOfBoundsException::class);
+
         $data = $this->createClientMetadataConfig();
         unset($data[$missingField]);
 
@@ -41,33 +42,36 @@ class ClientMetadataTest extends TestCase
     }
 
     /**
-     * @expectedException BadMethodCallException
      * @test
      */
     public function shouldThrowExceptionWhenSetValueOnInstance(): void
     {
+        $this->expectException(BadMethodCallException::class);
+
         $target = new ClientMetadata($this->createClientMetadataConfig());
 
         $target['client_id'] = 'whatever';
     }
 
     /**
-     * @expectedException BadMethodCallException
      * @test
      */
     public function shouldThrowExceptionWhenUnsetValueOnInstance(): void
     {
+        $this->expectException(BadMethodCallException::class);
+
         $target = new ClientMetadata($this->createClientMetadataConfig());
 
         unset($target['client_id']);
     }
 
     /**
-     * @expectedException OutOfBoundsException
      * @test
      */
     public function shouldThrowExceptionWhenAssertNotExistConfig(): void
     {
+        $this->expectException(OutOfBoundsException::class);
+
         $target = new ClientMetadata($this->createClientMetadataConfig());
 
         $target->assertConfiguration('not-exist');

@@ -41,7 +41,7 @@ class ClientTest extends TestCase
     {
         $actual = $this->target->authorizationUrl();
 
-        $this->assertContains('response_type=code', $actual);
-        $this->assertContains('client_id=some_id', $actual);
+        $this->assertStringContainsStringIgnoringCase('response_type=code', $actual);
+        $this->assertStringContainsStringIgnoringCase('client_id=some_id', $actual);
     }
 }
