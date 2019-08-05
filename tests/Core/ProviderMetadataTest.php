@@ -2,7 +2,7 @@
 
 namespace Tests\Core;
 
-use BadMethodCallException;
+use DomainException;
 use OpenIDConnect\ProviderMetadata;
 use OutOfBoundsException;
 use Tests\TestCase;
@@ -46,7 +46,7 @@ class ProviderMetadataTest extends TestCase
      */
     public function shouldThrowExceptionWhenSetValueOnInstance(): void
     {
-        $this->expectException(BadMethodCallException::class);
+        $this->expectException(DomainException::class);
 
         $target = new ProviderMetadata($this->createProviderMetadataConfig());
 
@@ -58,7 +58,7 @@ class ProviderMetadataTest extends TestCase
      */
     public function shouldThrowExceptionWhenUnsetValueOnInstance(): void
     {
-        $this->expectException(BadMethodCallException::class);
+        $this->expectException(DomainException::class);
 
         $target = new ProviderMetadata($this->createProviderMetadataConfig());
 

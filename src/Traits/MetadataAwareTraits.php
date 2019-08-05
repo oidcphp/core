@@ -2,7 +2,7 @@
 
 namespace OpenIDConnect\Traits;
 
-use BadMethodCallException;
+use DomainException;
 use Illuminate\Support\Collection;
 use OutOfBoundsException;
 
@@ -43,11 +43,11 @@ trait MetadataAwareTraits
 
     public function offsetSet($key, $value)
     {
-        throw new BadMethodCallException('Cannot set any value on metadata instance');
+        throw new DomainException('Cannot set any value on metadata instance');
     }
 
     public function offsetUnset($key)
     {
-        throw new BadMethodCallException('Cannot unset any value on a metadata instance');
+        throw new DomainException('Cannot unset any value on a metadata instance');
     }
 }
