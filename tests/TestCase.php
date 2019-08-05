@@ -81,8 +81,11 @@ class TestCase extends \PHPUnit\Framework\TestCase
      * @param array $headers
      * @return ResponseInterface
      */
-    protected function createHttpJsonResponse(array $data = [], int $status = 200, array $headers = []): ResponseInterface
-    {
+    protected function createHttpJsonResponse(
+        array $data = [],
+        int $status = 200,
+        array $headers = []
+    ): ResponseInterface {
         return new HttpResponse($status, $headers, json_encode($data));
     }
 
