@@ -41,7 +41,24 @@ class ClientTest extends TestCase
     {
         $actual = $this->target->authorizationUrl();
 
+        $this->assertStringStartsWith('https://somewhere/auth', $actual);
+        $this->assertStringContainsStringIgnoringCase('state=', $actual);
         $this->assertStringContainsStringIgnoringCase('response_type=code', $actual);
+        $this->assertStringContainsStringIgnoringCase('redirect_uri=', $actual);
         $this->assertStringContainsStringIgnoringCase('client_id=some_id', $actual);
+    }
+
+    /**
+     * @test
+     */
+    public function shouldReturnAuthorizationPostFormWhenCallSame(): void
+    {
+        $actual = $this->target->authorizationPost();
+
+        $this->assertStringContainsStringIgnoringCase('<form method="post" action="https://somewhere/auth">', $actual);
+        $this->assertStringContainsStringIgnoringCase('name="state"', $actual);
+        $this->assertStringContainsStringIgnoringCase('name="response_type" value="code"', $actual);
+        $this->assertStringContainsStringIgnoringCase('name="redirect_uri" value="https://someredirect"', $actual);
+        $this->assertStringContainsStringIgnoringCase('name="client_id" value="some_id"', $actual);
     }
 }
