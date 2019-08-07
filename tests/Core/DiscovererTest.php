@@ -66,11 +66,13 @@ class DiscovererTest extends TestCase
      */
     public function shouldProviderMetadataWhenDiscover(): void
     {
-        $target = new Discoverer($this->createHttpMockOption(
-            $this->createHttpJsonResponse(self::GOOGLE_OPENID_CONNECT_CONFIG)
-        ));
+        $mockHttpOption = $this->createHttpMockOption([
+            $this->createHttpJsonResponse(self::GOOGLE_OPENID_CONNECT_CONFIG),
+            $this->createHttpJsonResponse(['keys' => []]),
+        ]);
 
-        $actual = $target->discover('http://somewhere');
+        /** @var ProviderMetadata $actual */
+        $actual = Discoverer::discover('http://somewhere', false, $mockHttpOption)[0];
 
         $this->assertInstanceOf(ProviderMetadata::class, $actual);
 
