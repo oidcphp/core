@@ -3,8 +3,8 @@
 namespace OpenIDConnect;
 
 use GuzzleHttp\Client;
-use Jose\Component\Core\JWK;
-use Jose\Component\Core\JWKSet;
+use OpenIDConnect\Metadata\JWKMetadata;
+use OpenIDConnect\Metadata\ProviderMetadata;
 use Psr\Http\Message\ResponseInterface;
 use UnexpectedValueException;
 use function GuzzleHttp\json_decode;
@@ -27,7 +27,7 @@ class Issuer
      * @param string $uri
      * @param bool $raw
      * @param array $httpOption
-     * @return array [ProviderMetadata, JWKSet]
+     * @return array [ProviderMetadata, JWKMetadata]
      */
     public static function discover(string $uri, bool $raw = false, array $httpOption = []): array
     {
@@ -35,25 +35,17 @@ class Issuer
 
         $discoveryUri = $uri . self::OPENID_CONNECT_DISCOVERY;
 
-        $response = $httpClient->request('GET', $discoveryUri);
+        $providerResponse = $httpClient->request('GET', $discoveryUri);
+        $providerMetadata = new ProviderMetadata(self::processResponse($providerResponse));
 
-        $providerMetadata = ProviderMetadata::create(self::processResponse($response));
-
-        $jwkResponse = self::processResponse($httpClient->request('GET', $providerMetadata->jwksUri()));
-
-        $jwkSet = JWKSet::createFromKeyData($jwkResponse);
+        $jwkResponse = $httpClient->request('GET', $providerMetadata->jwksUri());
+        $jwkMetadata = new JWKMetadata(self::processResponse($jwkResponse));
 
         if (!$raw) {
-            return [$providerMetadata, $jwkSet];
+            return [$providerMetadata, $jwkMetadata];
         }
 
-        $rawProviderMetadata = $providerMetadata->toArray();
-
-        $rawJwkSet = array_values(array_map(static function (JWK $v) {
-            return $v->jsonSerialize();
-        }, $jwkSet->all()));
-
-        return [$rawProviderMetadata, ['keys' => $rawJwkSet]];
+        return [$providerMetadata->toArray(), $jwkMetadata->toArray()];
     }
 
     /**

@@ -1,6 +1,6 @@
 <?php
 
-namespace OpenIDConnect;
+namespace OpenIDConnect\Metadata;
 
 use ArrayAccess;
 use OpenIDConnect\Traits\MetadataAwareTraits;
@@ -20,15 +20,6 @@ class ClientMetadata implements ArrayAccess
         'client_secret',
         'redirect_uri',
     ];
-
-    /**
-     * @param array $metadata
-     * @return static
-     */
-    public static function create(array $metadata)
-    {
-        return new static($metadata);
-    }
 
     /**
      * @param array $metadata

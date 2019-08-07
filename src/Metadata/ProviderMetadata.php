@@ -1,6 +1,6 @@
 <?php
 
-namespace OpenIDConnect;
+namespace OpenIDConnect\Metadata;
 
 use ArrayAccess;
 use OpenIDConnect\Traits\MetadataAwareTraits;
@@ -22,15 +22,6 @@ class ProviderMetadata implements ArrayAccess
         'subject_types_supported',
         'token_endpoint',
     ];
-
-    /**
-     * @param array $metadata
-     * @return static
-     */
-    public static function create(array $metadata)
-    {
-        return new static($metadata);
-    }
 
     /**
      * @param array $metadata

@@ -7,8 +7,8 @@ use Illuminate\Support\ServiceProvider;
 use League\OAuth2\Client\OptionProvider\HttpBasicAuthOptionProvider;
 use League\OAuth2\Client\Provider\AbstractProvider;
 use League\OAuth2\Client\Provider\GenericProvider;
-use OpenIDConnect\ClientMetadata;
-use OpenIDConnect\ProviderMetadata;
+use OpenIDConnect\Metadata\ClientMetadata;
+use OpenIDConnect\Metadata\ProviderMetadata;
 
 /**
  * The service provider written for Laravel

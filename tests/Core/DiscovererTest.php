@@ -3,7 +3,7 @@
 namespace Tests\Core;
 
 use OpenIDConnect\Issuer;
-use OpenIDConnect\ProviderMetadata;
+use OpenIDConnect\Metadata\ProviderMetadata;
 use Tests\TestCase;
 
 class DiscovererTest extends TestCase

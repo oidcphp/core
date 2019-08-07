@@ -3,7 +3,7 @@
 namespace Tests\Core;
 
 use DomainException;
-use OpenIDConnect\ClientMetadata;
+use OpenIDConnect\Metadata\ClientMetadata;
 use OutOfBoundsException;
 use Tests\TestCase;
 
