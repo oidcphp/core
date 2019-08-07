@@ -2,7 +2,7 @@
 
 namespace App\Commands;
 
-use OpenIDConnect\Discoverer;
+use OpenIDConnect\Issuer;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -28,7 +28,7 @@ class Discover extends Command
         $format = $input->getOption('format');
         $type = $input->getOption('type');
 
-        $config = Discoverer::discover($url, true);
+        $config = Issuer::discover($url, true);
 
         switch ($type) {
             case 'meta':

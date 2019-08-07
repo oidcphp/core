@@ -2,7 +2,7 @@
 
 namespace Tests\Core;
 
-use OpenIDConnect\Discoverer;
+use OpenIDConnect\Issuer;
 use OpenIDConnect\ProviderMetadata;
 use Tests\TestCase;
 
@@ -72,7 +72,7 @@ class DiscovererTest extends TestCase
         ]);
 
         /** @var ProviderMetadata $actual */
-        $actual = Discoverer::discover('http://somewhere', false, $mockHttpOption)[0];
+        $actual = Issuer::discover('http://somewhere', false, $mockHttpOption)[0];
 
         $this->assertInstanceOf(ProviderMetadata::class, $actual);
 

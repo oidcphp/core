@@ -10,12 +10,14 @@ use UnexpectedValueException;
 use function GuzzleHttp\json_decode;
 
 /**
- * OpenID Connect provider discoverer
+ * OpenID Provider Issuer Discovery
+ *
+ * @see https://openid.net/specs/openid-connect-discovery-1_0.html#IssuerDiscovery
  */
-class Discoverer
+class Issuer
 {
     /**
-     * @see https://openid.net/specs/openid-connect-discovery-1_0.html
+     * @see https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfig
      */
     public const OPENID_CONNECT_DISCOVERY = '/.well-known/openid-configuration';
 
