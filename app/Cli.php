@@ -12,6 +12,7 @@ class Cli extends Application
 
         $this->addCommands([
             new Commands\Discover('discover'),
+            new Commands\KeyGenerateOct('key:generate:oct'),
         ]);
     }
 }
