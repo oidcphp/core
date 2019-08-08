@@ -3,35 +3,56 @@
 namespace OpenIDConnect;
 
 use League\OAuth2\Client\Provider\AbstractProvider;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
+use League\OAuth2\Client\Provider\ResourceOwnerInterface;
+use League\OAuth2\Client\Token\AccessToken;
+use OpenIDConnect\Metadata\ClientMetadata;
+use OpenIDConnect\Metadata\ProviderMetadata;
+use Psr\Http\Message\ResponseInterface;
+use UnexpectedValueException;
 
-class Client
+class Client extends AbstractProvider
 {
     /**
-     * @var AbstractProvider
+     * @var ProviderMetadata
      */
-    private $leagueOAuth2Client;
+    private $providerMetadata;
 
     /**
-     * @param AbstractProvider $leagueOAuth2Client
+     * @var ClientMetadata
      */
-    public function __construct(AbstractProvider $leagueOAuth2Client)
+    private $clientMetadata;
+
+    /**
+     * @param ProviderMetadata $providerMetadata
+     * @param ClientMetadata $clientMetadata
+     * @param array $collaborators
+     */
+    public function __construct(ProviderMetadata $providerMetadata, ClientMetadata $clientMetadata, $collaborators = [])
     {
-        $this->leagueOAuth2Client = $leagueOAuth2Client;
+        $this->providerMetadata = $providerMetadata;
+        $this->clientMetadata = $clientMetadata;
+
+        parent::__construct([
+            'clientId' => $clientMetadata->id(),
+            'clientSecret' => $clientMetadata->secret(),
+            'redirectUri' => $clientMetadata->redirectUri(),
+        ], $collaborators);
     }
 
     /**
      * @param array $options
      * @return string
      */
-    public function authorizationPost(array $options = []): string
+    public function getAuthorizationPost(array $options = []): string
     {
-        $baseAuthorizationUrl = $this->leagueOAuth2Client->getBaseAuthorizationUrl();
+        $baseAuthorizationUrl = $this->getBaseAuthorizationUrl();
 
-        parse_str((string)parse_url($this->authorizationUrl($options), PHP_URL_QUERY), $query);
+        $parameters = $this->getAuthorizationParameters($options);
 
         $formInput = implode('', array_map(function ($v, $k) {
             return "<input type=\"hidden\" name=\"${k}\" value=\"${v}\"/>";
-        }, $query, array_keys($query)));
+        }, $parameters, array_keys($parameters)));
 
         return <<< HTML
 <!DOCTYPE html>
@@ -43,12 +64,40 @@ class Client
 HTML;
     }
 
-    /**
-     * @param array $options
-     * @return string
-     */
-    public function authorizationUrl(array $options = []): string
+    public function getBaseAuthorizationUrl()
     {
-        return $this->leagueOAuth2Client->getAuthorizationUrl($options);
+        return $this->providerMetadata->authorizationEndpoint();
+    }
+
+    public function getBaseAccessTokenUrl(array $params)
+    {
+        return $this->providerMetadata->tokenEndpoint();
+    }
+
+    public function getResourceOwnerDetailsUrl(AccessToken $token)
+    {
+        return $this->providerMetadata['userinfo_endpoint'];
+    }
+
+    /**
+     * Returns the default scopes used by this provider.
+     *
+     * This should only be the scopes that are required to request the details
+     * of the resource owner, rather than all the available scopes.
+     *
+     * @return array
+     */
+    protected function getDefaultScopes()
+    {
+        return ['openid'];
+    }
+
+    protected function checkResponse(ResponseInterface $response, $data)
+    {
+    }
+
+    protected function createResourceOwner(array $response, AccessToken $token)
+    {
+        throw new \LogicException('Not implement');
     }
 }

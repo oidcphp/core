@@ -7,6 +7,7 @@ use Illuminate\Support\ServiceProvider;
 use League\OAuth2\Client\OptionProvider\HttpBasicAuthOptionProvider;
 use League\OAuth2\Client\Provider\AbstractProvider;
 use League\OAuth2\Client\Provider\GenericProvider;
+use OpenIDConnect\Client as OpenIDConnectClient;
 use OpenIDConnect\Metadata\ClientMetadata;
 use OpenIDConnect\Metadata\ProviderMetadata;
 
@@ -21,7 +22,7 @@ class Laravel extends ServiceProvider
     {
         $this->app->bind(AbstractProvider::class, GenericProvider::class);
 
-        $this->app->singleton(GenericProvider::class, function () {
+        $this->app->singleton(OpenIDConnectClient::class, function () {
             $clientMetadata = $this->app->make(ClientMetadata::class);
             $providerMetadata = $this->app->make(ProviderMetadata::class);
 
@@ -30,14 +31,7 @@ class Laravel extends ServiceProvider
                 'optionProvider' => new HttpBasicAuthOptionProvider(),
             ];
 
-            return new GenericProvider([
-                'clientId' => $clientMetadata->id(),
-                'clientSecret' => $clientMetadata->secret(),
-                'redirectUri' => $clientMetadata->redirectUri(),
-                'urlAuthorize' => $providerMetadata->authorizationEndpoint(),
-                'urlAccessToken' => $providerMetadata->tokenEndpoint(),
-                'urlResourceOwnerDetails' => $providerMetadata,
-            ], $collaborators);
+            return new OpenIDConnectClient($providerMetadata, $clientMetadata, $collaborators);
         });
     }
 }
