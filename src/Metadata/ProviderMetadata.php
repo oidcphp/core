@@ -3,6 +3,8 @@
 namespace OpenIDConnect\Metadata;
 
 use ArrayAccess;
+use Jose\Component\Core\AlgorithmManager;
+use OpenIDConnect\Jwt\AlgorithmFactory;
 use OpenIDConnect\Traits\MetadataAwareTraits;
 use OutOfBoundsException;
 
@@ -24,15 +26,33 @@ class ProviderMetadata implements ArrayAccess
     ];
 
     /**
-     * @param array $metadata
+     * @var AlgorithmFactory
      */
-    public function __construct(array $metadata = [])
+    private $algorithmFactory;
+
+    /**
+     * @param array $metadata
+     * @param AlgorithmFactory|null $algorithmFactory
+     */
+    public function __construct(array $metadata = [], AlgorithmFactory $algorithmFactory = null)
     {
         $this->metadata = collect($metadata);
 
         if (!$this->metadata->has(self::REQUIRED_METADATA)) {
             throw new OutOfBoundsException('Required config is missing. Config: ' . $this->metadata->toJson());
         }
+
+        if (null === $algorithmFactory) {
+            $this->algorithmFactory = new AlgorithmFactory();
+        }
+    }
+
+    /**
+     * @return AlgorithmManager
+     */
+    public function createAlgorithmManager(): AlgorithmManager
+    {
+        return $this->algorithmFactory->createAlgorithmManager($this->idTokenSigningAlgValuesSupported());
     }
 
     /**
