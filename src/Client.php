@@ -88,7 +88,7 @@ HTML;
      */
     public function getResourceOwnerDetailsUrl(AccessToken $token)
     {
-        return $this->providerMetadata['userinfo_endpoint'];
+        return $this->providerMetadata->userInfoEndpoint() ?? '';
     }
 
     /**
