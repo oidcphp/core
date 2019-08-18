@@ -13,6 +13,9 @@ use OpenIDConnect\Traits\MetadataAwareTraits;
 use OutOfBoundsException;
 
 /**
+ * OAuth 2.0 / OpenID Connect provider metadata
+ *
+ * @see https://tools.ietf.org/html/rfc8414#section-2
  * @see https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata
  */
 class ProviderMetadata implements ArrayAccess
