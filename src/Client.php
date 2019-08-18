@@ -6,12 +6,13 @@ use InvalidArgumentException;
 use League\OAuth2\Client\Provider\AbstractProvider;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Token\AccessToken;
+use OpenIDConnect\Exceptions\OpenIDProviderException;
+use OpenIDConnect\Exceptions\RelyingPartyException;
 use OpenIDConnect\Metadata\ClientMetadata;
 use OpenIDConnect\Metadata\ProviderMetadata;
 use OpenIDConnect\Token\TokenSet;
 use OpenIDConnect\Token\TokenSetInterface;
 use Psr\Http\Message\ResponseInterface;
-use UnexpectedValueException;
 
 /**
  * OpenID Connect Client
@@ -100,18 +101,18 @@ HTML;
      * @return TokenSetInterface
      * @throws IdentityProviderException
      */
-    public function handleCallback(string $redirectUri, array $parameters, array $checks = [])
+    public function handleOpenIDConnectCallback(string $redirectUri, array $parameters, array $checks = [])
     {
         if (isset($parameters['state']) && !isset($checks['state'])) {
             throw new InvalidArgumentException("'state' argument is missing");
         }
 
         if (!isset($parameters['state']) && isset($checks['state'])) {
-            throw new InvalidArgumentException("'state' missing from the response");
+            throw new RelyingPartyException("'state' missing from the response");
         }
 
         if (isset($parameters['state'], $checks['state']) && ($checks['state'] !== $parameters['state'])) {
-            throw new UnexpectedValueException(sprintf(
+            throw new RelyingPartyException(sprintf(
                 'State mismatch, expected %s, got: %s',
                 $checks['state'],
                 $parameters['state']
@@ -173,8 +174,8 @@ HTML;
         $response = $this->getParsedResponse($request);
 
         if (!is_array($response)) {
-            throw new UnexpectedValueException(
-                'Invalid response received from Authorization Server. Expected JSON.'
+            throw new OpenIDProviderException(
+                'Invalid response received from OpenID Provider. Expected JSON.'
             );
         }
 

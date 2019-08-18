@@ -7,7 +7,7 @@ use OpenIDConnect\Metadata\ClientMetadata;
 use OpenIDConnect\Metadata\ProviderMetadata;
 use Tests\TestCase;
 
-class ClientHandleCallbackTest extends TestCase
+class ClientHandleOpenIDConnectCallbackTest extends TestCase
 {
     protected function setUp(): void
     {
@@ -38,7 +38,7 @@ class ClientHandleCallbackTest extends TestCase
             ]
         );
 
-        $actual = $target->handleCallback('https://someredirect', [
+        $actual = $target->handleOpenIDConnectCallback('https://someredirect', [
             'code' => 'some-code',
         ]);
 
