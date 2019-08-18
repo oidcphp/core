@@ -12,7 +12,7 @@ use Tests\TestCase;
 
 class ProviderMetadataTest extends TestCase
 {
-    public function missionRequiredField()
+    public function missingTheRequiredField()
     {
         return array_map(static function ($v) {
             return [$v];
@@ -20,7 +20,7 @@ class ProviderMetadataTest extends TestCase
     }
 
     /**
-     * @dataProvider missionRequiredField
+     * @dataProvider missingTheRequiredField
      * @test
      */
     public function shouldThrowExceptionReturnAndCanUseIssetWithInstance($missingField): void
