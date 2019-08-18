@@ -6,6 +6,7 @@ use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
+use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Response as HttpResponse;
 use Illuminate\Container\Container;
 use OpenIDConnect\ServiceProvider\Laravel;
@@ -81,11 +82,8 @@ class TestCase extends \PHPUnit\Framework\TestCase
      * @param array $headers
      * @return ResponseInterface
      */
-    protected function createHttpJsonResponse(
-        array $data = [],
-        int $status = 200,
-        array $headers = []
-    ): ResponseInterface {
+    protected function createHttpJsonResponse(array $data = [], int $status = 200, array $headers = []): ResponseInterface
+    {
         return new HttpResponse($status, $headers, json_encode($data));
     }
 
@@ -116,6 +114,17 @@ class TestCase extends \PHPUnit\Framework\TestCase
             'subject_types_supported' => ['public'],
             'id_token_signing_alg_values_supported' => ['RS256'],
         ], $overwrite);
+    }
+
+    /**
+     * @param array $overwrite
+     * @param int $status
+     * @param array $headers
+     * @return ResponseInterface
+     */
+    protected function createFakeTokenEndpointResponse($overwrite = [], $status = 200, $headers = []): ResponseInterface
+    {
+        return $this->createHttpJsonResponse($this->createFakeTokenSetParameter($overwrite), $status, $headers);
     }
 
     /**
