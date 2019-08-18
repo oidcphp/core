@@ -11,6 +11,9 @@ use OpenIDConnect\Metadata\ProviderMetadata;
 use Psr\Http\Message\ResponseInterface;
 use UnexpectedValueException;
 
+/**
+ * OpenID Connect Client
+ */
 class Client extends AbstractProvider
 {
     /**
@@ -64,38 +67,48 @@ class Client extends AbstractProvider
 HTML;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function getBaseAuthorizationUrl()
     {
         return $this->providerMetadata->authorizationEndpoint();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function getBaseAccessTokenUrl(array $params)
     {
         return $this->providerMetadata->tokenEndpoint();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function getResourceOwnerDetailsUrl(AccessToken $token)
     {
         return $this->providerMetadata['userinfo_endpoint'];
     }
 
     /**
-     * Returns the default scopes used by this provider.
-     *
-     * This should only be the scopes that are required to request the details
-     * of the resource owner, rather than all the available scopes.
-     *
-     * @return array
+     * {@inheritDoc}
      */
     protected function getDefaultScopes()
     {
         return ['openid'];
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function checkResponse(ResponseInterface $response, $data)
     {
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function createResourceOwner(array $response, AccessToken $token)
     {
         throw new \LogicException('Not implement');
