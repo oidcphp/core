@@ -117,4 +117,19 @@ class TestCase extends \PHPUnit\Framework\TestCase
             'id_token_signing_alg_values_supported' => ['RS256'],
         ], $overwrite);
     }
+
+    /**
+     * @param array $overwrite
+     * @return array
+     */
+    protected function createFakeTokenSetParameter($overwrite = []): array
+    {
+        return array_merge([
+            'access_token' => 'some-access-token',
+            'expires_in' => 3600,
+            'id_token' => 'some-id-token',
+            'refresh_token' => 'some-refresh-token',
+            'scope' => 'some-scope',
+        ], $overwrite);
+    }
 }
