@@ -70,14 +70,6 @@ HTML;
     /**
      * {@inheritDoc}
      */
-    public function getBaseAuthorizationUrl()
-    {
-        return $this->providerMetadata->authorizationEndpoint();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public function getBaseAccessTokenUrl(array $params)
     {
         return $this->providerMetadata->tokenEndpoint();
@@ -86,17 +78,17 @@ HTML;
     /**
      * {@inheritDoc}
      */
-    public function getResourceOwnerDetailsUrl(AccessToken $token)
+    public function getBaseAuthorizationUrl()
     {
-        return $this->providerMetadata->userInfoEndpoint() ?? '';
+        return $this->providerMetadata->authorizationEndpoint();
     }
 
     /**
      * {@inheritDoc}
      */
-    protected function getDefaultScopes()
+    public function getResourceOwnerDetailsUrl(AccessToken $token)
     {
-        return ['openid'];
+        return $this->providerMetadata->userInfoEndpoint() ?? '';
     }
 
     /**
@@ -112,5 +104,13 @@ HTML;
     protected function createResourceOwner(array $response, AccessToken $token)
     {
         throw new \LogicException('Not implement');
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function getDefaultScopes()
+    {
+        return ['openid'];
     }
 }
