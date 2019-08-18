@@ -3,7 +3,11 @@
 namespace OpenIDConnect\Metadata;
 
 use ArrayAccess;
+use Jose\Component\Checker\AlgorithmChecker;
+use Jose\Component\Checker\HeaderCheckerManager;
 use Jose\Component\Core\AlgorithmManager;
+use Jose\Component\Encryption\JWETokenSupport;
+use Jose\Component\Signature\JWSTokenSupport;
 use OpenIDConnect\Jwt\AlgorithmFactory;
 use OpenIDConnect\Traits\MetadataAwareTraits;
 use OutOfBoundsException;
@@ -48,14 +52,6 @@ class ProviderMetadata implements ArrayAccess
     }
 
     /**
-     * @return AlgorithmManager
-     */
-    public function createAlgorithmManager(): AlgorithmManager
-    {
-        return $this->algorithmFactory->createAlgorithmManager($this->idTokenSigningAlgValuesSupported());
-    }
-
-    /**
      * @return string
      */
     public function authorizationEndpoint(): string
@@ -80,6 +76,50 @@ class ProviderMetadata implements ArrayAccess
     public function codeChallengeMethodsSupported(): ?array
     {
         return $this->metadata['code_challenge_methods_supported'] ?? null;
+    }
+
+    /**
+     * @return AlgorithmManager
+     */
+    public function createAlgorithmManager(): AlgorithmManager
+    {
+        return $this->algorithmFactory->createAlgorithmManager($this->idTokenAlgValuesSupported());
+    }
+
+    /**
+     * @return HeaderCheckerManager
+     */
+    public function createHeaderCheckerManager(): HeaderCheckerManager
+    {
+        $tokenTypesSupport = [new JWSTokenSupport()];
+
+        if (null !== $this->idTokenEncryptionAlgValuesSupported()) {
+            $tokenTypesSupport[] = new JWETokenSupport();
+        }
+
+        return HeaderCheckerManager::create([
+            new AlgorithmChecker($this->idTokenAlgValuesSupported()),
+        ], $tokenTypesSupport);
+    }
+
+    /**
+     * @return array
+     */
+    public function idTokenAlgValuesSupported(): array
+    {
+        $signing = $this->idTokenSigningAlgValuesSupported();
+
+        $encryption = $this->idTokenEncryptionAlgValuesSupported() ?? [];
+
+        return array_unique(array_merge($signing, $encryption));
+    }
+
+    /**
+     * @return array|null
+     */
+    public function idTokenEncryptionAlgValuesSupported(): ?array
+    {
+        return $this->metadata['id_token_encryption_alg_values_supported'] ?? null;
     }
 
     /**
