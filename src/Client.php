@@ -95,13 +95,12 @@ HTML;
     }
 
     /**
-     * @param string $redirectUri
      * @param array $parameters
      * @param array $checks
      * @return TokenSetInterface
      * @throws IdentityProviderException
      */
-    public function handleOpenIDConnectCallback(string $redirectUri, array $parameters, array $checks = [])
+    public function handleOpenIDConnectCallback(array $parameters, array $checks = [])
     {
         if (isset($parameters['state']) && !isset($checks['state'])) {
             throw new InvalidArgumentException("'state' argument is missing");
@@ -121,7 +120,7 @@ HTML;
 
         return $this->getTokenSet('authorization_code', [
             'code' => $parameters['code'],
-            'redirect_uri' => $redirectUri,
+            'redirect_uri' => $this->clientMetadata->redirectUri(),
         ]);
     }
 

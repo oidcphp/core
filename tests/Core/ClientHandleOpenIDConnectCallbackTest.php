@@ -38,7 +38,7 @@ class ClientHandleOpenIDConnectCallbackTest extends TestCase
             ]
         );
 
-        $actual = $target->handleOpenIDConnectCallback('https://someredirect', [
+        $actual = $target->handleOpenIDConnectCallback([
             'code' => 'some-code',
         ]);
 
