@@ -6,8 +6,14 @@ use ArrayAccess;
 use Jose\Component\Checker\AlgorithmChecker;
 use Jose\Component\Checker\HeaderCheckerManager;
 use Jose\Component\Core\AlgorithmManager;
+use Jose\Component\Core\Converter\StandardConverter;
 use Jose\Component\Encryption\JWETokenSupport;
+use Jose\Component\Signature\JWSBuilder;
+use Jose\Component\Signature\JWSLoader;
 use Jose\Component\Signature\JWSTokenSupport;
+use Jose\Component\Signature\JWSVerifier;
+use Jose\Component\Signature\Serializer\CompactSerializer;
+use Jose\Component\Signature\Serializer\JWSSerializerManager;
 use OpenIDConnect\Jwt\AlgorithmFactory;
 use OpenIDConnect\Traits\MetadataAwareTraits;
 use OutOfBoundsException;
@@ -39,18 +45,13 @@ class ProviderMetadata implements ArrayAccess
 
     /**
      * @param array $metadata
-     * @param AlgorithmFactory|null $algorithmFactory
      */
-    public function __construct(array $metadata = [], AlgorithmFactory $algorithmFactory = null)
+    public function __construct(array $metadata = [])
     {
         $this->metadata = collect($metadata);
 
         if (!$this->metadata->has(self::REQUIRED_METADATA)) {
             throw new OutOfBoundsException('Required config is missing. Config: ' . $this->metadata->toJson());
-        }
-
-        if (null === $algorithmFactory) {
-            $this->algorithmFactory = new AlgorithmFactory();
         }
     }
 
@@ -79,30 +80,6 @@ class ProviderMetadata implements ArrayAccess
     public function codeChallengeMethodsSupported(): ?array
     {
         return $this->metadata['code_challenge_methods_supported'] ?? null;
-    }
-
-    /**
-     * @return AlgorithmManager
-     */
-    public function createAlgorithmManager(): AlgorithmManager
-    {
-        return $this->algorithmFactory->createAlgorithmManager($this->idTokenAlgValuesSupported());
-    }
-
-    /**
-     * @return HeaderCheckerManager
-     */
-    public function createHeaderCheckerManager(): HeaderCheckerManager
-    {
-        $tokenTypesSupport = [new JWSTokenSupport()];
-
-        if (null !== $this->idTokenEncryptionAlgValuesSupported()) {
-            $tokenTypesSupport[] = new JWETokenSupport();
-        }
-
-        return HeaderCheckerManager::create([
-            new AlgorithmChecker($this->idTokenAlgValuesSupported()),
-        ], $tokenTypesSupport);
     }
 
     /**

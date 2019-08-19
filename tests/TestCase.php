@@ -9,6 +9,7 @@ use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Response as HttpResponse;
 use Illuminate\Container\Container;
+use OpenIDConnect\Metadata\ProviderMetadata;
 use OpenIDConnect\ServiceProvider\Laravel;
 use Psr\Http\Message\ResponseInterface;
 use function GuzzleHttp\json_encode;
@@ -97,6 +98,15 @@ class TestCase extends \PHPUnit\Framework\TestCase
         return [
             'handler' => $this->createHandlerStack($responses, $history),
         ];
+    }
+
+    /**
+     * @param array $overwrite
+     * @return ProviderMetadata
+     */
+    protected function createProviderMetadata($overwrite = []): ProviderMetadata
+    {
+        return new ProviderMetadata($this->createProviderMetadataConfig($overwrite));
     }
 
     /**

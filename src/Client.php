@@ -158,7 +158,7 @@ HTML;
      * @return TokenSetInterface
      * @throws IdentityProviderException
      */
-    protected function getTokenSet($grant, array $options = []): TokenSetInterface
+    private function getTokenSet($grant, array $options = []): TokenSetInterface
     {
         $grant = $this->verifyGrant($grant);
 
@@ -178,6 +178,23 @@ HTML;
             );
         }
 
-        return new TokenSet($response);
+        $tokenSet = new TokenSet($response);
+
+        if (!$tokenSet->hasIdToken()) {
+            return $tokenSet;
+        }
+
+        if ($jws = $this->validateIdToken($tokenSet)) {
+            return $jws;
+        }
+
+        throw new \UnexpectedValueException('Receive an invalid ID token: ' . $tokenSet->idToken());
+    }
+
+    /**
+     * @param TokenSetInterface $tokenSet
+     */
+    private function validateIdToken(TokenSetInterface $tokenSet)
+    {
     }
 }
