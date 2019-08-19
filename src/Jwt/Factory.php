@@ -16,20 +16,16 @@ use OpenIDConnect\Metadata\ProviderMetadata;
 
 class Factory
 {
-    /**
-     * @var AlgorithmFactory
-     */
-    private $algorithmFactory;
+    use AlgorithmFactoryTrait;
 
     /**
      * @var ProviderMetadata
      */
     private $providerMetadata;
 
-    public function __construct(ProviderMetadata $providerMetadata, AlgorithmFactory $algorithmFactory = null)
+    public function __construct(ProviderMetadata $providerMetadata)
     {
         $this->providerMetadata = $providerMetadata;
-        $this->algorithmFactory = $algorithmFactory ?? new AlgorithmFactory();
     }
 
     /**
@@ -37,7 +33,9 @@ class Factory
      */
     public function createAlgorithmManager(): AlgorithmManager
     {
-        return $this->algorithmFactory->createAlgorithmManager($this->providerMetadata->idTokenAlgValuesSupported());
+        return AlgorithmManager::create(
+            $this->createSignatureAlgorithms($this->providerMetadata->idTokenAlgValuesSupported())
+        );
     }
 
     /**

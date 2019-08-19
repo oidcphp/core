@@ -14,7 +14,7 @@ use Jose\Component\Signature\JWSTokenSupport;
 use Jose\Component\Signature\JWSVerifier;
 use Jose\Component\Signature\Serializer\CompactSerializer;
 use Jose\Component\Signature\Serializer\JWSSerializerManager;
-use OpenIDConnect\Jwt\AlgorithmFactory;
+use OpenIDConnect\Jwt\AlgorithmFactoryTrait;
 use OpenIDConnect\Traits\MetadataAwareTraits;
 use OutOfBoundsException;
 
@@ -37,11 +37,6 @@ class ProviderMetadata implements ArrayAccess
         'subject_types_supported',
         'token_endpoint',
     ];
-
-    /**
-     * @var AlgorithmFactory
-     */
-    private $algorithmFactory;
 
     /**
      * @param array $metadata
