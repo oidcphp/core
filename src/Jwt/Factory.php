@@ -53,4 +53,46 @@ class Factory
             new AlgorithmChecker($this->providerMetadata->idTokenAlgValuesSupported()),
         ], $tokenTypesSupport);
     }
+
+    /**
+     * @return JWSBuilder
+     */
+    public function createJwsBuilder(): JWSBuilder
+    {
+        return new JWSBuilder(
+            null,
+            $this->createAlgorithmManager()
+        );
+    }
+
+    /**
+     * @return JWSLoader
+     */
+    public function createJwsLoader(): JWSLoader
+    {
+        return new JWSLoader(
+            $this->createJwsSerializerManager(),
+            $this->createJwsVerifier(),
+            $this->createHeaderCheckerManager()
+        );
+    }
+
+    /**
+     * @return JWSSerializerManager
+     * @todo Serializer must be editable
+     */
+    public function createJwsSerializerManager(): JWSSerializerManager
+    {
+        return JWSSerializerManager::create([
+            new CompactSerializer(),
+        ]);
+    }
+
+    /**
+     * @return JWSVerifier
+     */
+    public function createJwsVerifier(): JWSVerifier
+    {
+        return new JWSVerifier($this->createAlgorithmManager());
+    }
 }

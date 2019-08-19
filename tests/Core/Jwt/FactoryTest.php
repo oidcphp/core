@@ -2,19 +2,36 @@
 
 namespace Tests\Core\Metadata;
 
-use DomainException;
 use InvalidArgumentException;
 use Jose\Component\Checker\InvalidHeaderException;
+use Jose\Component\Core\Util\JsonConverter;
+use Jose\Component\KeyManagement\JWKFactory;
 use Jose\Component\Signature\Algorithm\ES256;
 use Jose\Component\Signature\Algorithm\PS256;
 use Jose\Component\Signature\Algorithm\RS256;
+use Jose\Component\Signature\Serializer\CompactSerializer;
 use OpenIDConnect\Jwt\Factory;
-use OpenIDConnect\Metadata\ProviderMetadata;
-use OutOfBoundsException;
+use OutOfRangeException;
 use Tests\TestCase;
 
 class FactoryTest extends TestCase
 {
+    /**
+     * @test
+     */
+    public function shouldThrowExceptionWhenAlgorithmIsNotDefine(): void
+    {
+        $this->expectException(OutOfRangeException::class);
+
+        $target = new Factory($this->createProviderMetadata([
+            'id_token_signing_alg_values_supported' => ['Whatever'],
+        ]));
+
+        $actual = $target->createAlgorithmManager();
+
+        $this->assertInstanceOf(RS256::class, $actual->get('RS256'));
+        $this->assertInstanceOf(ES256::class, $actual->get('ES256'));
+    }
     /**
      * @test
      */
@@ -93,5 +110,38 @@ class FactoryTest extends TestCase
         $actual = $target->createHeaderCheckerManager()->getCheckers()['alg'];
 
         $actual->checkHeader('HS256');
+    }
+
+    /**
+     * A full flow for sign and verify
+     *
+     * @test
+     */
+    public function shouldBuildJwtAndVerifyAndStringAndSerializeStringAndLoadUsingRS256(): void
+    {
+        $target = new Factory($this->createProviderMetadata());
+
+        $jwk = JWKFactory::createRSAKey(1024, ['alg' => 'RS256']);
+
+        $builder = $target->createJwsBuilder();
+
+        $jws = $builder->withPayload(JsonConverter::encode([]))
+            ->addSignature($jwk, ['alg' => 'RS256'])
+            ->build();
+
+        $verifier = $target->createJwsVerifier();
+
+        $this->assertTrue($verifier->verifyWithKey($jws, $jwk, 0));
+
+        $token = (new CompactSerializer())->serialize($jws);
+
+        // {"alg": "RS256"} + []
+        $this->assertStringStartsWith('eyJhbGciOiJSUzI1NiJ9.W10', $token);
+
+        $loader = $target->createJwsLoader();
+
+        $jws = $loader->loadAndVerifyWithKey($token, $jwk, $sign);
+
+        $this->assertSame('[]', $jws->getPayload());
     }
 }
