@@ -3,10 +3,17 @@
 namespace OpenIDConnect\Token;
 
 use InvalidArgumentException;
-use JsonSerializable;
 
-class TokenSet implements JsonSerializable, TokenSetInterface
+class TokenSet implements TokenSetInterface
 {
+    public const DEFAULT_KEYS = [
+        'access_token',
+        'expires_in',
+        'id_token',
+        'refresh_token',
+        'scope',
+    ];
+
     /**
      * @var array
      */
@@ -29,13 +36,7 @@ class TokenSet implements JsonSerializable, TokenSetInterface
 
         $this->parameters = $parameters;
 
-        $this->values = array_diff_key($parameters, array_flip([
-            'access_token',
-            'expires_in',
-            'id_token',
-            'refresh_token',
-            'scope',
-        ]));
+        $this->values = array_diff_key($this->parameters, array_flip(self::DEFAULT_KEYS));
     }
 
     /**
@@ -51,15 +52,55 @@ class TokenSet implements JsonSerializable, TokenSetInterface
      */
     public function expiresIn(): int
     {
-        return $this->parameters['expires_in'] ?? null;
+        return $this->hasExpiresIn() ? $this->parameters['expires_in'] : null;
     }
 
     /**
      * {@inheritDoc}
      */
-    public function idToken(): string
+    public function has(string $key): bool
     {
-        return $this->parameters['id_token'] ?? null;
+        return isset($this->parameters[$key]);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function hasExpiresIn(): bool
+    {
+        return $this->has('expires_in');
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function hasIdToken(): bool
+    {
+        return $this->has('id_token');
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function hasRefreshToken(): bool
+    {
+        return $this->has('refresh_token');
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function hasScope(): bool
+    {
+        return $this->has('scope');
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function idToken(): ?string
+    {
+        return $this->hasIdToken() ? $this->parameters['id_token'] : null;
     }
 
     /**
@@ -75,7 +116,7 @@ class TokenSet implements JsonSerializable, TokenSetInterface
      */
     public function refreshToken(): string
     {
-        return $this->parameters['refresh_token'] ?? null;
+        return $this->hasRefreshToken() ? $this->parameters['refresh_token'] : null;
     }
 
     /**
@@ -83,7 +124,7 @@ class TokenSet implements JsonSerializable, TokenSetInterface
      */
     public function scope(): ?array
     {
-        if (!isset($this->parameters['scope'])) {
+        if (!$this->hasScope()) {
             return null;
         }
 
@@ -101,6 +142,10 @@ class TokenSet implements JsonSerializable, TokenSetInterface
     {
         if (null === $key) {
             return $this->values;
+        }
+
+        if (in_array($key, self::DEFAULT_KEYS, true)) {
+            throw new InvalidArgumentException('Cannot use values() method to get default keys');
         }
 
         if (!isset($this->values[$key])) {

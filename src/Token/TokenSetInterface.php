@@ -2,10 +2,12 @@
 
 namespace OpenIDConnect\Token;
 
+use JsonSerializable;
+
 /**
  * The token set interface for OpenID Connect flow
  */
-interface TokenSetInterface
+interface TokenSetInterface extends JsonSerializable
 {
     /**
      * @see https://tools.ietf.org/html/rfc6749#section-1.4
@@ -20,10 +22,36 @@ interface TokenSetInterface
     public function expiresIn(): ?int;
 
     /**
+     * @param string $key
+     * @return bool
+     */
+    public function has(string $key): bool;
+
+    /**
+     * @return bool
+     */
+    public function hasExpiresIn(): bool;
+
+    /**
+     * @return bool
+     */
+    public function hasIdToken(): bool;
+
+    /**
+     * @return bool
+     */
+    public function hasRefreshToken(): bool;
+
+    /**
+     * @return bool
+     */
+    public function hasScope(): bool;
+
+    /**
      * @see https://openid.net/specs/openid-connect-core-1_0.html#IDToken
      * @return string
      */
-    public function idToken();
+    public function idToken(): ?string;
 
     /**
      * @see https://tools.ietf.org/html/rfc6749#section-1.5

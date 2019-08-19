@@ -136,7 +136,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
         return array_merge([
             'access_token' => 'some-access-token',
             'expires_in' => 3600,
-            'id_token' => 'some-id-token',
+            'id_token' => null,
             'refresh_token' => 'some-refresh-token',
             'scope' => 'some-scope',
         ], $overwrite);
