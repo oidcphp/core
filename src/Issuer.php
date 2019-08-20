@@ -3,7 +3,7 @@
 namespace OpenIDConnect;
 
 use GuzzleHttp\Client;
-use OpenIDConnect\Metadata\JWKMetadata;
+use OpenIDConnect\Metadata\JwkMetadata;
 use OpenIDConnect\Metadata\ProviderMetadata;
 use Psr\Http\Message\ResponseInterface;
 use UnexpectedValueException;
@@ -39,7 +39,7 @@ class Issuer
         $providerMetadata = new ProviderMetadata(self::processResponse($providerResponse));
 
         $jwkResponse = $httpClient->request('GET', $providerMetadata->jwksUri());
-        $jwkMetadata = new JWKMetadata(self::processResponse($jwkResponse));
+        $jwkMetadata = new JwkMetadata(self::processResponse($jwkResponse));
 
         if (!$raw) {
             return [$providerMetadata, $jwkMetadata];

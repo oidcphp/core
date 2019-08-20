@@ -3,20 +3,10 @@
 namespace OpenIDConnect\Metadata;
 
 use ArrayAccess;
-use Jose\Component\Checker\AlgorithmChecker;
-use Jose\Component\Checker\HeaderCheckerManager;
-use Jose\Component\Core\AlgorithmManager;
-use Jose\Component\Core\Converter\StandardConverter;
-use Jose\Component\Encryption\JWETokenSupport;
-use Jose\Component\Signature\JWSBuilder;
-use Jose\Component\Signature\JWSLoader;
-use Jose\Component\Signature\JWSTokenSupport;
-use Jose\Component\Signature\JWSVerifier;
-use Jose\Component\Signature\Serializer\CompactSerializer;
-use Jose\Component\Signature\Serializer\JWSSerializerManager;
-use OpenIDConnect\Jwt\AlgorithmFactoryTrait;
+use OpenIDConnect\Jwt\Factory;
 use OpenIDConnect\Traits\MetadataAwareTraits;
 use OutOfBoundsException;
+use RuntimeException;
 
 /**
  * OAuth 2.0 / OpenID Connect provider metadata
@@ -39,11 +29,18 @@ class ProviderMetadata implements ArrayAccess
     ];
 
     /**
-     * @param array $metadata
+     * @var array|null
      */
-    public function __construct(array $metadata = [])
+    private $jwks;
+
+    /**
+     * @param array $metadata
+     * @param array|null $jwks
+     */
+    public function __construct(array $metadata = [], array $jwks = null)
     {
         $this->metadata = collect($metadata);
+        $this->jwks = $jwks;
 
         if (!$this->metadata->has(self::REQUIRED_METADATA)) {
             throw new OutOfBoundsException('Required config is missing. Config: ' . $this->metadata->toJson());
@@ -75,6 +72,14 @@ class ProviderMetadata implements ArrayAccess
     public function codeChallengeMethodsSupported(): ?array
     {
         return $this->metadata['code_challenge_methods_supported'] ?? null;
+    }
+
+    /**
+     * @return Factory
+     */
+    public function createJwtFactory(): Factory
+    {
+        return new Factory($this);
     }
 
     /**
@@ -111,6 +116,18 @@ class ProviderMetadata implements ArrayAccess
     public function issuer(): string
     {
         return $this->metadata['issuer'];
+    }
+
+    /**
+     * @return JwkMetadata
+     */
+    public function jwkMetadata(): JwkMetadata
+    {
+        if (null === $this->jwks) {
+            throw new RuntimeException('JWK metadata is empty');
+        }
+
+        return new JwkMetadata($this->jwks);
     }
 
     /**

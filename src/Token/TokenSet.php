@@ -3,6 +3,13 @@
 namespace OpenIDConnect\Token;
 
 use InvalidArgumentException;
+use Jose\Component\Checker\InvalidClaimException;
+use Jose\Component\Checker\MissingMandatoryClaimException;
+use Jose\Component\Core\Util\JsonConverter;
+use Jose\Component\Signature\JWS;
+use OpenIDConnect\Jwt\Factory;
+use OpenIDConnect\Metadata\ProviderMetadata;
+use RangeException;
 
 class TokenSet implements TokenSetInterface
 {
@@ -13,6 +20,16 @@ class TokenSet implements TokenSetInterface
         'refresh_token',
         'scope',
     ];
+
+    /**
+     * @var JWS
+     */
+    private $jws;
+
+    /**
+     * @var ProviderMetadata
+     */
+    private $providerMetadata;
 
     /**
      * @var array
@@ -26,15 +43,16 @@ class TokenSet implements TokenSetInterface
 
     /**
      * @param array $parameters An array from token endpoint response body
-     * @throws InvalidArgumentException
+     * @param ProviderMetadata $providerMetadata
      */
-    public function __construct(array $parameters = [])
+    public function __construct(array $parameters, ProviderMetadata $providerMetadata)
     {
         if (empty($parameters['access_token'])) {
             throw new InvalidArgumentException('Required "access_token" but not passed');
         }
 
         $this->parameters = $parameters;
+        $this->providerMetadata = $providerMetadata;
 
         $this->values = array_diff_key($this->parameters, array_flip(self::DEFAULT_KEYS));
     }
@@ -153,5 +171,53 @@ class TokenSet implements TokenSetInterface
         }
 
         return $this->values[$key];
+    }
+
+    /**
+     * @param array $mandatoryClaims
+     * @return JWS
+     * @throws InvalidClaimException
+     * @throws MissingMandatoryClaimException
+     */
+    public function verifyIdToken($mandatoryClaims = []): JWS
+    {
+        if (null !== $this->jws) {
+            return $this->jws;
+        }
+
+        $token = $this->idToken();
+
+        if (null === $token) {
+            throw new RangeException('No ID token');
+        }
+
+        $loader = $this->factory()->createJwsLoader();
+
+        $signature = null;
+
+        $jwkSet = $this->providerMetadata->jwkMetadata()->JWKSet();
+
+        $this->jws = $loader->loadAndVerifyWithKeySet($token, $jwkSet, $signature);
+
+        $payload = $this->jws->getPayload();
+
+        if (null === $payload) {
+            throw new \UnexpectedValueException('JWT has no payload');
+        }
+
+        $this->factory()->createClaimCheckerManager()->check(JsonConverter::decode($payload), array_unique(array_merge([
+            'aud',
+            'exp',
+            'iat',
+            'iss',
+            'sub',
+        ], $mandatoryClaims)));
+
+        return $this->jws;
+    }
+
+    private function factory(): Factory
+    {
+        return $this->providerMetadata->createJwtFactory();
     }
 }

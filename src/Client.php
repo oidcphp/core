@@ -8,6 +8,7 @@ use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Token\AccessToken;
 use OpenIDConnect\Exceptions\OpenIDProviderException;
 use OpenIDConnect\Exceptions\RelyingPartyException;
+use OpenIDConnect\Jwt\Factory;
 use OpenIDConnect\Metadata\ClientMetadata;
 use OpenIDConnect\Metadata\ProviderMetadata;
 use OpenIDConnect\Token\TokenSet;
@@ -20,14 +21,19 @@ use Psr\Http\Message\ResponseInterface;
 class Client extends AbstractProvider
 {
     /**
-     * @var ProviderMetadata
-     */
-    private $providerMetadata;
-
-    /**
      * @var ClientMetadata
      */
     private $clientMetadata;
+
+    /**
+     * @var Factory
+     */
+    private $jwtFactory;
+
+    /**
+     * @var ProviderMetadata
+     */
+    private $providerMetadata;
 
     /**
      * @param ProviderMetadata $providerMetadata
@@ -38,6 +44,7 @@ class Client extends AbstractProvider
     {
         $this->providerMetadata = $providerMetadata;
         $this->clientMetadata = $clientMetadata;
+        $this->jwtFactory = $providerMetadata->createJwtFactory();
 
         parent::__construct([
             'clientId' => $clientMetadata->id(),
@@ -178,7 +185,7 @@ HTML;
             );
         }
 
-        $tokenSet = new TokenSet($response);
+        $tokenSet = new TokenSet($response, $this->providerMetadata);
 
         if (!$tokenSet->hasIdToken()) {
             return $tokenSet;

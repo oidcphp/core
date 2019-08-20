@@ -6,7 +6,6 @@ use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
-use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Response as HttpResponse;
 use Illuminate\Container\Container;
 use OpenIDConnect\Metadata\ProviderMetadata;
@@ -102,11 +101,12 @@ class TestCase extends \PHPUnit\Framework\TestCase
 
     /**
      * @param array $overwrite
+     * @param array $jwks
      * @return ProviderMetadata
      */
-    protected function createProviderMetadata($overwrite = []): ProviderMetadata
+    protected function createProviderMetadata($overwrite = [], $jwks = []): ProviderMetadata
     {
-        return new ProviderMetadata($this->createProviderMetadataConfig($overwrite));
+        return new ProviderMetadata($this->createProviderMetadataConfig($overwrite), $jwks);
     }
 
     /**

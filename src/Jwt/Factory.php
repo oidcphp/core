@@ -3,7 +3,13 @@
 namespace OpenIDConnect\Jwt;
 
 use Jose\Component\Checker\AlgorithmChecker;
+use Jose\Component\Checker\AudienceChecker;
+use Jose\Component\Checker\ClaimCheckerManager;
+use Jose\Component\Checker\ExpirationTimeChecker;
 use Jose\Component\Checker\HeaderCheckerManager;
+use Jose\Component\Checker\IssuedAtChecker;
+use Jose\Component\Checker\NotBeforeChecker;
+use Jose\Component\Checker\Tests\Stub\IssuerChecker;
 use Jose\Component\Core\AlgorithmManager;
 use Jose\Component\Encryption\JWETokenSupport;
 use Jose\Component\Signature\JWSBuilder;
@@ -39,6 +45,18 @@ class Factory
     }
 
     /**
+     * @return ClaimCheckerManager
+     */
+    public function createClaimCheckerManager(): ClaimCheckerManager
+    {
+        return ClaimCheckerManager::create([
+            new ExpirationTimeChecker(),
+            new IssuedAtChecker(),
+            new NotBeforeChecker(),
+        ]);
+    }
+
+    /**
      * @return HeaderCheckerManager
      */
     public function createHeaderCheckerManager(): HeaderCheckerManager
@@ -51,6 +69,7 @@ class Factory
 
         return HeaderCheckerManager::create([
             new AlgorithmChecker($this->providerMetadata->idTokenAlgValuesSupported()),
+            new IssuerChecker($this->providerMetadata->issuer()),
         ], $tokenTypesSupport);
     }
 

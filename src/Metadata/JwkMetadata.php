@@ -11,7 +11,7 @@ use OpenIDConnect\Traits\MetadataAwareTraits;
  *
  * @see https://tools.ietf.org/html/rfc7517
  */
-class JWKMetadata implements ArrayAccess
+class JwkMetadata implements ArrayAccess
 {
     use MetadataAwareTraits;
 
