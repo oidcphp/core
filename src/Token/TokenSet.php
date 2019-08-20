@@ -7,6 +7,7 @@ use Jose\Component\Checker\InvalidClaimException;
 use Jose\Component\Checker\MissingMandatoryClaimException;
 use Jose\Component\Core\Util\JsonConverter;
 use Jose\Component\Signature\JWS;
+use OpenIDConnect\IdToken;
 use OpenIDConnect\Jwt\Factory;
 use OpenIDConnect\Metadata\ProviderMetadata;
 use RangeException;
@@ -22,9 +23,9 @@ class TokenSet implements TokenSetInterface
     ];
 
     /**
-     * @var JWS
+     * @var IdToken
      */
-    private $jws;
+    private $idToken;
 
     /**
      * @var ProviderMetadata
@@ -175,14 +176,14 @@ class TokenSet implements TokenSetInterface
 
     /**
      * @param array $mandatoryClaims
-     * @return JWS
+     * @return IdToken
      * @throws InvalidClaimException
      * @throws MissingMandatoryClaimException
      */
-    public function verifyIdToken($mandatoryClaims = []): JWS
+    public function verifyIdToken($mandatoryClaims = []): IdToken
     {
-        if (null !== $this->jws) {
-            return $this->jws;
+        if (null !== $this->idToken) {
+            return $this->idToken;
         }
 
         $token = $this->idToken();
@@ -197,9 +198,9 @@ class TokenSet implements TokenSetInterface
 
         $jwkSet = $this->providerMetadata->jwkMetadata()->JWKSet();
 
-        $this->jws = $loader->loadAndVerifyWithKeySet($token, $jwkSet, $signature);
+        $jws = $loader->loadAndVerifyWithKeySet($token, $jwkSet, $signature);
 
-        $payload = $this->jws->getPayload();
+        $payload = $jws->getPayload();
 
         if (null === $payload) {
             throw new \UnexpectedValueException('JWT has no payload');
@@ -213,7 +214,7 @@ class TokenSet implements TokenSetInterface
             'sub',
         ], $mandatoryClaims)));
 
-        return $this->jws;
+        return $this->idToken = IdToken::createFromJWS($jws);
     }
 
     private function factory(): Factory

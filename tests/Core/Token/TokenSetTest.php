@@ -8,6 +8,7 @@ use Jose\Component\Core\Util\JsonConverter;
 use Jose\Component\KeyManagement\JWKFactory;
 use Jose\Component\Signature\JWS;
 use Jose\Component\Signature\Serializer\CompactSerializer;
+use OpenIDConnect\IdToken;
 use OpenIDConnect\Metadata\ProviderMetadata;
 use OpenIDConnect\Token\TokenSet;
 use Tests\TestCase;
@@ -74,10 +75,13 @@ class TokenSetTest extends TestCase
 
         $providerMetadata = new ProviderMetadata($this->createProviderMetadataConfig(), JsonConverter::decode($jwks));
 
+        $expectedExp = time() + 3600;
+        $expectedIat = time();
+
         $payload = [
             'aud' => 'some-aud',
-            'exp' => time() + 3600,
-            'iat' => time(),
+            'exp' => $expectedExp,
+            'iat' => $expectedIat,
             'iss' => 'some-iss',
             'sub' => 'some-sub',
         ];
@@ -91,6 +95,17 @@ class TokenSetTest extends TestCase
             'id_token' => (new CompactSerializer())->serialize($jws),
         ]), $providerMetadata);
 
-        $this->assertInstanceOf(JWS::class, $target->verifyIdToken());
+        $actual = $target->verifyIdToken();
+
+        $this->assertSame('some-aud', $actual->aud());
+        $this->assertSame('some-iss', $actual->iss());
+        $this->assertSame($expectedExp, $actual->exp());
+        $this->assertSame($expectedIat, $actual->iat());
+        $this->assertSame('some-sub', $actual->sub());
+        $this->assertNull($actual->authTime());
+        $this->assertNull($actual->nonce());
+        $this->assertNull($actual->acr());
+        $this->assertNull($actual->amr());
+        $this->assertNull($actual->azp());
     }
 }
