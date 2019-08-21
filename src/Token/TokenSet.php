@@ -6,7 +6,6 @@ use InvalidArgumentException;
 use Jose\Component\Checker\InvalidClaimException;
 use Jose\Component\Checker\MissingMandatoryClaimException;
 use Jose\Component\Core\Util\JsonConverter;
-use Jose\Component\Signature\JWS;
 use OpenIDConnect\IdToken;
 use OpenIDConnect\Jwt\Factory;
 use OpenIDConnect\Metadata\ProviderMetadata;
