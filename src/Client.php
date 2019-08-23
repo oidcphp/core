@@ -190,18 +190,5 @@ HTML;
         if (!$tokenSet->hasIdToken()) {
             return $tokenSet;
         }
-
-        if ($jws = $this->validateIdToken($tokenSet)) {
-            return $jws;
-        }
-
-        throw new \UnexpectedValueException('Receive an invalid ID token: ' . $tokenSet->idToken());
-    }
-
-    /**
-     * @param TokenSetInterface $tokenSet
-     */
-    private function validateIdToken(TokenSetInterface $tokenSet)
-    {
     }
 }

@@ -3,6 +3,7 @@
 namespace OpenIDConnect\Token;
 
 use JsonSerializable;
+use OpenIDConnect\IdToken;
 
 /**
  * The token set interface for OpenID Connect flow
@@ -49,9 +50,15 @@ interface TokenSetInterface extends JsonSerializable
 
     /**
      * @see https://openid.net/specs/openid-connect-core-1_0.html#IDToken
+     * @return IdToken
+     */
+    public function idToken(): IdToken;
+
+    /**
+     * @see https://openid.net/specs/openid-connect-core-1_0.html#IDToken
      * @return string
      */
-    public function idToken(): ?string;
+    public function idTokenRaw(): ?string;
 
     /**
      * @see https://tools.ietf.org/html/rfc6749#section-1.5

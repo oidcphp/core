@@ -3,9 +3,8 @@
 namespace OpenIDConnect\Token;
 
 use InvalidArgumentException;
-use Jose\Component\Checker\InvalidClaimException;
-use Jose\Component\Checker\MissingMandatoryClaimException;
 use Jose\Component\Core\Util\JsonConverter;
+use OpenIDConnect\Exceptions\RelyingPartyException;
 use OpenIDConnect\IdToken;
 use OpenIDConnect\Jwt\Factory;
 use OpenIDConnect\Metadata\ProviderMetadata;
@@ -113,10 +112,53 @@ class TokenSet implements TokenSetInterface
         return $this->has('scope');
     }
 
+    public function idToken($mandatoryClaims = []): IdToken
+    {
+        if (null !== $this->idToken) {
+            return $this->idToken;
+        }
+
+        $token = $this->idTokenRaw();
+
+        if (null === $token) {
+            throw new RangeException('No ID token');
+        }
+
+        $loader = $this->factory()->createJwsLoader();
+
+        $signature = null;
+
+        $jwkSet = $this->providerMetadata->jwkMetadata()->JWKSet();
+
+        $jws = $loader->loadAndVerifyWithKeySet($token, $jwkSet, $signature);
+
+        $payload = $jws->getPayload();
+
+        if (null === $payload) {
+            throw new \UnexpectedValueException('JWT has no payload');
+        }
+
+        $claimCheckerManager = $this->factory()->createClaimCheckerManager();
+
+        try {
+            $claimCheckerManager->check(JsonConverter::decode($payload), array_unique(array_merge([
+                'aud',
+                'exp',
+                'iat',
+                'iss',
+                'sub',
+            ], $mandatoryClaims)));
+        } catch (\Exception $e) {
+            throw new RelyingPartyException('Receive an invalid ID token: ' . $this->idTokenRaw(), 0, $e);
+        }
+
+        return $this->idToken = IdToken::createFromJWS($jws);
+    }
+
     /**
      * {@inheritDoc}
      */
-    public function idToken(): ?string
+    public function idTokenRaw(): ?string
     {
         return $this->hasIdToken() ? $this->parameters['id_token'] : null;
     }
@@ -171,49 +213,6 @@ class TokenSet implements TokenSetInterface
         }
 
         return $this->values[$key];
-    }
-
-    /**
-     * @param array $mandatoryClaims
-     * @return IdToken
-     * @throws InvalidClaimException
-     * @throws MissingMandatoryClaimException
-     */
-    public function verifyIdToken($mandatoryClaims = []): IdToken
-    {
-        if (null !== $this->idToken) {
-            return $this->idToken;
-        }
-
-        $token = $this->idToken();
-
-        if (null === $token) {
-            throw new RangeException('No ID token');
-        }
-
-        $loader = $this->factory()->createJwsLoader();
-
-        $signature = null;
-
-        $jwkSet = $this->providerMetadata->jwkMetadata()->JWKSet();
-
-        $jws = $loader->loadAndVerifyWithKeySet($token, $jwkSet, $signature);
-
-        $payload = $jws->getPayload();
-
-        if (null === $payload) {
-            throw new \UnexpectedValueException('JWT has no payload');
-        }
-
-        $this->factory()->createClaimCheckerManager()->check(JsonConverter::decode($payload), array_unique(array_merge([
-            'aud',
-            'exp',
-            'iat',
-            'iss',
-            'sub',
-        ], $mandatoryClaims)));
-
-        return $this->idToken = IdToken::createFromJWS($jws);
     }
 
     private function factory(): Factory
