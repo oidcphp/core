@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace OpenIDConnect;
 
-use Illuminate\Support\Facades\Facade;
 use Jose\Component\Core\Util\JsonConverter;
 use Jose\Component\Signature\JWS;
 

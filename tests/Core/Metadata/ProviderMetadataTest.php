@@ -4,7 +4,7 @@ namespace Tests\Core\Metadata;
 
 use DomainException;
 use OpenIDConnect\Metadata\ProviderMetadata;
-use OutOfBoundsException;
+use RuntimeException;
 use Tests\TestCase;
 
 class ProviderMetadataTest extends TestCase
@@ -22,7 +22,7 @@ class ProviderMetadataTest extends TestCase
      */
     public function shouldThrowExceptionReturnAndCanUseIssetWithInstance($missingField): void
     {
-        $this->expectException(OutOfBoundsException::class);
+        $this->expectException(RuntimeException::class);
 
         $data = $this->createProviderMetadataConfig();
         unset($data[$missingField]);

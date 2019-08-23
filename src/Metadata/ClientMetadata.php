@@ -4,7 +4,6 @@ namespace OpenIDConnect\Metadata;
 
 use ArrayAccess;
 use OpenIDConnect\Traits\MetadataAwareTraits;
-use OutOfBoundsException;
 
 /**
  * The metadata of client registration
@@ -26,11 +25,9 @@ class ClientMetadata implements ArrayAccess
      */
     public function __construct(array $metadata = [])
     {
-        $this->metadata = collect($metadata);
+        $this->metadata = $metadata;
 
-        if (!$this->metadata->has(self::REQUIRED_METADATA)) {
-            throw new OutOfBoundsException('Required config is missing. Config: ' . $this->metadata->toJson());
-        }
+        $this->assertKeys(self::REQUIRED_METADATA);
     }
 
     /**

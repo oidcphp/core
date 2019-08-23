@@ -37,14 +37,12 @@ class ProviderMetadata implements ArrayAccess
      * @param array $metadata
      * @param array|null $jwks
      */
-    public function __construct(array $metadata = [], array $jwks = null)
+    public function __construct(array $metadata, array $jwks = null)
     {
-        $this->metadata = collect($metadata);
+        $this->metadata = $metadata;
         $this->jwks = $jwks;
 
-        if (!$this->metadata->has(self::REQUIRED_METADATA)) {
-            throw new OutOfBoundsException('Required config is missing. Config: ' . $this->metadata->toJson());
-        }
+        $this->assertKeys(self::REQUIRED_METADATA);
     }
 
     /**

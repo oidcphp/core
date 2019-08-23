@@ -25,7 +25,7 @@ class JwkMetadata implements ArrayAccess
      */
     public function __construct(array $metadata = [])
     {
-        $this->metadata = collect($metadata);
+        $this->metadata = $metadata;
 
         $this->jwkSet = JWKSet::createFromKeyData($metadata);
     }

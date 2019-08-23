@@ -4,7 +4,7 @@ namespace Tests\Core\Metadata;
 
 use DomainException;
 use OpenIDConnect\Metadata\ClientMetadata;
-use OutOfBoundsException;
+use RuntimeException;
 use Tests\TestCase;
 
 class ClientMetadataTest extends TestCase
@@ -22,7 +22,7 @@ class ClientMetadataTest extends TestCase
      */
     public function shouldThrowExceptionReturnAndCanUseIssetWithInstance($missingField): void
     {
-        $this->expectException(OutOfBoundsException::class);
+        $this->expectException(RuntimeException::class);
 
         $data = $this->createClientMetadataConfig();
         unset($data[$missingField]);
@@ -70,10 +70,10 @@ class ClientMetadataTest extends TestCase
      */
     public function shouldThrowExceptionWhenAssertNotExistConfig(): void
     {
-        $this->expectException(OutOfBoundsException::class);
+        $this->expectException(RuntimeException::class);
 
         $target = new ClientMetadata($this->createClientMetadataConfig());
 
-        $target->assertConfiguration('not-exist');
+        $target->assertKey('not-exist');
     }
 }
