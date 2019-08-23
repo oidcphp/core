@@ -33,7 +33,7 @@ class ClientHandleOpenIDConnectCallbackTest extends TestCase
             $this->app->make(ClientMetadata::class),
             [
                 'httpClient' => $this->createHttpClient([
-                    $this->createFakeTokenEndpointResponse(),
+                    $this->createFakeTokenEndpointResponse(['id_token' => 'whatever']),
                 ]),
             ]
         );
@@ -47,6 +47,6 @@ class ClientHandleOpenIDConnectCallbackTest extends TestCase
         $this->assertSame('some-refresh-token', $actual->refreshToken());
         $this->assertSame(['some-scope'], $actual->scope());
 
-        $this->assertNull($actual->idTokenRaw());
+        $this->assertSame('whatever', $actual->idTokenRaw());
     }
 }

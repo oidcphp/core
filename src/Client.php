@@ -188,7 +188,9 @@ HTML;
         $tokenSet = new TokenSet($response, $this->providerMetadata);
 
         if (!$tokenSet->hasIdToken()) {
-            return $tokenSet;
+            throw new OpenIDProviderException("'id_token' missing from the token endpoint response");
         }
+
+        return $tokenSet;
     }
 }
