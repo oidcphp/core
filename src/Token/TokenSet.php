@@ -3,8 +3,6 @@
 namespace OpenIDConnect\Token;
 
 use InvalidArgumentException;
-use Jose\Component\Core\JWK;
-use Jose\Component\Core\JWKSet;
 use Jose\Component\Core\Util\JsonConverter;
 use OpenIDConnect\Exceptions\RelyingPartyException;
 use OpenIDConnect\IdToken;

@@ -3,13 +3,9 @@
 namespace Tests\Core\Token;
 
 use InvalidArgumentException;
-use Jose\Component\Core\AlgorithmManager;
-use Jose\Component\Core\AlgorithmManagerFactory;
 use Jose\Component\Core\JWKSet;
 use Jose\Component\Core\Util\JsonConverter;
 use Jose\Component\KeyManagement\JWKFactory;
-use Jose\Component\Signature\Algorithm\HS256;
-use Jose\Component\Signature\JWSBuilder;
 use Jose\Component\Signature\Serializer\CompactSerializer;
 use OpenIDConnect\Metadata\ProviderMetadata;
 use OpenIDConnect\Token\TokenSet;
