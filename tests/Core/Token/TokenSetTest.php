@@ -55,9 +55,12 @@ class TokenSetTest extends TestCase
         $jwk = JWKFactory::createRSAKey(1024, ['alg' => 'RS256']);
         $jwks = JsonConverter::encode(new JWKSet([$jwk]));
 
+        $additionJwk = JWKFactory::createFromSecret('whatever', ['alg' => 'HS256']);
+
         $providerMetadata = new ProviderMetadata($this->createProviderMetadataConfig(), JsonConverter::decode($jwks));
 
-        $additionJwk = JWKFactory::createFromSecret('whatever', ['alg' => 'HS256']);
+        // Register addition JWK
+        $providerMetadata->withJwkInstances($additionJwk);
 
         $expectedExp = time() + 3600;
         $expectedIat = time();
@@ -70,7 +73,7 @@ class TokenSetTest extends TestCase
             'sub' => 'some-sub',
         ];
 
-        $jws = (new JWSBuilder(null, AlgorithmManager::create([new HS256()])))
+        $jws = $providerMetadata->createJwtFactory()->createJwsBuilder()
             ->withPayload(JsonConverter::encode($payload))
             ->addSignature($additionJwk, ['alg' => 'HS256'])
             ->build();
@@ -78,9 +81,6 @@ class TokenSetTest extends TestCase
         $target = new TokenSet($this->createFakeTokenSetParameter([
             'id_token' => (new CompactSerializer())->serialize($jws),
         ]), $providerMetadata);
-
-        // Register addition JWK
-        $target->withJwk($additionJwk);
 
         $actual = $target->idToken();
 

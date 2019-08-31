@@ -101,10 +101,10 @@ class TestCase extends \PHPUnit\Framework\TestCase
 
     /**
      * @param array $overwrite
-     * @param array $jwks
+     * @param array|null $jwks
      * @return ProviderMetadata
      */
-    protected function createProviderMetadata($overwrite = [], $jwks = []): ProviderMetadata
+    protected function createProviderMetadata($overwrite = [], $jwks = null): ProviderMetadata
     {
         return new ProviderMetadata($this->createProviderMetadataConfig($overwrite), $jwks);
     }

@@ -3,7 +3,10 @@
 namespace OpenIDConnect\Metadata;
 
 use ArrayAccess;
+use Jose\Component\Core\JWK;
+use Jose\Component\Core\JWKSet;
 use OpenIDConnect\Jwt\Factory;
+use OpenIDConnect\Token\TokenSet;
 use OpenIDConnect\Traits\MetadataAwareTraits;
 use OutOfBoundsException;
 use RuntimeException;
@@ -29,18 +32,28 @@ class ProviderMetadata implements ArrayAccess
     ];
 
     /**
-     * @var array|null
+     * @var array
      */
-    private $jwks;
+    private $additionAlgorithms = [];
+
+    /**
+     * @var JWKSet
+     */
+    private $jwkSet;
 
     /**
      * @param array $metadata
-     * @param array|null $jwks
+     * @param array|null $jwks The metadata from `jwks_uri`
      */
     public function __construct(array $metadata, array $jwks = null)
     {
         $this->metadata = $metadata;
-        $this->jwks = $jwks;
+
+        if (null === $jwks) {
+            $this->jwkSet = new JWKSet([]);
+        } else {
+            $this->jwkSet = JWKSet::createFromKeyData($jwks);
+        }
 
         $this->assertKeys(self::REQUIRED_METADATA);
     }
@@ -77,7 +90,10 @@ class ProviderMetadata implements ArrayAccess
      */
     public function createJwtFactory(): Factory
     {
-        return new Factory($this);
+        $factory = new Factory($this);
+        $factory->withAlgorithm($this->additionAlgorithms);
+
+        return $factory;
     }
 
     /**
@@ -117,23 +133,19 @@ class ProviderMetadata implements ArrayAccess
     }
 
     /**
-     * @return JwkMetadata
-     */
-    public function jwkMetadata(): JwkMetadata
-    {
-        if (null === $this->jwks) {
-            throw new RuntimeException('JWK metadata is empty');
-        }
-
-        return new JwkMetadata($this->jwks);
-    }
-
-    /**
      * @return string
      */
     public function jwksUri(): string
     {
         return $this->metadata['jwks_uri'];
+    }
+
+    /**
+     * @return JWKSet
+     */
+    public function jwkSet(): JWKSet
+    {
+        return $this->jwkSet;
     }
 
     /**
@@ -182,5 +194,20 @@ class ProviderMetadata implements ArrayAccess
     public function userInfoEndpoint(): ?string
     {
         return $this->metadata['userinfo_endpoint'] ?? null;
+    }
+
+    /**
+     * @param array<int, JWK> $jwkInstances JWK instance array
+     * @return static
+     */
+    public function withJwkInstances(...$jwkInstances)
+    {
+        /** @var JWK $jwk */
+        foreach ($jwkInstances as $jwk) {
+            $this->jwkSet = $this->jwkSet->with($jwk);
+            $this->additionAlgorithms[] = $jwk->get('alg');
+        }
+
+        return $this;
     }
 }

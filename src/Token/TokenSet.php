@@ -24,18 +24,6 @@ class TokenSet implements TokenSetInterface
     ];
 
     /**
-     * Addition JWK for verify
-     *
-     * @var array
-     */
-    private $additionJwks = [];
-
-    /**
-     * @var array
-     */
-    private $additionAlgs = [];
-
-    /**
      * @var IdToken
      */
     private $idToken;
@@ -147,7 +135,7 @@ class TokenSet implements TokenSetInterface
 
         $jws = $loader->loadAndVerifyWithKeySet(
             $token,
-            $this->resolveJwkSet(),
+            $this->providerMetadata->jwkSet(),
             $signature
         );
 
@@ -231,39 +219,10 @@ class TokenSet implements TokenSetInterface
     }
 
     /**
-     * @param array<int, JWK> $jwk
-     * @return TokenSet
-     */
-    public function withJwk(...$jwk): TokenSet
-    {
-        /** @var JWK $item */
-        foreach ($jwk as $item) {
-            $this->additionJwks[] = $item;
-            $this->additionAlgs[] = $item->get('alg');
-        }
-
-        return $this;
-    }
-
-    private function resolveJwkSet(): JWKSet
-    {
-        $jwkSet = $this->providerMetadata->jwkMetadata()->jwkSet();
-
-        foreach ($this->additionJwks as $jwk) {
-            $jwkSet = $jwkSet->with($jwk);
-        }
-
-        return $jwkSet;
-    }
-
-    /**
      * @return Factory
      */
     private function jwtFactory(): Factory
     {
-        $factory = $this->providerMetadata->createJwtFactory();
-        $factory->withAlgorithm($this->additionAlgs);
-
-        return $factory;
+        return $this->providerMetadata->createJwtFactory();
     }
 }
