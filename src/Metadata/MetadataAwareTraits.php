@@ -1,6 +1,6 @@
 <?php
 
-namespace OpenIDConnect\Traits;
+namespace OpenIDConnect\Metadata;
 
 use DomainException;
 use OutOfBoundsException;
@@ -55,5 +55,20 @@ trait MetadataAwareTraits
     public function offsetUnset($key)
     {
         throw new DomainException('Cannot unset any value on a metadata instance');
+    }
+
+    /**
+     * Return a clone object with new value
+     *
+     * @param string $key
+     * @param mixed $value
+     * @return static
+     */
+    public function withMetadata(string $key, $value)
+    {
+        $clone = clone $this;
+        $clone->metadata[$key] = $value;
+
+        return $clone;
     }
 }

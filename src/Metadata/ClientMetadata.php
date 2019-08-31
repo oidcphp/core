@@ -4,7 +4,7 @@ namespace OpenIDConnect\Metadata;
 
 use ArrayAccess;
 use JsonSerializable;
-use OpenIDConnect\Traits\MetadataAwareTraits;
+use OpenIDConnect\Metadata\MetadataAwareTraits;
 
 /**
  * The metadata of client registration

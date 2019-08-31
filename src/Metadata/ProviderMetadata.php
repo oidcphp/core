@@ -7,7 +7,7 @@ use Jose\Component\Core\JWK;
 use Jose\Component\Core\JWKSet;
 use JsonSerializable;
 use OpenIDConnect\Jwt\Factory;
-use OpenIDConnect\Traits\MetadataAwareTraits;
+use OpenIDConnect\Metadata\MetadataAwareTraits;
 
 /**
  * OAuth 2.0 / OpenID Connect provider metadata
