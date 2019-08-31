@@ -5,11 +5,9 @@ namespace OpenIDConnect\Metadata;
 use ArrayAccess;
 use Jose\Component\Core\JWK;
 use Jose\Component\Core\JWKSet;
+use JsonSerializable;
 use OpenIDConnect\Jwt\Factory;
-use OpenIDConnect\Token\TokenSet;
 use OpenIDConnect\Traits\MetadataAwareTraits;
-use OutOfBoundsException;
-use RuntimeException;
 
 /**
  * OAuth 2.0 / OpenID Connect provider metadata
@@ -17,7 +15,7 @@ use RuntimeException;
  * @see https://tools.ietf.org/html/rfc8414#section-2
  * @see https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata
  */
-class ProviderMetadata implements ArrayAccess
+class ProviderMetadata implements ArrayAccess, JsonSerializable
 {
     use MetadataAwareTraits;
 
@@ -133,6 +131,16 @@ class ProviderMetadata implements ArrayAccess
     }
 
     /**
+     * {@inheritDoc}
+     *
+     * @return array
+     */
+    public function jsonSerialize()
+    {
+        return $this->toArray();
+    }
+
+    /**
      * @return string
      */
     public function jwksUri(): string
@@ -170,6 +178,17 @@ class ProviderMetadata implements ArrayAccess
     public function subjectTypesSupported(): array
     {
         return $this->metadata['subject_types_supported'];
+    }
+
+    /**
+     * @return array
+     */
+    public function toArray(): array
+    {
+        return [
+            'discovery' => $this->metadata,
+            'jwks' => $this->jwkSet->jsonSerialize(),
+        ];
     }
 
     /**

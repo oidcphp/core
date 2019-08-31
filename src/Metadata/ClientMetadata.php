@@ -3,6 +3,7 @@
 namespace OpenIDConnect\Metadata;
 
 use ArrayAccess;
+use JsonSerializable;
 use OpenIDConnect\Traits\MetadataAwareTraits;
 
 /**
@@ -10,7 +11,7 @@ use OpenIDConnect\Traits\MetadataAwareTraits;
  *
  * @see https://tools.ietf.org/html/rfc6749#section-2
  */
-class ClientMetadata implements ArrayAccess
+class ClientMetadata implements ArrayAccess, JsonSerializable
 {
     use MetadataAwareTraits;
 
@@ -39,6 +40,16 @@ class ClientMetadata implements ArrayAccess
     }
 
     /**
+     * {@inheritDoc}
+     *
+     * @return array
+     */
+    public function jsonSerialize()
+    {
+        return $this->toArray();
+    }
+
+    /**
      * @return string
      */
     public function redirectUri(): string
@@ -52,5 +63,13 @@ class ClientMetadata implements ArrayAccess
     public function secret(): string
     {
         return $this->metadata['client_secret'];
+    }
+
+    /**
+     * @return array
+     */
+    public function toArray(): array
+    {
+        return $this->metadata;
     }
 }

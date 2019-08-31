@@ -35,7 +35,7 @@ class ClientMetadataTest extends TestCase
      */
     public function shouldReturnAndCanUseIssetWithInstance(): void
     {
-        $target = new ClientMetadata($this->createClientMetadataConfig());
+        $target = $this->createClientMetadata();
 
         $this->assertTrue(isset($target['client_id']));
         $this->assertSame('some_id', $target['client_id']);
@@ -48,7 +48,7 @@ class ClientMetadataTest extends TestCase
     {
         $this->expectException(DomainException::class);
 
-        $target = new ClientMetadata($this->createClientMetadataConfig());
+        $target = $this->createClientMetadata();
 
         $target['client_id'] = 'whatever';
     }
@@ -60,7 +60,7 @@ class ClientMetadataTest extends TestCase
     {
         $this->expectException(DomainException::class);
 
-        $target = new ClientMetadata($this->createClientMetadataConfig());
+        $target = $this->createClientMetadata();
 
         unset($target['client_id']);
     }
@@ -75,5 +75,33 @@ class ClientMetadataTest extends TestCase
         $target = new ClientMetadata($this->createClientMetadataConfig());
 
         $target->assertKey('not-exist');
+    }
+
+    /**
+     * @test
+     */
+    public function shouldExpectedArrayKeyWhenCallJsonSerialize(): void
+    {
+        $target = $this->createClientMetadata();
+
+        $actual = $target->jsonSerialize();
+
+        $this->assertArrayHasKey('client_id', $actual);
+        $this->assertArrayHasKey('client_secret', $actual);
+        $this->assertArrayHasKey('redirect_uri', $actual);
+    }
+
+    /**
+     * @test
+     */
+    public function shouldExpectedArrayKeyWhenCallToArray(): void
+    {
+        $target = $this->createClientMetadata();
+
+        $actual = $target->toArray();
+
+        $this->assertArrayHasKey('client_id', $actual);
+        $this->assertArrayHasKey('client_secret', $actual);
+        $this->assertArrayHasKey('redirect_uri', $actual);
     }
 }

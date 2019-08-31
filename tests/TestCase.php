@@ -8,6 +8,7 @@ use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response as HttpResponse;
 use Illuminate\Container\Container;
+use OpenIDConnect\Metadata\ClientMetadata;
 use OpenIDConnect\Metadata\ProviderMetadata;
 use OpenIDConnect\ServiceProvider\Laravel;
 use Psr\Http\Message\ResponseInterface;
@@ -30,6 +31,15 @@ class TestCase extends \PHPUnit\Framework\TestCase
     protected function tearDown(): void
     {
         $this->app = null;
+    }
+
+    /**
+     * @param array $overwrite
+     * @return ClientMetadata
+     */
+    protected function createClientMetadata($overwrite = []): ClientMetadata
+    {
+        return new ClientMetadata($this->createClientMetadataConfig($overwrite));
     }
 
     /**

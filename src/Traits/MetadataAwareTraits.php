@@ -11,7 +11,7 @@ trait MetadataAwareTraits
     /**
      * @var array
      */
-    private $metadata;
+    private $metadata = [];
 
     /**
      * @param string $key
@@ -31,14 +31,6 @@ trait MetadataAwareTraits
         foreach ($keys as $key) {
             $this->assertKey($key);
         }
-    }
-
-    /**
-     * @return array
-     */
-    public function toArray(): array
-    {
-        return $this->metadata;
     }
 
     public function offsetExists($key)

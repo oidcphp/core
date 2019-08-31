@@ -64,4 +64,30 @@ class ProviderMetadataTest extends TestCase
 
         unset($target['issuer']);
     }
+
+    /**
+     * @test
+     */
+    public function shouldExpectedArrayKeyWhenCallJsonSerialize(): void
+    {
+        $target = $this->createProviderMetadata();
+
+        $actual = $target->jsonSerialize();
+
+        $this->assertArrayHasKey('discovery', $actual);
+        $this->assertArrayHasKey('jwks', $actual);
+    }
+
+    /**
+     * @test
+     */
+    public function shouldExpectedArrayKeyWhenCallToArray(): void
+    {
+        $target = $this->createProviderMetadata();
+
+        $actual = $target->toArray();
+
+        $this->assertArrayHasKey('discovery', $actual);
+        $this->assertArrayHasKey('jwks', $actual);
+    }
 }
