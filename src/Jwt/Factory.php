@@ -3,6 +3,7 @@
 namespace OpenIDConnect\Jwt;
 
 use Jose\Component\Checker\AlgorithmChecker;
+use Jose\Component\Checker\AudienceChecker;
 use Jose\Component\Checker\ClaimCheckerManager;
 use Jose\Component\Checker\ExpirationTimeChecker;
 use Jose\Component\Checker\HeaderCheckerManager;
@@ -24,6 +25,13 @@ class Factory
     use AlgorithmFactoryTrait;
 
     /**
+     * Addition algorithms
+     *
+     * @var array
+     */
+    private $algorithms = [];
+
+    /**
      * @var ProviderMetadata
      */
     private $providerMetadata;
@@ -39,7 +47,7 @@ class Factory
     public function createAlgorithmManager(): AlgorithmManager
     {
         return AlgorithmManager::create(
-            $this->createSignatureAlgorithms($this->providerMetadata->idTokenAlgValuesSupported())
+            $this->createSignatureAlgorithms($this->resolveAlgorithms())
         );
     }
 
@@ -67,7 +75,7 @@ class Factory
         }
 
         return HeaderCheckerManager::create([
-            new AlgorithmChecker($this->providerMetadata->idTokenAlgValuesSupported()),
+            new AlgorithmChecker($this->resolveAlgorithms()),
             new IssuerChecker($this->providerMetadata->issuer()),
         ], $tokenTypesSupport);
     }
@@ -112,5 +120,28 @@ class Factory
     public function createJwsVerifier(): JWSVerifier
     {
         return new JWSVerifier($this->createAlgorithmManager());
+    }
+
+    /**
+     * @param array<int, mixed> $alg
+     * @return static
+     */
+    public function withAlgorithm(...$alg)
+    {
+        if (is_array($alg[0])) {
+            $alg = $alg[0];
+        }
+
+        $this->algorithms = $alg;
+
+        return $this;
+    }
+
+    private function resolveAlgorithms()
+    {
+        return array_unique(array_merge(
+            $this->providerMetadata->idTokenAlgValuesSupported(),
+            $this->algorithms
+        ));
     }
 }

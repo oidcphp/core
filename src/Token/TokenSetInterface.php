@@ -11,6 +11,17 @@ use OpenIDConnect\IdToken;
 interface TokenSetInterface extends JsonSerializable
 {
     /**
+     * @see https://openid.net/specs/openid-connect-core-1_0.html#IDToken
+     */
+    public const REQUIRED_CLAIMS = [
+        'aud',
+        'exp',
+        'iat',
+        'iss',
+        'sub',
+    ];
+
+    /**
      * @see https://tools.ietf.org/html/rfc6749#section-1.4
      * @return string
      */

@@ -3,9 +3,13 @@
 namespace Tests\Core\Token;
 
 use InvalidArgumentException;
+use Jose\Component\Core\AlgorithmManager;
+use Jose\Component\Core\AlgorithmManagerFactory;
 use Jose\Component\Core\JWKSet;
 use Jose\Component\Core\Util\JsonConverter;
 use Jose\Component\KeyManagement\JWKFactory;
+use Jose\Component\Signature\Algorithm\HS256;
+use Jose\Component\Signature\JWSBuilder;
 use Jose\Component\Signature\Serializer\CompactSerializer;
 use OpenIDConnect\Metadata\ProviderMetadata;
 use OpenIDConnect\Token\TokenSet;
@@ -41,6 +45,55 @@ class TokenSetTest extends TestCase
         $this->assertTrue($target->has('addition'));
 
         $this->assertFalse($target->has('whatever'));
+    }
+
+    /**
+     * @test
+     */
+    public function shouldBeOkayWhenUseAdditionJwk(): void
+    {
+        $jwk = JWKFactory::createRSAKey(1024, ['alg' => 'RS256']);
+        $jwks = JsonConverter::encode(new JWKSet([$jwk]));
+
+        $providerMetadata = new ProviderMetadata($this->createProviderMetadataConfig(), JsonConverter::decode($jwks));
+
+        $additionJwk = JWKFactory::createFromSecret('whatever', ['alg' => 'HS256']);
+
+        $expectedExp = time() + 3600;
+        $expectedIat = time();
+
+        $payload = [
+            'aud' => 'some-aud',
+            'exp' => $expectedExp,
+            'iat' => $expectedIat,
+            'iss' => 'some-iss',
+            'sub' => 'some-sub',
+        ];
+
+        $jws = (new JWSBuilder(null, AlgorithmManager::create([new HS256()])))
+            ->withPayload(JsonConverter::encode($payload))
+            ->addSignature($additionJwk, ['alg' => 'HS256'])
+            ->build();
+
+        $target = new TokenSet($this->createFakeTokenSetParameter([
+            'id_token' => (new CompactSerializer())->serialize($jws),
+        ]), $providerMetadata);
+
+        // Register addition JWK
+        $target->withJwk($additionJwk);
+
+        $actual = $target->idToken();
+
+        $this->assertSame('some-aud', $actual->aud());
+        $this->assertSame('some-iss', $actual->iss());
+        $this->assertSame($expectedExp, $actual->exp());
+        $this->assertSame($expectedIat, $actual->iat());
+        $this->assertSame('some-sub', $actual->sub());
+        $this->assertNull($actual->authTime());
+        $this->assertNull($actual->nonce());
+        $this->assertNull($actual->acr());
+        $this->assertNull($actual->amr());
+        $this->assertNull($actual->azp());
     }
 
     public function defaultKeys()

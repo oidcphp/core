@@ -3,12 +3,15 @@
 namespace OpenIDConnect\Token;
 
 use InvalidArgumentException;
+use Jose\Component\Core\JWK;
+use Jose\Component\Core\JWKSet;
 use Jose\Component\Core\Util\JsonConverter;
 use OpenIDConnect\Exceptions\RelyingPartyException;
 use OpenIDConnect\IdToken;
 use OpenIDConnect\Jwt\Factory;
 use OpenIDConnect\Metadata\ProviderMetadata;
 use RangeException;
+use UnexpectedValueException;
 
 class TokenSet implements TokenSetInterface
 {
@@ -19,6 +22,18 @@ class TokenSet implements TokenSetInterface
         'refresh_token',
         'scope',
     ];
+
+    /**
+     * Addition JWK for verify
+     *
+     * @var array
+     */
+    private $additionJwks = [];
+
+    /**
+     * @var array
+     */
+    private $additionAlgs = [];
 
     /**
      * @var IdToken
@@ -112,7 +127,7 @@ class TokenSet implements TokenSetInterface
         return $this->has('scope');
     }
 
-    public function idToken($mandatoryClaims = []): IdToken
+    public function idToken($extraMandatoryClaims = []): IdToken
     {
         if (null !== $this->idToken) {
             return $this->idToken;
@@ -124,30 +139,30 @@ class TokenSet implements TokenSetInterface
             throw new RangeException('No ID token');
         }
 
-        $loader = $this->factory()->createJwsLoader();
+        $jwtFactory = $this->jwtFactory();
+
+        $loader = $jwtFactory->createJwsLoader();
 
         $signature = null;
 
-        $jwkSet = $this->providerMetadata->jwkMetadata()->jwkSet();
-
-        $jws = $loader->loadAndVerifyWithKeySet($token, $jwkSet, $signature);
+        $jws = $loader->loadAndVerifyWithKeySet(
+            $token,
+            $this->resolveJwkSet(),
+            $signature
+        );
 
         $payload = $jws->getPayload();
 
         if (null === $payload) {
-            throw new \UnexpectedValueException('JWT has no payload');
+            throw new UnexpectedValueException('JWT has no payload');
         }
 
-        $claimCheckerManager = $this->factory()->createClaimCheckerManager();
+        $claimCheckerManager = $jwtFactory->createClaimCheckerManager();
 
         try {
-            $claimCheckerManager->check(JsonConverter::decode($payload), array_unique(array_merge([
-                'aud',
-                'exp',
-                'iat',
-                'iss',
-                'sub',
-            ], $mandatoryClaims)));
+            $mandatoryClaims = array_unique(array_merge(static::REQUIRED_CLAIMS, $extraMandatoryClaims));
+
+            $claimCheckerManager->check(JsonConverter::decode($payload), $mandatoryClaims);
         } catch (\Exception $e) {
             throw new RelyingPartyException('Receive an invalid ID token: ' . $this->idTokenRaw(), 0, $e);
         }
@@ -215,8 +230,40 @@ class TokenSet implements TokenSetInterface
         return $this->values[$key];
     }
 
-    private function factory(): Factory
+    /**
+     * @param array<int, JWK> $jwk
+     * @return TokenSet
+     */
+    public function withJwk(...$jwk): TokenSet
     {
-        return $this->providerMetadata->createJwtFactory();
+        /** @var JWK $item */
+        foreach ($jwk as $item) {
+            $this->additionJwks[] = $item;
+            $this->additionAlgs[] = $item->get('alg');
+        }
+
+        return $this;
+    }
+
+    private function resolveJwkSet(): JWKSet
+    {
+        $jwkSet = $this->providerMetadata->jwkMetadata()->jwkSet();
+
+        foreach ($this->additionJwks as $jwk) {
+            $jwkSet = $jwkSet->with($jwk);
+        }
+
+        return $jwkSet;
+    }
+
+    /**
+     * @return Factory
+     */
+    private function jwtFactory(): Factory
+    {
+        $factory = $this->providerMetadata->createJwtFactory();
+        $factory->withAlgorithm($this->additionAlgs);
+
+        return $factory;
     }
 }
