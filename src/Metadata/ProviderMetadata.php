@@ -184,9 +184,14 @@ class ProviderMetadata implements ArrayAccess, JsonSerializable
      */
     public function toArray(): array
     {
+        $jwks = $this->jwkSet->jsonSerialize();
+        $jwks['keys'] = array_map(function (JWK $jwk) {
+            return $jwk->jsonSerialize();
+        }, $jwks['keys']);
+
         return [
             'discovery' => $this->metadata,
-            'jwks' => $this->jwkSet->jsonSerialize(),
+            'jwks' => $jwks,
         ];
     }
 
