@@ -128,7 +128,7 @@ class TokenSet implements TokenSetInterface
 
         $signature = null;
 
-        $jwkSet = $this->providerMetadata->jwkMetadata()->JWKSet();
+        $jwkSet = $this->providerMetadata->jwkMetadata()->jwkSet();
 
         $jws = $loader->loadAndVerifyWithKeySet($token, $jwkSet, $signature);
 

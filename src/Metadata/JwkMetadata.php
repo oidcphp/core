@@ -33,7 +33,7 @@ class JwkMetadata implements ArrayAccess
     /**
      * @return JWKSet
      */
-    public function JWKSet(): JWKSet
+    public function jwkSet(): JWKSet
     {
         return $this->jwkSet;
     }
