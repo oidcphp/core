@@ -76,12 +76,12 @@ class Issuer
      */
     private static function resolveJwksUri($jwksUri, array $providerResponse): string
     {
-        if (null !== $jwksUri) {
-            $jwksUri = $providerResponse['jwks_uri'];
+        if (null === $jwksUri && empty($providerResponse['jwks_uri'])) {
+            throw new RelyingPartyException("Missing 'jwks_url` metadata");
         }
 
         if (null === $jwksUri) {
-            throw new RelyingPartyException("Missing 'jwks_url` metadata");
+            $jwksUri = $providerResponse['jwks_uri'];
         }
 
         return $jwksUri;
