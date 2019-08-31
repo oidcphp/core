@@ -24,16 +24,16 @@ class Issuer
     /**
      * Discover the OpenID Connect provider
      *
-     * @param string $uri
+     * @param string $baseUrl
      * @param bool $raw
      * @param array $httpOption
      * @return array [ProviderMetadata, JWKMetadata]
      */
-    public static function discover(string $uri, bool $raw = false, array $httpOption = []): array
+    public static function discover(string $baseUrl, bool $raw = false, array $httpOption = []): array
     {
         $httpClient = new Client($httpOption);
 
-        $discoveryUri = $uri . self::OPENID_CONNECT_DISCOVERY;
+        $discoveryUri = self::normalizeUrl($baseUrl) . self::OPENID_CONNECT_DISCOVERY;
 
         $providerResponse = $httpClient->request('GET', $discoveryUri);
         $providerMetadata = new ProviderMetadata(self::processResponse($providerResponse));
@@ -46,6 +46,18 @@ class Issuer
         }
 
         return [$providerMetadata->toArray(), $jwkMetadata->toArray()];
+    }
+
+    /**
+     * @param string $uri
+     * @return string
+     */
+    private static function normalizeUrl(string $uri): string
+    {
+        $uri = str_replace(self::OPENID_CONNECT_DISCOVERY, '', $uri);
+        $uri = rtrim($uri, '/');
+
+        return $uri;
     }
 
     /**
