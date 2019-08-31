@@ -28,32 +28,9 @@ class Discover extends Command
         $format = $input->getOption('format');
         $type = $input->getOption('type');
 
-        $config = Issuer::discover($url, true);
+        $config = Issuer::discover($url);
 
-        switch ($type) {
-            case 'meta':
-                $config = $config[0];
-                break;
-            case 'jwks':
-                $config = $config[1];
-                break;
-            case 'all':
-            default:
-                // Nothing to do
-        }
-
-        switch ($format) {
-            case 'json':
-                $output->writeln(json_encode($config, JSON_PRETTY_PRINT));
-                break;
-            case 'yaml':
-                $output->writeln(Yaml::dump($config, 4, 2));
-                break;
-            case 'dump':
-            default:
-                dump($config);
-        }
-
+        // TODO
         return 0;
     }
 }

@@ -72,7 +72,7 @@ class DiscovererTest extends TestCase
         ]);
 
         /** @var ProviderMetadata $actual */
-        $actual = Issuer::discover('http://somewhere', false, $mockHttpOption)[0];
+        $actual = Issuer::discover('http://somewhere', $mockHttpOption, 'whatever');
 
         $this->assertInstanceOf(ProviderMetadata::class, $actual);
 

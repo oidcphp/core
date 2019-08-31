@@ -3,7 +3,7 @@
 namespace OpenIDConnect;
 
 use GuzzleHttp\Client;
-use OpenIDConnect\Metadata\JwkMetadata;
+use OpenIDConnect\Exceptions\RelyingPartyException;
 use OpenIDConnect\Metadata\ProviderMetadata;
 use Psr\Http\Message\ResponseInterface;
 use UnexpectedValueException;
@@ -25,27 +25,23 @@ class Issuer
      * Discover the OpenID Connect provider
      *
      * @param string $baseUrl
-     * @param bool $raw
      * @param array $httpOption
-     * @return array [ProviderMetadata, JWKMetadata]
+     * @param string|null $jwksUri
+     * @return ProviderMetadata
      */
-    public static function discover(string $baseUrl, bool $raw = false, array $httpOption = []): array
+    public static function discover(string $baseUrl, array $httpOption = [], string $jwksUri = null): ProviderMetadata
     {
         $httpClient = new Client($httpOption);
 
         $discoveryUri = self::normalizeUrl($baseUrl) . self::OPENID_CONNECT_DISCOVERY;
 
-        $providerResponse = $httpClient->request('GET', $discoveryUri);
-        $providerMetadata = new ProviderMetadata(self::processResponse($providerResponse));
+        $providerResponse = self::processResponse($httpClient->request('GET', $discoveryUri));
 
-        $jwkResponse = $httpClient->request('GET', $providerMetadata->jwksUri());
-        $jwkMetadata = new JwkMetadata(self::processResponse($jwkResponse));
+        $jwksUri = self::resolveJwksUri($jwksUri, $providerResponse);
 
-        if (!$raw) {
-            return [$providerMetadata, $jwkMetadata];
-        }
+        $jwksResponse = self::processResponse($httpClient->request('GET', $jwksUri));
 
-        return [$providerMetadata->toArray(), $jwkMetadata->toArray()];
+        return new ProviderMetadata($providerResponse, $jwksResponse);
     }
 
     /**
@@ -71,5 +67,23 @@ class Issuer
         }
 
         return json_decode((string)$response->getBody(), true);
+    }
+
+    /**
+     * @param string|null $jwksUri
+     * @param array $providerResponse
+     * @return string
+     */
+    private static function resolveJwksUri($jwksUri, array $providerResponse): string
+    {
+        if (null !== $jwksUri) {
+            $jwksUri = $providerResponse['jwks_uri'];
+        }
+
+        if (null === $jwksUri) {
+            throw new RelyingPartyException("Missing 'jwks_url` metadata");
+        }
+
+        return $jwksUri;
     }
 }
