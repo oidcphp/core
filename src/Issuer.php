@@ -35,13 +35,13 @@ class Issuer
 
         $discoveryUri = self::normalizeUrl($baseUrl) . self::OPENID_CONNECT_DISCOVERY;
 
-        $providerResponse = self::processResponse($httpClient->request('GET', $discoveryUri));
+        $discoverResponse = self::processResponse($httpClient->request('GET', $discoveryUri));
 
-        $jwksUri = self::resolveJwksUri($jwksUri, $providerResponse);
+        $jwksUri = self::resolveJwksUri($jwksUri, $discoverResponse);
 
         $jwksResponse = self::processResponse($httpClient->request('GET', $jwksUri));
 
-        return new ProviderMetadata($providerResponse, $jwksResponse);
+        return new ProviderMetadata($discoverResponse, $jwksResponse);
     }
 
     /**
@@ -70,20 +70,20 @@ class Issuer
     }
 
     /**
-     * @param string|null $jwksUri
-     * @param array $providerResponse
+     * @param string|null $customUri
+     * @param array $discoverResponse
      * @return string
      */
-    private static function resolveJwksUri($jwksUri, array $providerResponse): string
+    private static function resolveJwksUri($customUri, array $discoverResponse): string
     {
-        if (null === $jwksUri && empty($providerResponse['jwks_uri'])) {
+        if (null === $customUri && empty($discoverResponse['jwks_uri'])) {
             throw new RelyingPartyException("Missing 'jwks_url` metadata");
         }
 
-        if (null === $jwksUri) {
-            $jwksUri = $providerResponse['jwks_uri'];
+        if (null === $customUri) {
+            $customUri = $discoverResponse['jwks_uri'];
         }
 
-        return $jwksUri;
+        return $customUri;
     }
 }
