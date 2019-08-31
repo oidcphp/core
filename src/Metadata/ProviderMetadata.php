@@ -83,11 +83,12 @@ class ProviderMetadata implements ArrayAccess, JsonSerializable
     }
 
     /**
+     * @param ClientMetadata $clientMetadata
      * @return Factory
      */
-    public function createJwtFactory(): Factory
+    public function createJwtFactory(ClientMetadata $clientMetadata): Factory
     {
-        $factory = new Factory($this);
+        $factory = new Factory($this, $clientMetadata);
         $factory->withAlgorithm($this->additionAlgorithms);
 
         return $factory;

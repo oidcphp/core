@@ -7,6 +7,7 @@ use Jose\Component\Core\Util\JsonConverter;
 use OpenIDConnect\Exceptions\RelyingPartyException;
 use OpenIDConnect\IdToken;
 use OpenIDConnect\Jwt\Factory;
+use OpenIDConnect\Metadata\ClientMetadata;
 use OpenIDConnect\Metadata\ProviderMetadata;
 use RangeException;
 use UnexpectedValueException;
@@ -42,10 +43,16 @@ class TokenSet implements TokenSetInterface
     private $values;
 
     /**
+     * @var ClientMetadata
+     */
+    private $clientMetadata;
+
+    /**
      * @param array $parameters An array from token endpoint response body
      * @param ProviderMetadata $providerMetadata
+     * @param ClientMetadata $clientMetadata
      */
-    public function __construct(array $parameters, ProviderMetadata $providerMetadata)
+    public function __construct(array $parameters, ProviderMetadata $providerMetadata, ClientMetadata $clientMetadata)
     {
         if (empty($parameters['access_token'])) {
             throw new InvalidArgumentException('Required "access_token" but not passed');
@@ -55,6 +62,7 @@ class TokenSet implements TokenSetInterface
         $this->providerMetadata = $providerMetadata;
 
         $this->values = array_diff_key($this->parameters, array_flip(self::DEFAULT_KEYS));
+        $this->clientMetadata = $clientMetadata;
     }
 
     /**
@@ -221,6 +229,6 @@ class TokenSet implements TokenSetInterface
      */
     private function jwtFactory(): Factory
     {
-        return $this->providerMetadata->createJwtFactory();
+        return $this->providerMetadata->createJwtFactory($this->clientMetadata);
     }
 }

@@ -26,11 +26,6 @@ class Client extends AbstractProvider
     private $clientMetadata;
 
     /**
-     * @var Factory
-     */
-    private $jwtFactory;
-
-    /**
      * @var ProviderMetadata
      */
     private $providerMetadata;
@@ -44,7 +39,6 @@ class Client extends AbstractProvider
     {
         $this->providerMetadata = $providerMetadata;
         $this->clientMetadata = $clientMetadata;
-        $this->jwtFactory = $providerMetadata->createJwtFactory();
 
         parent::__construct([
             'clientId' => $clientMetadata->id(),
@@ -185,7 +179,7 @@ HTML;
             );
         }
 
-        $tokenSet = new TokenSet($response, $this->providerMetadata);
+        $tokenSet = new TokenSet($response, $this->providerMetadata, $this->clientMetadata);
 
         if (!$tokenSet->hasIdToken()) {
             throw new OpenIDProviderException("'id_token' missing from the token endpoint response");

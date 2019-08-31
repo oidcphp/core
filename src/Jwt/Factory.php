@@ -3,6 +3,7 @@
 namespace OpenIDConnect\Jwt;
 
 use Jose\Component\Checker\AlgorithmChecker;
+use Jose\Component\Checker\AudienceChecker;
 use Jose\Component\Checker\ClaimCheckerManager;
 use Jose\Component\Checker\ExpirationTimeChecker;
 use Jose\Component\Checker\HeaderCheckerManager;
@@ -17,6 +18,7 @@ use Jose\Component\Signature\JWSTokenSupport;
 use Jose\Component\Signature\JWSVerifier;
 use Jose\Component\Signature\Serializer\CompactSerializer;
 use Jose\Component\Signature\Serializer\JWSSerializerManager;
+use OpenIDConnect\Metadata\ClientMetadata;
 use OpenIDConnect\Metadata\ProviderMetadata;
 
 class Factory
@@ -35,9 +37,15 @@ class Factory
      */
     private $providerMetadata;
 
-    public function __construct(ProviderMetadata $providerMetadata)
+    /**
+     * @var ClientMetadata
+     */
+    private $clientMetadata;
+
+    public function __construct(ProviderMetadata $providerMetadata, ClientMetadata $clientMetadata)
     {
         $this->providerMetadata = $providerMetadata;
+        $this->clientMetadata = $clientMetadata;
     }
 
     /**
@@ -52,10 +60,12 @@ class Factory
 
     /**
      * @return ClaimCheckerManager
+     * @see https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation
      */
     public function createClaimCheckerManager(): ClaimCheckerManager
     {
         return ClaimCheckerManager::create([
+            new AudienceChecker($this->clientMetadata->id()),
             new ExpirationTimeChecker(),
             new IssuedAtChecker(),
             new NotBeforeChecker(),

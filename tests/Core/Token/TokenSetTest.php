@@ -25,7 +25,7 @@ class TokenSetTest extends TestCase
             'refresh_token' => 'some-refresh-token',
             'scope' => 'some-scope',
             'addition' => 'some-addition',
-        ]), $this->createProviderMetadata());
+        ]), $this->createProviderMetadata(), $this->createClientMetadata());
 
         $this->assertSame('some-access-token', $target->accessToken());
         $this->assertSame(3600, $target->expiresIn());
@@ -61,6 +61,10 @@ class TokenSetTest extends TestCase
         $expectedExp = time() + 3600;
         $expectedIat = time();
 
+        $clientMetadata = $this->createClientMetadata([
+            'client_id' => 'some-aud',
+        ]);
+
         $payload = [
             'aud' => 'some-aud',
             'exp' => $expectedExp,
@@ -69,14 +73,14 @@ class TokenSetTest extends TestCase
             'sub' => 'some-sub',
         ];
 
-        $jws = $providerMetadata->createJwtFactory()->createJwsBuilder()
+        $jws = $providerMetadata->createJwtFactory($clientMetadata)->createJwsBuilder()
             ->withPayload(JsonConverter::encode($payload))
             ->addSignature($additionJwk, ['alg' => 'HS256'])
             ->build();
 
         $target = new TokenSet($this->createFakeTokenSetParameter([
             'id_token' => (new CompactSerializer())->serialize($jws),
-        ]), $providerMetadata);
+        ]), $providerMetadata, $clientMetadata);
 
         $actual = $target->idToken();
 
@@ -107,7 +111,11 @@ class TokenSetTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        $target = new TokenSet($this->createFakeTokenSetParameter(), $this->createProviderMetadata());
+        $target = new TokenSet(
+            $this->createFakeTokenSetParameter(),
+            $this->createProviderMetadata(),
+            $this->createClientMetadata()
+        );
 
         $target->values($key);
     }
@@ -125,6 +133,10 @@ class TokenSetTest extends TestCase
         $expectedExp = time() + 3600;
         $expectedIat = time();
 
+        $clientMetadata = $this->createClientMetadata([
+            'client_id' => 'some-aud',
+        ]);
+
         $payload = [
             'aud' => 'some-aud',
             'exp' => $expectedExp,
@@ -133,14 +145,14 @@ class TokenSetTest extends TestCase
             'sub' => 'some-sub',
         ];
 
-        $jws = $providerMetadata->createJwtFactory()->createJwsBuilder()
+        $jws = $providerMetadata->createJwtFactory($clientMetadata)->createJwsBuilder()
             ->withPayload(JsonConverter::encode($payload))
             ->addSignature($jwk, ['alg' => 'RS256'])
             ->build();
 
         $target = new TokenSet($this->createFakeTokenSetParameter([
             'id_token' => (new CompactSerializer())->serialize($jws),
-        ]), $providerMetadata);
+        ]), $providerMetadata, $clientMetadata);
 
         $actual = $target->idToken();
 

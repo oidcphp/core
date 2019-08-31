@@ -25,7 +25,7 @@ class FactoryTest extends TestCase
 
         $target = new Factory($this->createProviderMetadata([
             'id_token_signing_alg_values_supported' => ['Whatever'],
-        ]));
+        ]), $this->createClientMetadata());
 
         $actual = $target->createAlgorithmManager();
 
@@ -39,7 +39,7 @@ class FactoryTest extends TestCase
     {
         $target = new Factory($this->createProviderMetadata([
             'id_token_signing_alg_values_supported' => ['RS256', 'ES256'],
-        ]));
+        ]), $this->createClientMetadata());
 
         $actual = $target->createAlgorithmManager();
 
@@ -55,7 +55,7 @@ class FactoryTest extends TestCase
         $target = new Factory($this->createProviderMetadata([
             'id_token_encryption_alg_values_supported' => ['RS256', 'ES256', 'PS256'],
             'id_token_signing_alg_values_supported' => ['RS256', 'ES256'],
-        ]));
+        ]), $this->createClientMetadata());
 
         $actual = $target->createAlgorithmManager();
 
@@ -73,7 +73,7 @@ class FactoryTest extends TestCase
 
         $target = new Factory($this->createProviderMetadata([
             'id_token_signing_alg_values_supported' => ['RS256'],
-        ]));
+        ]), $this->createClientMetadata());
 
         $actual = $target->createAlgorithmManager();
 
@@ -88,7 +88,7 @@ class FactoryTest extends TestCase
         $target = new Factory($this->createProviderMetadata([
             'id_token_encryption_alg_values_supported' => ['RS256', 'PS256'],
             'id_token_signing_alg_values_supported' => ['RS256', 'ES256'],
-        ]));
+        ]), $this->createClientMetadata());
 
         $actual = $target->createHeaderCheckerManager()->getCheckers()['alg'];
 
@@ -105,7 +105,7 @@ class FactoryTest extends TestCase
         $this->expectException(InvalidHeaderException::class);
         $this->expectExceptionMessage('Unsupported algorithm');
 
-        $target = new Factory($this->createProviderMetadata());
+        $target = new Factory($this->createProviderMetadata(), $this->createClientMetadata());
 
         $actual = $target->createHeaderCheckerManager()->getCheckers()['alg'];
 
@@ -119,7 +119,7 @@ class FactoryTest extends TestCase
      */
     public function shouldBuildJwtAndVerifyAndStringAndSerializeStringAndLoadUsingRS256(): void
     {
-        $target = new Factory($this->createProviderMetadata());
+        $target = new Factory($this->createProviderMetadata(), $this->createClientMetadata());
 
         $jwk = JWKFactory::createRSAKey(1024, ['alg' => 'RS256']);
 
