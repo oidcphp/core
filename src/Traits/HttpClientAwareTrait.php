@@ -19,7 +19,7 @@ trait HttpClientAwareTrait
      * Implements get the Guzzle Client.
      *
      * @param array $config
-     * @return Client
+     * @return ClientInterface
      */
     public function getHttpClient(array $config = []): ClientInterface
     {

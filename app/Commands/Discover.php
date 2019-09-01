@@ -28,7 +28,7 @@ class Discover extends Command
         $format = $input->getOption('format');
         $type = $input->getOption('type');
 
-        $config = Issuer::discover($url);
+        $config = Issuer::create($url)->discover();
 
         // TODO
         return 0;
