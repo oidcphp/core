@@ -2,73 +2,51 @@
 
 namespace OpenIDConnect\Metadata;
 
-use DomainException;
-use OutOfBoundsException;
-use RuntimeException;
-
 trait MetadataAwareTraits
 {
     /**
-     * @var array
+     * @var ClientMetadata
      */
-    private $metadata = [];
+    private $clientMetadata;
 
     /**
-     * @param string $key
+     * @var ProviderMetadata
      */
-    public function assertKey(string $key): void
-    {
-        if (!array_key_exists($key, $this->metadata)) {
-            throw new RuntimeException("{$key} must be configured in metadata");
-        }
-    }
+    private $providerMetadata;
 
     /**
-     * @param array $keys
+     * @return ClientMetadata
      */
-    public function assertKeys(array $keys): void
+    public function getClientMetadata(): ClientMetadata
     {
-        foreach ($keys as $key) {
-            $this->assertKey($key);
-        }
-    }
-
-    public function offsetExists($key)
-    {
-        return array_key_exists($key, $this->metadata);
-    }
-
-    public function offsetGet($key)
-    {
-        if ($this->offsetExists($key)) {
-            return $this->metadata[$key];
-        }
-
-        throw new OutOfBoundsException("Key '{$key}' is not found in metadata");
-    }
-
-    public function offsetSet($key, $value)
-    {
-        throw new DomainException('Cannot set any value on metadata instance');
-    }
-
-    public function offsetUnset($key)
-    {
-        throw new DomainException('Cannot unset any value on a metadata instance');
+        return $this->clientMetadata;
     }
 
     /**
-     * Return a clone object with new value
-     *
-     * @param string $key
-     * @param mixed $value
+     * @return ProviderMetadata
+     */
+    public function getProviderMetadata(): ProviderMetadata
+    {
+        return $this->providerMetadata;
+    }
+
+    /**
+     * @param ClientMetadata $clientMetadata
      * @return static
      */
-    public function withMetadata(string $key, $value)
+    public function setClientMetadata(ClientMetadata $clientMetadata)
     {
-        $clone = clone $this;
-        $clone->metadata[$key] = $value;
+        $this->clientMetadata = $clientMetadata;
+        return $this;
+    }
 
-        return $clone;
+    /**
+     * @param ProviderMetadata $providerMetadata
+     * @return static
+     */
+    public function setProviderMetadata(ProviderMetadata $providerMetadata)
+    {
+        $this->providerMetadata = $providerMetadata;
+        return $this;
     }
 }

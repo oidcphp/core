@@ -19,11 +19,13 @@ use Jose\Component\Signature\JWSVerifier;
 use Jose\Component\Signature\Serializer\CompactSerializer;
 use Jose\Component\Signature\Serializer\JWSSerializerManager;
 use OpenIDConnect\Metadata\ClientMetadata;
+use OpenIDConnect\Metadata\MetadataAwareTraits;
 use OpenIDConnect\Metadata\ProviderMetadata;
 
-class Factory
+class JwtFactory
 {
     use AlgorithmFactoryTrait;
+    use MetadataAwareTraits;
 
     /**
      * Addition algorithms
@@ -32,20 +34,10 @@ class Factory
      */
     private $algorithms = [];
 
-    /**
-     * @var ProviderMetadata
-     */
-    private $providerMetadata;
-
-    /**
-     * @var ClientMetadata
-     */
-    private $clientMetadata;
-
     public function __construct(ProviderMetadata $providerMetadata, ClientMetadata $clientMetadata)
     {
-        $this->providerMetadata = $providerMetadata;
-        $this->clientMetadata = $clientMetadata;
+        $this->setProviderMetadata($providerMetadata);
+        $this->setClientMetadata($clientMetadata);
     }
 
     /**

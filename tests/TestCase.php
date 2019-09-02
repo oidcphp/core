@@ -8,6 +8,7 @@ use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response as HttpResponse;
 use Illuminate\Container\Container;
+use OpenIDConnect\Factory;
 use OpenIDConnect\Metadata\ClientMetadata;
 use OpenIDConnect\Metadata\ProviderMetadata;
 use OpenIDConnect\ServiceProvider\Laravel;
@@ -53,6 +54,22 @@ class TestCase extends \PHPUnit\Framework\TestCase
             'client_secret' => 'some_secret',
             'redirect_uri' => 'https://someredirect',
         ], $overwrite);
+    }
+
+    /**
+     * @param array $provider
+     * @param array $client
+     * @param array $httpMock
+     * @param array $history
+     * @return Factory
+     */
+    protected function createFactory($provider = [], $client = [], $httpMock = [], $history = []): Factory
+    {
+        return new Factory(
+            $this->createProviderMetadata($provider),
+            $this->createClientMetadata($client),
+            $this->createHttpClient($httpMock, $history)
+        );
     }
 
     /**

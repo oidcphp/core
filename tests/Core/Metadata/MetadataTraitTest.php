@@ -2,18 +2,18 @@
 
 namespace Tests\Core\Metadata;
 
-use OpenIDConnect\Metadata\MetadataAwareTraits;
+use OpenIDConnect\Metadata\MetadataTraits;
 use Tests\TestCase;
 
-class MetadataAwareTraitTest extends TestCase
+class MetadataTraitTest extends TestCase
 {
     /**
      * @test
      */
     public function shouldReturnNewObjectWhenUsingWithMetadata(): void
     {
-        /** @var MetadataAwareTraits $target */
-        $target = $this->getObjectForTrait(MetadataAwareTraits::class);
+        /** @var MetadataTraits $target */
+        $target = $this->getObjectForTrait(MetadataTraits::class);
 
         $actual = $target->withMetadata('some', 'value');
 

@@ -12,7 +12,7 @@ use JsonSerializable;
  */
 class ClientMetadata implements ArrayAccess, JsonSerializable
 {
-    use MetadataAwareTraits;
+    use MetadataTraits;
 
     public const REQUIRED_METADATA = [
         'client_id',

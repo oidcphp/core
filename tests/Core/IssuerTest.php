@@ -6,7 +6,7 @@ use OpenIDConnect\Issuer;
 use OpenIDConnect\Metadata\ProviderMetadata;
 use Tests\TestCase;
 
-class DiscovererTest extends TestCase
+class IssuerTest extends TestCase
 {
     /**
      * OpenID Connect config from Google

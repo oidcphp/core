@@ -6,7 +6,7 @@ use ArrayAccess;
 use Jose\Component\Core\JWK;
 use Jose\Component\Core\JWKSet;
 use JsonSerializable;
-use OpenIDConnect\Jwt\Factory;
+use OpenIDConnect\Jwt\JwtFactory;
 
 /**
  * OAuth 2.0 / OpenID Connect provider metadata
@@ -16,7 +16,7 @@ use OpenIDConnect\Jwt\Factory;
  */
 class ProviderMetadata implements ArrayAccess, JsonSerializable
 {
-    use MetadataAwareTraits;
+    use MetadataTraits;
 
     public const REQUIRED_METADATA = [
         'authorization_endpoint',
@@ -84,11 +84,11 @@ class ProviderMetadata implements ArrayAccess, JsonSerializable
 
     /**
      * @param ClientMetadata $clientMetadata
-     * @return Factory
+     * @return JwtFactory
      */
-    public function createJwtFactory(ClientMetadata $clientMetadata): Factory
+    public function createJwtFactory(ClientMetadata $clientMetadata): JwtFactory
     {
-        $factory = new Factory($this, $clientMetadata);
+        $factory = new JwtFactory($this, $clientMetadata);
         $factory->withAlgorithm($this->additionAlgorithms);
 
         return $factory;

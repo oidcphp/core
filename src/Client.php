@@ -8,8 +8,8 @@ use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Token\AccessToken;
 use OpenIDConnect\Exceptions\OpenIDProviderException;
 use OpenIDConnect\Exceptions\RelyingPartyException;
-use OpenIDConnect\Jwt\Factory;
 use OpenIDConnect\Metadata\ClientMetadata;
+use OpenIDConnect\Metadata\MetadataAwareTraits;
 use OpenIDConnect\Metadata\ProviderMetadata;
 use OpenIDConnect\Token\TokenSet;
 use OpenIDConnect\Token\TokenSetInterface;
@@ -20,15 +20,7 @@ use Psr\Http\Message\ResponseInterface;
  */
 class Client extends AbstractProvider
 {
-    /**
-     * @var ClientMetadata
-     */
-    private $clientMetadata;
-
-    /**
-     * @var ProviderMetadata
-     */
-    private $providerMetadata;
+    use MetadataAwareTraits;
 
     /**
      * @param ProviderMetadata $providerMetadata
@@ -37,8 +29,8 @@ class Client extends AbstractProvider
      */
     public function __construct(ProviderMetadata $providerMetadata, ClientMetadata $clientMetadata, $collaborators = [])
     {
-        $this->providerMetadata = $providerMetadata;
-        $this->clientMetadata = $clientMetadata;
+        $this->setProviderMetadata($providerMetadata);
+        $this->setClientMetadata($clientMetadata);
 
         parent::__construct([
             'clientId' => $clientMetadata->id(),

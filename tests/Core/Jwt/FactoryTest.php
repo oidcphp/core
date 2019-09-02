@@ -10,7 +10,7 @@ use Jose\Component\Signature\Algorithm\ES256;
 use Jose\Component\Signature\Algorithm\PS256;
 use Jose\Component\Signature\Algorithm\RS256;
 use Jose\Component\Signature\Serializer\CompactSerializer;
-use OpenIDConnect\Jwt\Factory;
+use OpenIDConnect\Jwt\JwtFactory;
 use OutOfRangeException;
 use Tests\TestCase;
 
@@ -23,7 +23,7 @@ class FactoryTest extends TestCase
     {
         $this->expectException(OutOfRangeException::class);
 
-        $target = new Factory($this->createProviderMetadata([
+        $target = new JwtFactory($this->createProviderMetadata([
             'id_token_signing_alg_values_supported' => ['Whatever'],
         ]), $this->createClientMetadata());
 
@@ -37,7 +37,7 @@ class FactoryTest extends TestCase
      */
     public function shouldReturnAlgorithmManagerContainAlgorithms(): void
     {
-        $target = new Factory($this->createProviderMetadata([
+        $target = new JwtFactory($this->createProviderMetadata([
             'id_token_signing_alg_values_supported' => ['RS256', 'ES256'],
         ]), $this->createClientMetadata());
 
@@ -52,7 +52,7 @@ class FactoryTest extends TestCase
      */
     public function shouldReturnAlgorithmManagerContainEncryptionAlgorithms(): void
     {
-        $target = new Factory($this->createProviderMetadata([
+        $target = new JwtFactory($this->createProviderMetadata([
             'id_token_encryption_alg_values_supported' => ['RS256', 'ES256', 'PS256'],
             'id_token_signing_alg_values_supported' => ['RS256', 'ES256'],
         ]), $this->createClientMetadata());
@@ -71,7 +71,7 @@ class FactoryTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        $target = new Factory($this->createProviderMetadata([
+        $target = new JwtFactory($this->createProviderMetadata([
             'id_token_signing_alg_values_supported' => ['RS256'],
         ]), $this->createClientMetadata());
 
@@ -85,7 +85,7 @@ class FactoryTest extends TestCase
      */
     public function shouldReturnHeaderCheckManagerContainAlgorithms(): void
     {
-        $target = new Factory($this->createProviderMetadata([
+        $target = new JwtFactory($this->createProviderMetadata([
             'id_token_encryption_alg_values_supported' => ['RS256', 'PS256'],
             'id_token_signing_alg_values_supported' => ['RS256', 'ES256'],
         ]), $this->createClientMetadata());
@@ -105,7 +105,7 @@ class FactoryTest extends TestCase
         $this->expectException(InvalidHeaderException::class);
         $this->expectExceptionMessage('Unsupported algorithm');
 
-        $target = new Factory($this->createProviderMetadata(), $this->createClientMetadata());
+        $target = new JwtFactory($this->createProviderMetadata(), $this->createClientMetadata());
 
         $actual = $target->createHeaderCheckerManager()->getCheckers()['alg'];
 
@@ -119,7 +119,7 @@ class FactoryTest extends TestCase
      */
     public function shouldBuildJwtAndVerifyAndStringAndSerializeStringAndLoadUsingRS256(): void
     {
-        $target = new Factory($this->createProviderMetadata(), $this->createClientMetadata());
+        $target = new JwtFactory($this->createProviderMetadata(), $this->createClientMetadata());
 
         $jwk = JWKFactory::createRSAKey(1024, ['alg' => 'RS256']);
 

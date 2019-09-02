@@ -6,14 +6,17 @@ use InvalidArgumentException;
 use Jose\Component\Core\Util\JsonConverter;
 use OpenIDConnect\Exceptions\RelyingPartyException;
 use OpenIDConnect\IdToken;
-use OpenIDConnect\Jwt\Factory;
+use OpenIDConnect\Jwt\JwtFactory;
 use OpenIDConnect\Metadata\ClientMetadata;
+use OpenIDConnect\Metadata\MetadataAwareTraits;
 use OpenIDConnect\Metadata\ProviderMetadata;
 use RangeException;
 use UnexpectedValueException;
 
 class TokenSet implements TokenSetInterface
 {
+    use MetadataAwareTraits;
+
     public const DEFAULT_KEYS = [
         'access_token',
         'expires_in',
@@ -28,11 +31,6 @@ class TokenSet implements TokenSetInterface
     private $idToken;
 
     /**
-     * @var ProviderMetadata
-     */
-    private $providerMetadata;
-
-    /**
      * @var array
      */
     private $parameters;
@@ -41,11 +39,6 @@ class TokenSet implements TokenSetInterface
      * @var array
      */
     private $values;
-
-    /**
-     * @var ClientMetadata
-     */
-    private $clientMetadata;
 
     /**
      * @param array $parameters An array from token endpoint response body
@@ -59,10 +52,10 @@ class TokenSet implements TokenSetInterface
         }
 
         $this->parameters = $parameters;
-        $this->providerMetadata = $providerMetadata;
+        $this->setProviderMetadata($providerMetadata);
+        $this->setClientMetadata($clientMetadata);
 
         $this->values = array_diff_key($this->parameters, array_flip(self::DEFAULT_KEYS));
-        $this->clientMetadata = $clientMetadata;
     }
 
     /**
@@ -225,9 +218,9 @@ class TokenSet implements TokenSetInterface
     }
 
     /**
-     * @return Factory
+     * @return JwtFactory
      */
-    private function jwtFactory(): Factory
+    private function jwtFactory(): JwtFactory
     {
         return $this->providerMetadata->createJwtFactory($this->clientMetadata);
     }
