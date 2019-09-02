@@ -3,25 +3,10 @@
 namespace Tests\Core;
 
 use OpenIDConnect\Client;
-use OpenIDConnect\Metadata\ClientMetadata;
-use OpenIDConnect\Metadata\ProviderMetadata;
 use Tests\TestCase;
 
 class ClientHandleOpenIDConnectCallbackTest extends TestCase
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->app->singleton(ProviderMetadata::class, function () {
-            return new ProviderMetadata($this->createProviderMetadataConfig());
-        });
-
-        $this->app->singleton(ClientMetadata::class, function () {
-            return new ClientMetadata($this->createClientMetadataConfig());
-        });
-    }
-
     /**
      * @test
      */
@@ -29,8 +14,8 @@ class ClientHandleOpenIDConnectCallbackTest extends TestCase
     {
         /** @var Client $target */
         $target = new Client(
-            $this->app->make(ProviderMetadata::class),
-            $this->app->make(ClientMetadata::class),
+            $this->createProviderMetadata(),
+            $this->createClientMetadata(),
             [
                 'httpClient' => $this->createHttpClient([
                     $this->createFakeTokenEndpointResponse(['id_token' => 'whatever']),

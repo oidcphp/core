@@ -3,8 +3,6 @@
 namespace Tests\Core;
 
 use OpenIDConnect\Client;
-use OpenIDConnect\Metadata\ClientMetadata;
-use OpenIDConnect\Metadata\ProviderMetadata;
 use Tests\TestCase;
 
 class ClientTest extends TestCase
@@ -16,17 +14,10 @@ class ClientTest extends TestCase
 
     protected function setUp(): void
     {
-        parent::setUp();
-
-        $this->app->singleton(ProviderMetadata::class, function () {
-            return new ProviderMetadata($this->createProviderMetadataConfig());
-        });
-
-        $this->app->singleton(ClientMetadata::class, function () {
-            return new ClientMetadata($this->createClientMetadataConfig());
-        });
-
-        $this->target = $this->app->make(Client::class);
+        $this->target = new Client(
+            $this->createProviderMetadata(),
+            $this->createClientMetadata()
+        );
     }
 
     protected function tearDown(): void
