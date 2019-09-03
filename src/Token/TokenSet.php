@@ -176,7 +176,7 @@ class TokenSet implements TokenSetInterface
     /**
      * {@inheritDoc}
      */
-    public function refreshToken(): string
+    public function refreshToken(): ?string
     {
         return $this->hasRefreshToken() ? $this->parameters['refresh_token'] : null;
     }
