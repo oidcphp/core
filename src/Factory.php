@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace OpenIDConnect;
 
 use GuzzleHttp\ClientInterface as HttpClientInterface;
-use OpenIDConnect\Jwt\JwtFactory;
 use OpenIDConnect\Metadata\ClientMetadata as ClientMeta;
 use OpenIDConnect\Metadata\MetadataAwareTraits;
 use OpenIDConnect\Metadata\ProviderMetadata as ProviderMeta;
@@ -33,14 +32,6 @@ class Factory
         if (null !== $httpClient) {
             $this->setHttpClient($httpClient);
         }
-    }
-
-    /**
-     * @return JwtFactory
-     */
-    public function createJwtFactory(): JwtFactory
-    {
-        return new JwtFactory($this->providerMetadata, $this->clientMetadata);
     }
 
     /**

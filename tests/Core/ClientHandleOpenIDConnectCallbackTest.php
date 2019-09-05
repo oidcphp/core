@@ -32,6 +32,6 @@ class ClientHandleOpenIDConnectCallbackTest extends TestCase
         $this->assertSame('some-refresh-token', $actual->refreshToken());
         $this->assertSame(['some-scope'], $actual->scope());
 
-        $this->assertSame('whatever', $actual->idTokenRaw());
+        $this->assertSame('whatever', $actual->idToken());
     }
 }

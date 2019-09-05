@@ -14,7 +14,7 @@ use OpenIDConnect\Jwt\JwtFactory;
 use OutOfRangeException;
 use Tests\TestCase;
 
-class FactoryTest extends TestCase
+class JwtFactoryTest extends TestCase
 {
     /**
      * @test

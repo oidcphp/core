@@ -3,7 +3,7 @@
 namespace OpenIDConnect\Token;
 
 use JsonSerializable;
-use OpenIDConnect\IdToken;
+use OpenIDConnect\Claims;
 
 /**
  * The token set interface for OpenID Connect flow
@@ -60,16 +60,19 @@ interface TokenSetInterface extends JsonSerializable
     public function hasScope(): bool;
 
     /**
+     * Verified claim from ID token string
+     *
      * @see https://openid.net/specs/openid-connect-core-1_0.html#IDToken
-     * @return IdToken
+     * @return Claims
      */
-    public function idToken(): IdToken;
+    public function idTokenClaims(): Claims;
 
     /**
-     * @see https://openid.net/specs/openid-connect-core-1_0.html#IDToken
+     * The raw ID token string
+     *
      * @return string
      */
-    public function idTokenRaw(): ?string;
+    public function idToken(): ?string;
 
     /**
      * @see https://tools.ietf.org/html/rfc6749#section-1.5

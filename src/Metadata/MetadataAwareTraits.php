@@ -2,6 +2,8 @@
 
 namespace OpenIDConnect\Metadata;
 
+use OpenIDConnect\Jwt\JwtFactory;
+
 trait MetadataAwareTraits
 {
     /**
@@ -13,6 +15,14 @@ trait MetadataAwareTraits
      * @var ProviderMetadata
      */
     private $providerMetadata;
+
+    /**
+     * @return JwtFactory
+     */
+    public function createJwtFactory(): JwtFactory
+    {
+        return $this->providerMetadata->createJwtFactory($this->clientMetadata);
+    }
 
     /**
      * @return ClientMetadata

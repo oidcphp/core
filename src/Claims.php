@@ -8,11 +8,11 @@ use Jose\Component\Core\Util\JsonConverter;
 use Jose\Component\Signature\JWS;
 
 /**
- * Verified JWT
+ * Verified JWT Claims
  *
  * @see https://openid.net/specs/openid-connect-core-1_0.html#IDToken
  */
-class IdToken
+class Claims
 {
     /**
      * @var array

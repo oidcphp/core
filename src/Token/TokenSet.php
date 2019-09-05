@@ -3,19 +3,15 @@
 namespace OpenIDConnect\Token;
 
 use InvalidArgumentException;
-use Jose\Component\Core\Util\JsonConverter;
-use OpenIDConnect\Exceptions\RelyingPartyException;
-use OpenIDConnect\IdToken;
-use OpenIDConnect\Jwt\JwtFactory;
 use OpenIDConnect\Metadata\ClientMetadata;
 use OpenIDConnect\Metadata\MetadataAwareTraits;
 use OpenIDConnect\Metadata\ProviderMetadata;
-use RangeException;
-use UnexpectedValueException;
+use OpenIDConnect\Token\Concerns\IdToken;
 
 class TokenSet implements TokenSetInterface
 {
     use MetadataAwareTraits;
+    use IdToken;
 
     public const DEFAULT_KEYS = [
         'access_token',
@@ -24,11 +20,6 @@ class TokenSet implements TokenSetInterface
         'refresh_token',
         'scope',
     ];
-
-    /**
-     * @var IdToken
-     */
-    private $idToken;
 
     /**
      * @var array
@@ -114,53 +105,10 @@ class TokenSet implements TokenSetInterface
         return $this->has('scope');
     }
 
-    public function idToken($extraMandatoryClaims = []): IdToken
-    {
-        if (null !== $this->idToken) {
-            return $this->idToken;
-        }
-
-        $token = $this->idTokenRaw();
-
-        if (null === $token) {
-            throw new RangeException('No ID token');
-        }
-
-        $jwtFactory = $this->jwtFactory();
-
-        $loader = $jwtFactory->createJwsLoader();
-
-        $signature = null;
-
-        $jws = $loader->loadAndVerifyWithKeySet(
-            $token,
-            $this->providerMetadata->jwkSet(),
-            $signature
-        );
-
-        $payload = $jws->getPayload();
-
-        if (null === $payload) {
-            throw new UnexpectedValueException('JWT has no payload');
-        }
-
-        $claimCheckerManager = $jwtFactory->createClaimCheckerManager();
-
-        try {
-            $mandatoryClaims = array_unique(array_merge(static::REQUIRED_CLAIMS, $extraMandatoryClaims));
-
-            $claimCheckerManager->check(JsonConverter::decode($payload), $mandatoryClaims);
-        } catch (\Exception $e) {
-            throw new RelyingPartyException('Receive an invalid ID token: ' . $this->idTokenRaw(), 0, $e);
-        }
-
-        return $this->idToken = IdToken::createFromJWS($jws);
-    }
-
     /**
      * {@inheritDoc}
      */
-    public function idTokenRaw(): ?string
+    public function idToken(): ?string
     {
         return $this->hasIdToken() ? $this->parameters['id_token'] : null;
     }
@@ -215,13 +163,5 @@ class TokenSet implements TokenSetInterface
         }
 
         return $this->values[$key];
-    }
-
-    /**
-     * @return JwtFactory
-     */
-    private function jwtFactory(): JwtFactory
-    {
-        return $this->providerMetadata->createJwtFactory($this->clientMetadata);
     }
 }

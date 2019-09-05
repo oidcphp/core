@@ -29,7 +29,7 @@ class TokenSetTest extends TestCase
 
         $this->assertSame('some-access-token', $target->accessToken());
         $this->assertSame(3600, $target->expiresIn());
-        $this->assertSame('some-id-token', $target->idTokenRaw());
+        $this->assertSame('some-id-token', $target->idToken());
         $this->assertSame('some-refresh-token', $target->refreshToken());
         $this->assertSame(['some-scope'], $target->scope());
         $this->assertSame('some-addition', $target->values('addition'));
@@ -82,7 +82,7 @@ class TokenSetTest extends TestCase
             'id_token' => (new CompactSerializer())->serialize($jws),
         ]), $providerMetadata, $clientMetadata);
 
-        $actual = $target->idToken();
+        $actual = $target->idTokenClaims();
 
         $this->assertSame('some-aud', $actual->aud());
         $this->assertSame('some-iss', $actual->iss());
@@ -154,7 +154,7 @@ class TokenSetTest extends TestCase
             'id_token' => (new CompactSerializer())->serialize($jws),
         ]), $providerMetadata, $clientMetadata);
 
-        $actual = $target->idToken();
+        $actual = $target->idTokenClaims();
 
         $this->assertSame('some-aud', $actual->aud());
         $this->assertSame('some-iss', $actual->iss());
