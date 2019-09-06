@@ -6,6 +6,7 @@ use InvalidArgumentException;
 use League\OAuth2\Client\Provider\AbstractProvider;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Token\AccessToken;
+use OpenIDConnect\ClientAuthentication\QueryProcessorTrait;
 use OpenIDConnect\Exceptions\OpenIDProviderException;
 use OpenIDConnect\Exceptions\RelyingPartyException;
 use OpenIDConnect\Metadata\ClientMetadata;
@@ -13,6 +14,7 @@ use OpenIDConnect\Metadata\MetadataAwareTraits;
 use OpenIDConnect\Metadata\ProviderMetadata;
 use OpenIDConnect\Token\TokenSet;
 use OpenIDConnect\Token\TokenSetInterface;
+use OpenIDConnect\Traits\ClientAuthenticationAwareTrait;
 use Psr\Http\Message\ResponseInterface;
 
 /**
@@ -20,6 +22,8 @@ use Psr\Http\Message\ResponseInterface;
  */
 class Client extends AbstractProvider
 {
+    use ClientAuthenticationAwareTrait;
+    use QueryProcessorTrait;
     use MetadataAwareTraits;
 
     /**
@@ -162,8 +166,23 @@ HTML;
         ];
 
         $params = $grant->prepareRequestParameters($params, $options);
-        $request = $this->getAccessTokenRequest($params);
-        $response = $this->getParsedResponse($request);
+
+        $method = $this->getAccessTokenMethod();
+        $url = $this->getAccessTokenUrl($params);
+
+        $options['body'] = $this->buildQueryString($params);
+        $options['headers'] = ['content-type' => 'application/x-www-form-urlencoded'];
+
+        $request = $this->getRequest($method, $url, $options);
+
+        $appender = $this->getTokenRequestAppender();
+        $appendedRequest = $appender->withClientAuthentication(
+            $request,
+            $this->clientMetadata->id(),
+            $this->clientMetadata->secret()
+        );
+
+        $response = $this->getParsedResponse($appendedRequest);
 
         if (!is_array($response)) {
             throw new OpenIDProviderException(
