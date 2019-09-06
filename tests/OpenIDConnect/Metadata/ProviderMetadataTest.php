@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Core\Metadata;
+namespace Tests\OpenIDConnect\Metadata;
 
 use DomainException;
 use OpenIDConnect\Metadata\ProviderMetadata;

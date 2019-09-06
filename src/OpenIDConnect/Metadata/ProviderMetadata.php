@@ -165,6 +165,14 @@ class ProviderMetadata implements ArrayAccess, JsonSerializable
     }
 
     /**
+     * @return string
+     */
+    public function revocationEndpoint(): ?string
+    {
+        return $this->metadata['revocation_endpoint'] ?? null;
+    }
+
+    /**
      * @return array|null
      */
     public function scopesSupported(): ?array

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Core\Jwt;
+namespace Tests\OpenIDConnect\Jwt;
 
 use Jose\Component\Signature\Algorithm\ES256;
 use Jose\Component\Signature\Algorithm\RS256;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Core\Token;
+namespace Tests\OpenIDConnect\Token;
 
 use InvalidArgumentException;
 use Jose\Component\Core\JWKSet;

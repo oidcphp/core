@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Core\Metadata;
+namespace Tests\OpenIDConnect\Metadata;
 
 use InvalidArgumentException;
 use Jose\Component\Checker\InvalidHeaderException;

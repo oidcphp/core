@@ -33,6 +33,15 @@ trait MetadataTraits
         }
     }
 
+    /**
+     * @param string $key
+     * @return bool
+     */
+    public function has(string $key): bool
+    {
+        return $this->offsetExists($key);
+    }
+
     public function offsetExists($key)
     {
         return array_key_exists($key, $this->metadata);

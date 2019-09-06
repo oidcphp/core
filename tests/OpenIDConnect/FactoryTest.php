@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Core;
+namespace Tests\OpenIDConnect;
 
 use OpenIDConnect\Client;
 use OpenIDConnect\Factory;
