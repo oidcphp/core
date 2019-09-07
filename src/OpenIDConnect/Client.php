@@ -6,9 +6,9 @@ use InvalidArgumentException;
 use League\OAuth2\Client\Provider\AbstractProvider;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Token\AccessToken;
-use OpenIDConnect\ClientAuthentication\QueryProcessorTrait;
 use OpenIDConnect\Exceptions\OpenIDProviderException;
 use OpenIDConnect\Exceptions\RelyingPartyException;
+use OpenIDConnect\Http\TokenRequestFactory;
 use OpenIDConnect\Metadata\ClientMetadata;
 use OpenIDConnect\Metadata\MetadataAwareTraits;
 use OpenIDConnect\Metadata\ProviderMetadata;
@@ -23,7 +23,6 @@ use Psr\Http\Message\ResponseInterface;
 class Client extends AbstractProvider
 {
     use ClientAuthenticationAwareTrait;
-    use QueryProcessorTrait;
     use MetadataAwareTraits;
 
     /**
@@ -167,13 +166,8 @@ HTML;
 
         $params = $grant->prepareRequestParameters($params, $options);
 
-        $method = $this->getAccessTokenMethod();
-        $url = $this->getAccessTokenUrl($params);
-
-        $options['body'] = $this->buildQueryString($params);
-        $options['headers'] = ['content-type' => 'application/x-www-form-urlencoded'];
-
-        $request = $this->getRequest($method, $url, $options);
+        $request = (new TokenRequestFactory($this->providerMetadata->tokenEndpoint()))
+            ->createRequest($params);
 
         $appender = $this->getTokenRequestAppender();
         $appendedRequest = $appender->withClientAuthentication(

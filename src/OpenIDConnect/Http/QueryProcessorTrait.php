@@ -1,6 +1,6 @@
 <?php
 
-namespace OpenIDConnect\ClientAuthentication;
+namespace OpenIDConnect\Http;
 
 /**
  * General query builder and parser for process query and post body

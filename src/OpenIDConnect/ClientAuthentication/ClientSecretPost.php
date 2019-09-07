@@ -2,6 +2,7 @@
 
 namespace OpenIDConnect\ClientAuthentication;
 
+use OpenIDConnect\Http\QueryProcessorTrait;
 use Psr\Http\Message\RequestInterface as Request;
 use function GuzzleHttp\Psr7\stream_for;
 
