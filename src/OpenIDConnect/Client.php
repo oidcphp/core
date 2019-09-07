@@ -2,6 +2,7 @@
 
 namespace OpenIDConnect;
 
+use GuzzleHttp\Exception\BadResponseException;
 use InvalidArgumentException;
 use League\OAuth2\Client\Provider\AbstractProvider;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
@@ -125,11 +126,6 @@ HTML;
      */
     protected function checkResponse(ResponseInterface $response, $data)
     {
-        if (is_array($data) && !empty($data['error'])) {
-            $error = $data['error'];
-
-            throw new IdentityProviderException($error, 0, $data);
-        }
     }
 
     /**
@@ -176,15 +172,33 @@ HTML;
             $this->clientMetadata->secret()
         );
 
-        $response = $this->getParsedResponse($appendedRequest);
+        try {
+            $response = $this->getHttpClient()->send($appendedRequest);
+        } catch (BadResponseException $e) {
+            throw new OpenIDProviderException('OpenID Connect provider error');
+        }
 
-        if (!is_array($response)) {
+        $content = (string)$response->getBody();
+
+        if (strpos($response->getHeaderLine('urlencoded'), 'urlencoded') !== false) {
+            parse_str($content, $parsed);
+        } else {
+            $parsed = \GuzzleHttp\json_decode($content, true);
+        }
+
+        if (is_array($parsed) && !empty($parsed['error'])) {
+            $error = $parsed['error'];
+
+            throw new IdentityProviderException($error, 0, $parsed);
+        }
+
+        if (!is_array($parsed)) {
             throw new OpenIDProviderException(
                 'Invalid response received from OpenID Provider. Expected JSON.'
             );
         }
 
-        $tokenSet = new TokenSet($response, $this->providerMetadata, $this->clientMetadata);
+        $tokenSet = new TokenSet($parsed, $this->providerMetadata, $this->clientMetadata);
 
         if (!$tokenSet->hasIdToken()) {
             throw new OpenIDProviderException("'id_token' missing from the token endpoint response");
