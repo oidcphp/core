@@ -95,35 +95,6 @@ class Client
 HTML;
     }
 
-    /**
-     * @param array $parameters
-     * @param array $checks
-     * @return TokenSetInterface
-     */
-    public function handleOpenIDConnectCallback(array $parameters, array $checks = [])
-    {
-        if (isset($parameters['state']) && !isset($checks['state'])) {
-            throw new InvalidArgumentException("'state' argument is missing");
-        }
-
-        if (!isset($parameters['state']) && isset($checks['state'])) {
-            throw new RelyingPartyException("'state' missing from the response");
-        }
-
-        if (isset($parameters['state'], $checks['state']) && ($checks['state'] !== $parameters['state'])) {
-            throw new RelyingPartyException(sprintf(
-                'State mismatch, expected %s, got: %s',
-                $checks['state'],
-                $parameters['state']
-            ));
-        }
-
-        return $this->getTokenSet('authorization_code', [
-            'code' => $parameters['code'],
-            'redirect_uri' => $this->clientMetadata->redirectUri(),
-        ]);
-    }
-
     protected function getRandomState($length = 32): string
     {
         // Converting bytes to hex will always double length. Hence, we can reduce
@@ -161,6 +132,35 @@ HTML;
         $options['client_id'] = $this->clientMetadata->id();
 
         return $options;
+    }
+
+    /**
+     * @param array $parameters
+     * @param array $checks
+     * @return TokenSetInterface
+     */
+    public function handleOpenIDConnectCallback(array $parameters, array $checks = [])
+    {
+        if (isset($parameters['state']) && !isset($checks['state'])) {
+            throw new InvalidArgumentException("'state' argument is missing");
+        }
+
+        if (!isset($parameters['state']) && isset($checks['state'])) {
+            throw new RelyingPartyException("'state' missing from the response");
+        }
+
+        if (isset($parameters['state'], $checks['state']) && ($checks['state'] !== $parameters['state'])) {
+            throw new RelyingPartyException(sprintf(
+                'State mismatch, expected %s, got: %s',
+                $checks['state'],
+                $parameters['state']
+            ));
+        }
+
+        return $this->getTokenSet('authorization_code', [
+            'code' => $parameters['code'],
+            'redirect_uri' => $this->clientMetadata->redirectUri(),
+        ]);
     }
 
     /**
