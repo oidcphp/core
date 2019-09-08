@@ -30,13 +30,13 @@ class ClientTest extends TestCase
      */
     public function shouldReturnAuthorizationUrlWhenCallSame(): void
     {
-        $actual = $this->target->getAuthorizationUrl();
+        $actual = $this->target->getAuthorizationUri();
 
-        $this->assertStringStartsWith('https://somewhere/auth', $actual);
-        $this->assertStringContainsStringIgnoringCase('state=', $actual);
-        $this->assertStringContainsStringIgnoringCase('response_type=code', $actual);
-        $this->assertStringContainsStringIgnoringCase('redirect_uri=', $actual);
-        $this->assertStringContainsStringIgnoringCase('client_id=some_id', $actual);
+        $this->assertStringStartsWith('https://somewhere/auth', (string)$actual);
+        $this->assertStringContainsStringIgnoringCase('state=', (string)$actual);
+        $this->assertStringContainsStringIgnoringCase('response_type=code', (string)$actual);
+        $this->assertStringContainsStringIgnoringCase('redirect_uri=', (string)$actual);
+        $this->assertStringContainsStringIgnoringCase('client_id=some_id', (string)$actual);
     }
 
     /**

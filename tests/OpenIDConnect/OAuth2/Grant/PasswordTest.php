@@ -3,7 +3,7 @@
 namespace Tests\OpenIDConnect\OAuth2\Grant;
 
 use OpenIDConnect\Exceptions\RelyingPartyException;
-use OpenIDConnect\OAuth2\Grant\Factory;
+use OpenIDConnect\OAuth2\Grant\GrantFactory;
 use OpenIDConnect\OAuth2\Grant\Password;
 use PHPUnit\Framework\TestCase;
 
@@ -14,7 +14,7 @@ class PasswordTest extends TestCase
      */
     public function shouldReturnPasswordWhenRegisterInFactory(): void
     {
-        $factory = new Factory();
+        $factory = new GrantFactory();
         $factory->setGrant('some', new Password());
 
         $this->assertInstanceOf(Password::class, $factory->getGrant('some'));
@@ -25,7 +25,7 @@ class PasswordTest extends TestCase
      */
     public function shouldReturnPasswordWhenNotRegisterInFactory(): void
     {
-        $factory = new Factory();
+        $factory = new GrantFactory();
 
         $this->assertInstanceOf(Password::class, $factory->getGrant('password'));
     }
@@ -35,7 +35,7 @@ class PasswordTest extends TestCase
      */
     public function shouldReturnOkayWhenRequireParametersIsReady(): void
     {
-        $target = (new Factory())->getGrant('password');
+        $target = (new GrantFactory())->getGrant('password');
 
         $actual = $target->prepareRequestParameters([
             'username' => 'some-username',
@@ -54,7 +54,7 @@ class PasswordTest extends TestCase
     {
         $this->expectException(RelyingPartyException::class);
 
-        $target = (new Factory())->getGrant('password');
+        $target = (new GrantFactory())->getGrant('password');
 
         $target->prepareRequestParameters([]);
     }

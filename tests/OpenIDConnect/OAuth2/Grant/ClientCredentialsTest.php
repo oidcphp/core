@@ -4,7 +4,7 @@ namespace Tests\OpenIDConnect\OAuth2\Grant;
 
 use OpenIDConnect\Exceptions\RelyingPartyException;
 use OpenIDConnect\OAuth2\Grant\ClientCredentials;
-use OpenIDConnect\OAuth2\Grant\Factory;
+use OpenIDConnect\OAuth2\Grant\GrantFactory;
 use PHPUnit\Framework\TestCase;
 
 class ClientCredentialsTest extends TestCase
@@ -14,7 +14,7 @@ class ClientCredentialsTest extends TestCase
      */
     public function shouldReturnClientCredentialsWhenRegisterInFactory(): void
     {
-        $factory = new Factory();
+        $factory = new GrantFactory();
         $factory->setGrant('some', new ClientCredentials());
 
         $this->assertInstanceOf(ClientCredentials::class, $factory->getGrant('some'));
@@ -25,7 +25,7 @@ class ClientCredentialsTest extends TestCase
      */
     public function shouldReturnClientCredentialsWhenNotRegisterInFactory(): void
     {
-        $factory = new Factory();
+        $factory = new GrantFactory();
 
         $this->assertInstanceOf(ClientCredentials::class, $factory->getGrant('client_credentials'));
     }
@@ -35,7 +35,7 @@ class ClientCredentialsTest extends TestCase
      */
     public function shouldReturnOkayWhenRequireParametersIsReady(): void
     {
-        $target = (new Factory())->getGrant('client_credentials');
+        $target = (new GrantFactory())->getGrant('client_credentials');
 
         $actual = $target->prepareRequestParameters([]);
 

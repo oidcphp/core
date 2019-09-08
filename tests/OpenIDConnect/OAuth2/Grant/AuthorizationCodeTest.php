@@ -4,7 +4,7 @@ namespace Tests\OpenIDConnect\OAuth2\Grant;
 
 use OpenIDConnect\Exceptions\RelyingPartyException;
 use OpenIDConnect\OAuth2\Grant\AuthorizationCode;
-use OpenIDConnect\OAuth2\Grant\Factory;
+use OpenIDConnect\OAuth2\Grant\GrantFactory;
 use PHPUnit\Framework\TestCase;
 
 class AuthorizationCodeTest extends TestCase
@@ -14,7 +14,7 @@ class AuthorizationCodeTest extends TestCase
      */
     public function shouldReturnAuthorizationCodeWhenRegisterInFactory(): void
     {
-        $factory = new Factory();
+        $factory = new GrantFactory();
         $factory->setGrant('some', new AuthorizationCode());
 
         $this->assertInstanceOf(AuthorizationCode::class, $factory->getGrant('some'));
@@ -25,7 +25,7 @@ class AuthorizationCodeTest extends TestCase
      */
     public function shouldReturnAuthorizationCodeWhenNotRegisterInFactory(): void
     {
-        $factory = new Factory();
+        $factory = new GrantFactory();
 
         $this->assertInstanceOf(AuthorizationCode::class, $factory->getGrant('authorization_code'));
     }
@@ -35,7 +35,7 @@ class AuthorizationCodeTest extends TestCase
      */
     public function shouldReturnOkayWhenRequireParametersIsReady(): void
     {
-        $target = (new Factory())->getGrant('authorization_code');
+        $target = (new GrantFactory())->getGrant('authorization_code');
 
         $actual = $target->prepareRequestParameters([
             'code' => 'some',
@@ -52,7 +52,7 @@ class AuthorizationCodeTest extends TestCase
     {
         $this->expectException(RelyingPartyException::class);
 
-        $target = (new Factory())->getGrant('authorization_code');
+        $target = (new GrantFactory())->getGrant('authorization_code');
 
         $target->prepareRequestParameters([]);
     }

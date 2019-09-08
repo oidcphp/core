@@ -2,29 +2,40 @@
 
 namespace OpenIDConnect;
 
+use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Exception\BadResponseException;
 use InvalidArgumentException;
-use League\OAuth2\Client\Provider\AbstractProvider;
-use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
-use League\OAuth2\Client\Token\AccessToken;
 use OpenIDConnect\Exceptions\OpenIDProviderException;
 use OpenIDConnect\Exceptions\RelyingPartyException;
+use OpenIDConnect\Http\DefaultUriFactory;
+use OpenIDConnect\Http\QueryProcessorTrait;
 use OpenIDConnect\Http\TokenRequestFactory;
 use OpenIDConnect\Metadata\ClientMetadata;
 use OpenIDConnect\Metadata\MetadataAwareTraits;
 use OpenIDConnect\Metadata\ProviderMetadata;
+use OpenIDConnect\OAuth2\Grant\GrantFactory;
+use OpenIDConnect\OAuth2\Grant\GrantFactoryAwareTrait;
 use OpenIDConnect\Token\TokenSet;
 use OpenIDConnect\Token\TokenSetInterface;
 use OpenIDConnect\Traits\ClientAuthenticationAwareTrait;
-use Psr\Http\Message\ResponseInterface;
+use OpenIDConnect\Traits\HttpClientAwareTrait;
+use Psr\Http\Message\UriInterface;
 
 /**
  * OpenID Connect Client
  */
-class Client extends AbstractProvider
+class Client
 {
     use ClientAuthenticationAwareTrait;
+    use GrantFactoryAwareTrait;
+    use HttpClientAwareTrait;
     use MetadataAwareTraits;
+    use QueryProcessorTrait;
+
+    /**
+     * @var string
+     */
+    private $state;
 
     /**
      * @param ProviderMetadata $providerMetadata
@@ -36,11 +47,28 @@ class Client extends AbstractProvider
         $this->setProviderMetadata($providerMetadata);
         $this->setClientMetadata($clientMetadata);
 
-        parent::__construct([
-            'clientId' => $clientMetadata->id(),
-            'clientSecret' => $clientMetadata->secret(),
-            'redirectUri' => $clientMetadata->redirectUri(),
-        ], $collaborators);
+        if (empty($collaborators['grantFactory'])) {
+            $collaborators['grantFactory'] = new GrantFactory();
+        }
+        $this->setGrantFactory($collaborators['grantFactory']);
+
+        if (empty($collaborators['httpClient'])) {
+            $collaborators['httpClient'] = new HttpClient();
+        }
+        $this->setHttpClient($collaborators['httpClient']);
+    }
+
+    /**
+     * @param array $options
+     * @return UriInterface
+     */
+    public function getAuthorizationUri(array $options = []): UriInterface
+    {
+        $params = $this->getAuthorizationParameters($options);
+
+        return (new DefaultUriFactory())
+            ->createUri($this->providerMetadata->authorizationEndpoint())
+            ->withQuery($this->buildQueryString($params));
     }
 
     /**
@@ -49,7 +77,7 @@ class Client extends AbstractProvider
      */
     public function getAuthorizationPost(array $options = []): string
     {
-        $baseAuthorizationUrl = $this->getBaseAuthorizationUrl();
+        $baseAuthorizationUrl = $this->providerMetadata->authorizationEndpoint();
 
         $parameters = $this->getAuthorizationParameters($options);
 
@@ -68,34 +96,9 @@ HTML;
     }
 
     /**
-     * {@inheritDoc}
-     */
-    public function getBaseAccessTokenUrl(array $params)
-    {
-        return $this->providerMetadata->tokenEndpoint();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getBaseAuthorizationUrl()
-    {
-        return $this->providerMetadata->authorizationEndpoint();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getResourceOwnerDetailsUrl(AccessToken $token)
-    {
-        return $this->providerMetadata->userInfoEndpoint() ?? '';
-    }
-
-    /**
      * @param array $parameters
      * @param array $checks
      * @return TokenSetInterface
-     * @throws IdentityProviderException
      */
     public function handleOpenIDConnectCallback(array $parameters, array $checks = [])
     {
@@ -121,46 +124,61 @@ HTML;
         ]);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    protected function checkResponse(ResponseInterface $response, $data)
+    protected function getRandomState($length = 32): string
     {
+        // Converting bytes to hex will always double length. Hence, we can reduce
+        // the amount of bytes by half to produce the correct length.
+        return bin2hex(random_bytes($length / 2));
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    protected function createResourceOwner(array $response, AccessToken $token)
+    protected function getAuthorizationParameters(array $options): array
     {
-        throw new \LogicException('Not implement');
-    }
+        if (empty($options['state'])) {
+            $options['state'] = $this->getRandomState();
+        }
 
-    /**
-     * {@inheritDoc}
-     */
-    protected function getDefaultScopes()
-    {
-        return ['openid'];
+        if (empty($options['scope'])) {
+            $options['scope'] = ['openid'];
+        }
+
+        $options += [
+            'response_type' => 'code',
+        ];
+
+        if (is_array($options['scope'])) {
+            $options['scope'] = implode(' ', $options['scope']);
+        }
+
+        // Store the state as it may need to be accessed later on.
+        $this->state = $options['state'];
+
+        // Business code layer might set a different redirect_uri parameter
+        // depending on the context, leave it as-is
+        if (!isset($options['redirect_uri'])) {
+            $options['redirect_uri'] = $this->clientMetadata->redirectUri();
+        }
+
+        $options['client_id'] = $this->clientMetadata->id();
+
+        return $options;
     }
 
     /**
      * @param mixed $grant
      * @param array $options
      * @return TokenSetInterface
-     * @throws IdentityProviderException
      */
     private function getTokenSet($grant, array $options = []): TokenSetInterface
     {
-        $grant = $this->verifyGrant($grant);
+        $grant = $this->grantFactory->getGrant($grant);
 
-        $params = [
-            'client_id' => $this->clientId,
-            'client_secret' => $this->clientSecret,
-            'redirect_uri' => $this->redirectUri,
-        ];
+        $params = array_merge([
+            'client_id' => $this->clientMetadata->id(),
+            'client_secret' => $this->clientMetadata->secret(),
+            'redirect_uri' => $this->clientMetadata->redirectUri(),
+        ], $options);
 
-        $params = $grant->prepareRequestParameters($params, $options);
+        $params = $grant->prepareRequestParameters($params);
 
         $request = (new TokenRequestFactory($this->providerMetadata->tokenEndpoint()))
             ->createRequest($params);
@@ -189,7 +207,7 @@ HTML;
         if (is_array($parsed) && !empty($parsed['error'])) {
             $error = $parsed['error'];
 
-            throw new IdentityProviderException($error, 0, $parsed);
+            throw new OpenIDProviderException($error);
         }
 
         if (!is_array($parsed)) {

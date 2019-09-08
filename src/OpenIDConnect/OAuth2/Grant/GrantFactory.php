@@ -5,7 +5,7 @@ namespace OpenIDConnect\OAuth2\Grant;
 /**
  * Implement the registry singleton pattern
  */
-class Factory
+class GrantFactory
 {
     /**
      * @var AbstractGrant[]

@@ -4,7 +4,7 @@ namespace Tests\OpenIDConnect\OAuth2\Grant;
 
 use OpenIDConnect\OAuth2\Grant\AbstractGrant;
 use OpenIDConnect\OAuth2\Grant\AuthorizationCode;
-use OpenIDConnect\OAuth2\Grant\Factory;
+use OpenIDConnect\OAuth2\Grant\GrantFactory;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 

@@ -3,7 +3,7 @@
 namespace Tests\OpenIDConnect\OAuth2\Grant;
 
 use OpenIDConnect\Exceptions\RelyingPartyException;
-use OpenIDConnect\OAuth2\Grant\Factory;
+use OpenIDConnect\OAuth2\Grant\GrantFactory;
 use OpenIDConnect\OAuth2\Grant\RefreshToken;
 use PHPUnit\Framework\TestCase;
 
@@ -14,7 +14,7 @@ class RefreshTokenTest extends TestCase
      */
     public function shouldReturnRefreshTokenWhenRegisterInFactory(): void
     {
-        $factory = new Factory();
+        $factory = new GrantFactory();
         $factory->setGrant('some', new RefreshToken());
 
         $this->assertInstanceOf(RefreshToken::class, $factory->getGrant('some'));
@@ -25,7 +25,7 @@ class RefreshTokenTest extends TestCase
      */
     public function shouldReturnRefreshTokenWhenNotRegisterInFactory(): void
     {
-        $factory = new Factory();
+        $factory = new GrantFactory();
 
         $this->assertInstanceOf(RefreshToken::class, $factory->getGrant('refresh_token'));
     }
@@ -35,7 +35,7 @@ class RefreshTokenTest extends TestCase
      */
     public function shouldReturnOkayWhenRequireParametersIsReady(): void
     {
-        $target = (new Factory())->getGrant('refresh_token');
+        $target = (new GrantFactory())->getGrant('refresh_token');
 
         $actual = $target->prepareRequestParameters([
             'refresh_token' => 'some',
@@ -52,7 +52,7 @@ class RefreshTokenTest extends TestCase
     {
         $this->expectException(RelyingPartyException::class);
 
-        $target = (new Factory())->getGrant('refresh_token');
+        $target = (new GrantFactory())->getGrant('refresh_token');
 
         $target->prepareRequestParameters([]);
     }
