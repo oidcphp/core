@@ -19,6 +19,7 @@ class Cli extends Application
 
         $this->addCommands([
             new Commands\Discover('discover'),
+            new Commands\Register('register'),
             new EcKeyGeneratorCommand($jsonConverter),
             new OctKeyGeneratorCommand($jsonConverter),
             new PublicKeyCommand($jsonConverter),

@@ -2,7 +2,6 @@
 
 namespace OpenIDConnect\ClientAuthentication;
 
-use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\RequestInterface as Request;
 
 /**

@@ -3,7 +3,7 @@
 namespace OpenIDConnect\Token;
 
 use InvalidArgumentException;
-use OpenIDConnect\Metadata\ClientMetadata;
+use OpenIDConnect\Metadata\ClientRegistration;
 use OpenIDConnect\Metadata\MetadataAwareTraits;
 use OpenIDConnect\Metadata\ProviderMetadata;
 use OpenIDConnect\Token\Concerns\IdToken;
@@ -34,17 +34,20 @@ class TokenSet implements TokenSetInterface
     /**
      * @param array $parameters An array from token endpoint response body
      * @param ProviderMetadata $providerMetadata
-     * @param ClientMetadata $clientMetadata
+     * @param ClientRegistration $clientRegistration
      */
-    public function __construct(array $parameters, ProviderMetadata $providerMetadata, ClientMetadata $clientMetadata)
-    {
+    public function __construct(
+        array $parameters,
+        ProviderMetadata $providerMetadata,
+        ClientRegistration $clientRegistration
+    ) {
         if (empty($parameters['access_token'])) {
             throw new InvalidArgumentException('Required "access_token" but not passed');
         }
 
         $this->parameters = $parameters;
         $this->setProviderMetadata($providerMetadata);
-        $this->setClientMetadata($clientMetadata);
+        $this->setClientRegistration($clientRegistration);
 
         $this->values = array_diff_key($this->parameters, array_flip(self::DEFAULT_KEYS));
     }

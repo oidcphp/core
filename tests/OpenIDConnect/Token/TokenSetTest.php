@@ -25,7 +25,7 @@ class TokenSetTest extends TestCase
             'refresh_token' => 'some-refresh-token',
             'scope' => 'some-scope',
             'addition' => 'some-addition',
-        ]), $this->createProviderMetadata(), $this->createClientMetadata());
+        ]), $this->createProviderMetadata(), $this->createClientRegistration());
 
         $this->assertSame('some-access-token', $target->accessToken());
         $this->assertSame(3600, $target->expiresIn());
@@ -61,7 +61,7 @@ class TokenSetTest extends TestCase
         $expectedExp = time() + 3600;
         $expectedIat = time();
 
-        $clientMetadata = $this->createClientMetadata([
+        $clientMetadata = $this->createClientRegistration([
             'client_id' => 'some-aud',
         ]);
 
@@ -114,7 +114,7 @@ class TokenSetTest extends TestCase
         $target = new TokenSet(
             $this->createFakeTokenSetParameter(),
             $this->createProviderMetadata(),
-            $this->createClientMetadata()
+            $this->createClientRegistration()
         );
 
         $target->values($key);
@@ -133,7 +133,7 @@ class TokenSetTest extends TestCase
         $expectedExp = time() + 3600;
         $expectedIat = time();
 
-        $clientMetadata = $this->createClientMetadata([
+        $clientMetadata = $this->createClientRegistration([
             'client_id' => 'some-aud',
         ]);
 

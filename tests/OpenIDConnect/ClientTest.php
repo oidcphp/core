@@ -16,7 +16,7 @@ class ClientTest extends TestCase
     {
         $this->target = new Client(
             $this->createProviderMetadata(),
-            $this->createClientMetadata()
+            $this->createClientRegistration([], 'https://someredirect')
         );
     }
 

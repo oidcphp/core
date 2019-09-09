@@ -40,6 +40,7 @@ class PasswordTest extends TestCase
         $actual = $target->prepareRequestParameters([
             'username' => 'some-username',
             'password' => 'some-password',
+            'redirect_uri' => 'https://someredirect',
         ]);
 
         $this->assertSame('password', $actual['grant_type']);
@@ -56,6 +57,8 @@ class PasswordTest extends TestCase
 
         $target = (new GrantFactory())->getGrant('password');
 
-        $target->prepareRequestParameters([]);
+        $target->prepareRequestParameters([
+            'redirect_uri' => 'https://someredirect',
+        ]);
     }
 }

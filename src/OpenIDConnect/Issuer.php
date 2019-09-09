@@ -3,11 +3,13 @@
 namespace OpenIDConnect;
 
 use GuzzleHttp\ClientInterface as HttpClientInterface;
+use OpenIDConnect\Exceptions\OpenIDProviderException;
 use OpenIDConnect\Exceptions\RelyingPartyException;
+use OpenIDConnect\Metadata\ClientMetadata;
+use OpenIDConnect\Metadata\ClientRegistration;
 use OpenIDConnect\Metadata\ProviderMetadata;
 use OpenIDConnect\Traits\HttpClientAwareTrait;
 use Psr\Http\Message\ResponseInterface;
-use UnexpectedValueException;
 use function GuzzleHttp\json_decode;
 
 /**
@@ -33,6 +35,11 @@ class Issuer
      * @var string|null
      */
     private $jwksUri;
+
+    /**
+     * @var ProviderMetadata
+     */
+    private $providerMetadata;
 
     /**
      * @param string $baseUrl
@@ -67,6 +74,10 @@ class Issuer
      */
     public function discover(): ProviderMetadata
     {
+        if (null !== $this->providerMetadata) {
+            return $this->providerMetadata;
+        }
+
         $httpClient = $this->getHttpClient();
 
         $discoveryUri = $this->normalizeUrl($this->baseUrl) . self::OPENID_CONNECT_DISCOVERY;
@@ -74,7 +85,30 @@ class Issuer
         $discoverResponse = $this->processResponse($httpClient->request('GET', $discoveryUri));
         $jwksResponse = $this->processResponse($httpClient->request('GET', $this->resolveJwksUri($discoverResponse)));
 
-        return new ProviderMetadata($discoverResponse, $jwksResponse);
+        return $this->providerMetadata = new ProviderMetadata($discoverResponse, $jwksResponse);
+    }
+
+    /**
+     * @param ClientMetadata $clientMetadata
+     * @return ClientRegistration
+     */
+    public function register(ClientMetadata $clientMetadata): ClientRegistration
+    {
+        $registrationEndpoint = $this->discover()->registrationEndpoint();
+
+        if (empty($registrationEndpoint)) {
+            $msg = 'Cannot use dynamic client registration on issuer: ' . $this->discover()->issuer();
+
+            throw new RelyingPartyException($msg);
+        }
+
+        $httpClient = $this->getHttpClient();
+
+        $registrationResponse = $this->processResponse($httpClient->request('POST', $registrationEndpoint, [
+            'json' => $clientMetadata->jsonSerialize(),
+        ]));
+
+        return new ClientRegistration($registrationResponse);
     }
 
     /**
@@ -95,8 +129,9 @@ class Issuer
      */
     private function processResponse(ResponseInterface $response): array
     {
-        if (200 !== $response->getStatusCode()) {
-            throw new UnexpectedValueException('Server Error');
+        $statusCode = $response->getStatusCode();
+        if (200 > $statusCode || $statusCode >= 300) {
+            throw new OpenIDProviderException('Response status code is not 2xx, Given is ' . $statusCode);
         }
 
         return json_decode((string)$response->getBody(), true);

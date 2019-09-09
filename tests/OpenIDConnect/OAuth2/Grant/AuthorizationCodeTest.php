@@ -39,6 +39,7 @@ class AuthorizationCodeTest extends TestCase
 
         $actual = $target->prepareRequestParameters([
             'code' => 'some',
+            'redirect_uri' => 'https://someredirect',
         ]);
 
         $this->assertSame('authorization_code', $actual['grant_type']);

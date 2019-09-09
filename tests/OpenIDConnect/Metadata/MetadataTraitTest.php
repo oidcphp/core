@@ -13,7 +13,7 @@ class MetadataTraitTest extends TestCase
     public function shouldReturnNewObjectWhenUsingWithMetadata(): void
     {
         /** @var MetadataTraits $target */
-        $target = $this->getObjectForTrait(MetadataTraits::class);
+        $target = $this->getMockForTrait(MetadataTraits::class);
 
         $actual = $target->withMetadata('some', 'value');
 

@@ -3,17 +3,17 @@
 namespace Tests\OpenIDConnect\Metadata;
 
 use DomainException;
-use OpenIDConnect\Metadata\ClientMetadata;
+use OpenIDConnect\Metadata\ClientRegistration;
 use RuntimeException;
 use Tests\TestCase;
 
-class ClientMetadataTest extends TestCase
+class ClientRegistrationTest extends TestCase
 {
     public function missionRequiredField()
     {
         return array_map(static function ($v) {
             return [$v];
-        }, array_keys($this->createClientMetadataConfig()));
+        }, array_keys($this->createClientRegistrationConfig()));
     }
 
     /**
@@ -24,10 +24,10 @@ class ClientMetadataTest extends TestCase
     {
         $this->expectException(RuntimeException::class);
 
-        $data = $this->createClientMetadataConfig();
+        $data = $this->createClientRegistrationConfig();
         unset($data[$missingField]);
 
-        new ClientMetadata($data);
+        new ClientRegistration($data);
     }
 
     /**
@@ -35,7 +35,7 @@ class ClientMetadataTest extends TestCase
      */
     public function shouldReturnAndCanUseIssetWithInstance(): void
     {
-        $target = $this->createClientMetadata();
+        $target = $this->createClientRegistration();
 
         $this->assertTrue(isset($target['client_id']));
         $this->assertSame('some_id', $target['client_id']);
@@ -48,7 +48,7 @@ class ClientMetadataTest extends TestCase
     {
         $this->expectException(DomainException::class);
 
-        $target = $this->createClientMetadata();
+        $target = $this->createClientRegistration();
 
         $target['client_id'] = 'whatever';
     }
@@ -60,7 +60,7 @@ class ClientMetadataTest extends TestCase
     {
         $this->expectException(DomainException::class);
 
-        $target = $this->createClientMetadata();
+        $target = $this->createClientRegistration();
 
         unset($target['client_id']);
     }
@@ -72,7 +72,7 @@ class ClientMetadataTest extends TestCase
     {
         $this->expectException(RuntimeException::class);
 
-        $target = new ClientMetadata($this->createClientMetadataConfig());
+        $target = new ClientRegistration($this->createClientRegistrationConfig());
 
         $target->assertKey('not-exist');
     }
@@ -82,13 +82,13 @@ class ClientMetadataTest extends TestCase
      */
     public function shouldExpectedArrayKeyWhenCallJsonSerialize(): void
     {
-        $target = $this->createClientMetadata();
+        $target = $this->createClientRegistration();
 
         $actual = $target->jsonSerialize();
 
         $this->assertArrayHasKey('client_id', $actual);
         $this->assertArrayHasKey('client_secret', $actual);
-        $this->assertArrayHasKey('redirect_uri', $actual);
+        $this->assertArrayHasKey('redirect_uris', $actual);
     }
 
     /**
@@ -96,12 +96,12 @@ class ClientMetadataTest extends TestCase
      */
     public function shouldExpectedArrayKeyWhenCallToArray(): void
     {
-        $target = $this->createClientMetadata();
+        $target = $this->createClientRegistration();
 
         $actual = $target->toArray();
 
         $this->assertArrayHasKey('client_id', $actual);
         $this->assertArrayHasKey('client_secret', $actual);
-        $this->assertArrayHasKey('redirect_uri', $actual);
+        $this->assertArrayHasKey('redirect_uris', $actual);
     }
 }

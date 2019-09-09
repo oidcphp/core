@@ -7,9 +7,9 @@ use OpenIDConnect\Jwt\JwtFactory;
 trait MetadataAwareTraits
 {
     /**
-     * @var ClientMetadata
+     * @var ClientRegistration
      */
-    private $clientMetadata;
+    private $clientRegistration;
 
     /**
      * @var ProviderMetadata
@@ -21,15 +21,15 @@ trait MetadataAwareTraits
      */
     public function createJwtFactory(): JwtFactory
     {
-        return $this->providerMetadata->createJwtFactory($this->clientMetadata);
+        return $this->providerMetadata->createJwtFactory($this->clientRegistration);
     }
 
     /**
-     * @return ClientMetadata
+     * @return ClientRegistration
      */
-    public function getClientMetadata(): ClientMetadata
+    public function getClientRegistration(): ClientRegistration
     {
-        return $this->clientMetadata;
+        return $this->clientRegistration;
     }
 
     /**
@@ -41,12 +41,13 @@ trait MetadataAwareTraits
     }
 
     /**
-     * @param ClientMetadata $clientMetadata
+     * @param ClientRegistration $clientRegistration
      * @return static
      */
-    public function setClientMetadata(ClientMetadata $clientMetadata)
+    public function setClientRegistration(ClientRegistration $clientRegistration)
     {
-        $this->clientMetadata = $clientMetadata;
+        $this->clientRegistration = $clientRegistration;
+
         return $this;
     }
 
@@ -57,6 +58,7 @@ trait MetadataAwareTraits
     public function setProviderMetadata(ProviderMetadata $providerMetadata)
     {
         $this->providerMetadata = $providerMetadata;
+
         return $this;
     }
 }

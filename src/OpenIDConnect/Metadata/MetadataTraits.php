@@ -67,6 +67,15 @@ trait MetadataTraits
     }
 
     /**
+     * @return array
+     * @see \JsonSerializable
+     */
+    public function jsonSerialize()
+    {
+        return $this->toArray();
+    }
+
+    /**
      * Return a clone object with new value
      *
      * @param string $key
@@ -80,4 +89,9 @@ trait MetadataTraits
 
         return $clone;
     }
+
+    /**
+     * @return array
+     */
+    abstract public function toArray(): array;
 }

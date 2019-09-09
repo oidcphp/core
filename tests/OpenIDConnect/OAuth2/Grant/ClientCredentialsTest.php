@@ -37,7 +37,9 @@ class ClientCredentialsTest extends TestCase
     {
         $target = (new GrantFactory())->getGrant('client_credentials');
 
-        $actual = $target->prepareRequestParameters([]);
+        $actual = $target->prepareRequestParameters([
+            'redirect_uri' => 'https://someredirect',
+        ]);
 
         $this->assertSame('client_credentials', $actual['grant_type']);
     }

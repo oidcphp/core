@@ -2,17 +2,15 @@
 
 namespace OpenIDConnect;
 
-use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\ClientInterface as HttpClientInterface;
 use GuzzleHttp\Exception\BadResponseException;
 use InvalidArgumentException;
 use OpenIDConnect\Container\Container;
 use OpenIDConnect\Exceptions\OpenIDProviderException;
 use OpenIDConnect\Exceptions\RelyingPartyException;
-use OpenIDConnect\Http\DefaultUriFactory;
 use OpenIDConnect\Http\QueryProcessorTrait;
 use OpenIDConnect\Http\TokenRequestFactory;
-use OpenIDConnect\Metadata\ClientMetadata;
+use OpenIDConnect\Metadata\ClientRegistration;
 use OpenIDConnect\Metadata\MetadataAwareTraits;
 use OpenIDConnect\Metadata\ProviderMetadata;
 use OpenIDConnect\OAuth2\Grant\GrantFactory;
@@ -20,7 +18,6 @@ use OpenIDConnect\Token\TokenSet;
 use OpenIDConnect\Token\TokenSetInterface;
 use OpenIDConnect\Traits\ClientAuthenticationAwareTrait;
 use Psr\Container\ContainerInterface;
-use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamFactoryInterface;
@@ -48,16 +45,16 @@ class Client
 
     /**
      * @param ProviderMetadata $providerMetadata
-     * @param ClientMetadata $clientMetadata
+     * @param ClientRegistration $clientRegistration
      * @param ContainerInterface|null $container The container implements PSR-11
      */
     public function __construct(
         ProviderMetadata $providerMetadata,
-        ClientMetadata $clientMetadata,
+        ClientRegistration $clientRegistration,
         ContainerInterface $container = null
     ) {
         $this->setProviderMetadata($providerMetadata);
-        $this->setClientMetadata($clientMetadata);
+        $this->setClientRegistration($clientRegistration);
 
         if (null === $container) {
             $container = Container::createDefaultInstance();
@@ -167,10 +164,10 @@ HTML;
         // Business code layer might set a different redirect_uri parameter
         // depending on the context, leave it as-is
         if (!isset($options['redirect_uri'])) {
-            $options['redirect_uri'] = $this->clientMetadata->redirectUri();
+            $options['redirect_uri'] = $this->clientRegistration->redirectUri();
         }
 
-        $options['client_id'] = $this->clientMetadata->id();
+        $options['client_id'] = $this->clientRegistration->id();
 
         return $options;
     }
@@ -180,8 +177,16 @@ HTML;
      * @param array $checks
      * @return TokenSetInterface
      */
-    public function handleOpenIDConnectCallback(array $parameters, array $checks = [])
+    public function handleOpenIDConnectCallback(array $parameters, array $checks = []): TokenSetInterface
     {
+        if (!isset($parameters['code'])) {
+            throw new InvalidArgumentException("'code' missing from the response");
+        }
+
+        if (!isset($checks['redirect_uri'])) {
+            throw new InvalidArgumentException("'redirect_uri' argument is missing");
+        }
+
         if (isset($parameters['state']) && !isset($checks['state'])) {
             throw new InvalidArgumentException("'state' argument is missing");
         }
@@ -200,7 +205,7 @@ HTML;
 
         return $this->getTokenSet('authorization_code', [
             'code' => $parameters['code'],
-            'redirect_uri' => $this->clientMetadata->redirectUri(),
+            'redirect_uri' => $checks['redirect_uri'],
         ]);
     }
 
@@ -217,9 +222,8 @@ HTML;
         $grant = $grantFactory->getGrant($grant);
 
         $params = array_merge([
-            'client_id' => $this->clientMetadata->id(),
-            'client_secret' => $this->clientMetadata->secret(),
-            'redirect_uri' => $this->clientMetadata->redirectUri(),
+            'client_id' => $this->clientRegistration->id(),
+            'client_secret' => $this->clientRegistration->secret(),
         ], $options);
 
         $params = $grant->prepareRequestParameters($params);
@@ -230,8 +234,8 @@ HTML;
         $appender = $this->getTokenRequestAppender();
         $appendedRequest = $appender->withClientAuthentication(
             $request,
-            $this->clientMetadata->id(),
-            $this->clientMetadata->secret()
+            $this->clientRegistration->id(),
+            $this->clientRegistration->secret()
         );
 
         /** @var HttpClientInterface $httpClient */
@@ -263,7 +267,7 @@ HTML;
             );
         }
 
-        $tokenSet = new TokenSet($parsed, $this->providerMetadata, $this->clientMetadata);
+        $tokenSet = new TokenSet($parsed, $this->providerMetadata, $this->clientRegistration);
 
         if (!$tokenSet->hasIdToken()) {
             throw new OpenIDProviderException("'id_token' missing from the token endpoint response");

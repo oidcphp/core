@@ -39,6 +39,7 @@ class RefreshTokenTest extends TestCase
 
         $actual = $target->prepareRequestParameters([
             'refresh_token' => 'some',
+            'redirect_uri' => 'https://someredirect',
         ]);
 
         $this->assertSame('refresh_token', $actual['grant_type']);
@@ -54,6 +55,8 @@ class RefreshTokenTest extends TestCase
 
         $target = (new GrantFactory())->getGrant('refresh_token');
 
-        $target->prepareRequestParameters([]);
+        $target->prepareRequestParameters([
+            'redirect_uri' => 'https://someredirect',
+        ]);
     }
 }

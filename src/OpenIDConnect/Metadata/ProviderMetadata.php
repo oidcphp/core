@@ -18,7 +18,7 @@ class ProviderMetadata implements ArrayAccess, JsonSerializable
 {
     use MetadataTraits;
 
-    public const REQUIRED_METADATA = [
+    public const REQUIRED = [
         'authorization_endpoint',
         'id_token_signing_alg_values_supported',
         'issuer',
@@ -52,7 +52,7 @@ class ProviderMetadata implements ArrayAccess, JsonSerializable
             $this->jwkSet = JWKSet::createFromKeyData($jwks);
         }
 
-        $this->assertKeys(self::REQUIRED_METADATA);
+        $this->assertKeys(self::REQUIRED);
     }
 
     /**
@@ -83,10 +83,10 @@ class ProviderMetadata implements ArrayAccess, JsonSerializable
     }
 
     /**
-     * @param ClientMetadata $clientMetadata
+     * @param ClientRegistration $clientMetadata
      * @return JwtFactory
      */
-    public function createJwtFactory(ClientMetadata $clientMetadata): JwtFactory
+    public function createJwtFactory(ClientRegistration $clientMetadata): JwtFactory
     {
         $factory = new JwtFactory($this, $clientMetadata);
         $factory->withAlgorithm($this->additionAlgorithms);
@@ -131,16 +131,6 @@ class ProviderMetadata implements ArrayAccess, JsonSerializable
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * @return array
-     */
-    public function jsonSerialize()
-    {
-        return $this->toArray();
-    }
-
-    /**
      * @return string
      */
     public function jwksUri(): string
@@ -154,6 +144,14 @@ class ProviderMetadata implements ArrayAccess, JsonSerializable
     public function jwkSet(): JWKSet
     {
         return $this->jwkSet;
+    }
+
+    /**
+     * @return string
+     */
+    public function registrationEndpoint(): ?string
+    {
+        return $this->metadata['registration_endpoint'] ?? null;
     }
 
     /**

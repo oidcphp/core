@@ -18,7 +18,7 @@ class ClientHandleOpenIDConnectCallbackTest extends TestCase
         /** @var Client $target */
         $target = new Client(
             $this->createProviderMetadata(),
-            $this->createClientMetadata(),
+            $this->createClientRegistration(),
             new Container([
                 ClientInterface::class => $this->createHttpClient([
                     $this->createFakeTokenEndpointResponse(['id_token' => 'whatever']),
@@ -29,6 +29,8 @@ class ClientHandleOpenIDConnectCallbackTest extends TestCase
 
         $actual = $target->handleOpenIDConnectCallback([
             'code' => 'some-code',
+        ], [
+            'redirect_uri' => 'https://someredirect',
         ]);
 
         $this->assertSame('some-access-token', $actual->accessToken());

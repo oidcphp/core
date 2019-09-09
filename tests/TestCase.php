@@ -8,7 +8,7 @@ use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response as HttpResponse;
 use OpenIDConnect\Factory;
-use OpenIDConnect\Metadata\ClientMetadata;
+use OpenIDConnect\Metadata\ClientRegistration;
 use OpenIDConnect\Metadata\ProviderMetadata;
 use Psr\Http\Message\ResponseInterface;
 use function GuzzleHttp\json_encode;
@@ -17,23 +17,24 @@ class TestCase extends \PHPUnit\Framework\TestCase
 {
     /**
      * @param array $overwrite
-     * @return ClientMetadata
+     * @param string|null $redirectUri
+     * @return ClientRegistration
      */
-    protected function createClientMetadata($overwrite = []): ClientMetadata
+    protected function createClientRegistration($overwrite = [], string $redirectUri = null): ClientRegistration
     {
-        return new ClientMetadata($this->createClientMetadataConfig($overwrite));
+        return new ClientRegistration($this->createClientRegistrationConfig($overwrite), $redirectUri);
     }
 
     /**
      * @param array $overwrite
      * @return array
      */
-    protected function createClientMetadataConfig($overwrite = []): array
+    protected function createClientRegistrationConfig($overwrite = []): array
     {
         return array_merge([
             'client_id' => 'some_id',
             'client_secret' => 'some_secret',
-            'redirect_uri' => 'https://someredirect',
+            'redirect_uris' => ['https://someredirect'],
         ], $overwrite);
     }
 
@@ -48,7 +49,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
     {
         return new Factory(
             $this->createProviderMetadata($provider),
-            $this->createClientMetadata($client),
+            $this->createClientRegistration($client),
             $this->createHttpClient($httpMock, $history)
         );
     }
@@ -90,8 +91,11 @@ class TestCase extends \PHPUnit\Framework\TestCase
      * @param array $headers
      * @return ResponseInterface
      */
-    protected function createHttpJsonResponse(array $data = [], int $status = 200, array $headers = []): ResponseInterface
-    {
+    protected function createHttpJsonResponse(
+        array $data = [],
+        int $status = 200,
+        array $headers = []
+    ): ResponseInterface {
         return new HttpResponse($status, $headers, json_encode($data));
     }
 

@@ -47,6 +47,8 @@ abstract class AbstractGrant
     public function prepareRequestParameters(array $options): array
     {
         $required = $this->getRequiredRequestParameters();
+        $required[] = 'redirect_uri';
+
         $provided = array_merge([
             'grant_type' => $this->getName(),
         ], $options);

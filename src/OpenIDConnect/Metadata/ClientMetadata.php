@@ -6,18 +6,16 @@ use ArrayAccess;
 use JsonSerializable;
 
 /**
- * The metadata of client registration
+ * The client metadata
  *
- * @see https://tools.ietf.org/html/rfc6749#section-2
+ * @see https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata
  */
 class ClientMetadata implements ArrayAccess, JsonSerializable
 {
     use MetadataTraits;
 
-    public const REQUIRED_METADATA = [
-        'client_id',
-        'client_secret',
-        'redirect_uri',
+    public const REQUIRED = [
+        'redirect_uris',
     ];
 
     /**
@@ -27,41 +25,39 @@ class ClientMetadata implements ArrayAccess, JsonSerializable
     {
         $this->metadata = $metadata;
 
-        $this->assertKeys(self::REQUIRED_METADATA);
+        $this->assertKeys(self::REQUIRED);
     }
 
     /**
-     * @return string
-     */
-    public function id(): string
-    {
-        return $this->metadata['client_id'];
-    }
-
-    /**
-     * {@inheritDoc}
-     *
      * @return array
      */
-    public function jsonSerialize()
+    public function contacts(): array
     {
-        return $this->toArray();
+        return $this->metadata['contacts'] ?? [];
     }
 
     /**
-     * @return string
+     * @return array
      */
-    public function redirectUri(): string
+    public function grantTypes(): array
     {
-        return $this->metadata['redirect_uri'];
+        return $this->metadata['grant_types'] ?? [];
     }
 
     /**
-     * @return string
+     * @return array
      */
-    public function secret(): string
+    public function redirectUris(): array
     {
-        return $this->metadata['client_secret'];
+        return $this->metadata['redirect_uris'];
+    }
+
+    /**
+     * @return array
+     */
+    public function responseTypes(): array
+    {
+        return $this->metadata['response_types'] ?? [];
     }
 
     /**

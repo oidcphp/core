@@ -18,7 +18,7 @@ use Jose\Component\Signature\JWSTokenSupport;
 use Jose\Component\Signature\JWSVerifier;
 use Jose\Component\Signature\Serializer\CompactSerializer;
 use Jose\Component\Signature\Serializer\JWSSerializerManager;
-use OpenIDConnect\Metadata\ClientMetadata;
+use OpenIDConnect\Metadata\ClientRegistration;
 use OpenIDConnect\Metadata\MetadataAwareTraits;
 use OpenIDConnect\Metadata\ProviderMetadata;
 
@@ -34,10 +34,10 @@ class JwtFactory
      */
     private $algorithms = [];
 
-    public function __construct(ProviderMetadata $providerMetadata, ClientMetadata $clientMetadata)
+    public function __construct(ProviderMetadata $providerMetadata, ClientRegistration $clientRegistration)
     {
         $this->setProviderMetadata($providerMetadata);
-        $this->setClientMetadata($clientMetadata);
+        $this->setClientRegistration($clientRegistration);
     }
 
     /**
@@ -57,7 +57,7 @@ class JwtFactory
     public function createClaimCheckerManager(): ClaimCheckerManager
     {
         return ClaimCheckerManager::create([
-            new AudienceChecker($this->clientMetadata->id()),
+            new AudienceChecker($this->clientRegistration->id()),
             new ExpirationTimeChecker(),
             new IssuedAtChecker(),
             new NotBeforeChecker(),
