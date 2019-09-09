@@ -20,6 +20,11 @@ use OpenIDConnect\Token\TokenSet;
 use OpenIDConnect\Token\TokenSetInterface;
 use OpenIDConnect\Traits\ClientAuthenticationAwareTrait;
 use Psr\Container\ContainerInterface;
+use Psr\Http\Message\RequestFactoryInterface;
+use Psr\Http\Message\ResponseFactoryInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\StreamFactoryInterface;
+use Psr\Http\Message\UriFactoryInterface;
 use Psr\Http\Message\UriInterface;
 
 /**
@@ -55,13 +60,43 @@ class Client
         $this->setClientMetadata($clientMetadata);
 
         if (null === $container) {
-            $container = new Container([
-                GrantFactory::class => new GrantFactory(),
-                HttpClientInterface::class => new HttpClient(),
-            ]);
+            $container = Container::createDefaultInstance();
         }
 
         $this->container = $container;
+    }
+
+    /**
+     * Create PSR-7 response with form post
+     *
+     * @param array $options
+     * @return ResponseInterface
+     */
+    public function createAuthorizeFormPostResponse(array $options = []): ResponseInterface
+    {
+        /** @var ResponseFactoryInterface $responseFactory */
+        $responseFactory = $this->container->get(ResponseFactoryInterface::class);
+
+        /** @var StreamFactoryInterface $streamFactory */
+        $streamFactory = $this->container->get(StreamFactoryInterface::class);
+
+        return $responseFactory->createResponse()
+            ->withBody($streamFactory->createStream($this->getAuthorizationPost($options)));
+    }
+
+    /**
+     * Create PSR-7 response with redirect info
+     *
+     * @param array $options
+     * @return ResponseInterface
+     */
+    public function createAuthorizeRedirectResponse(array $options = []): ResponseInterface
+    {
+        /** @var ResponseFactoryInterface $responseFactory */
+        $responseFactory = $this->container->get(ResponseFactoryInterface::class);
+
+        return $responseFactory->createResponse(302)
+            ->withHeader('Location', (string)$this->getAuthorizationUri($options));
     }
 
     /**
@@ -70,10 +105,12 @@ class Client
      */
     public function getAuthorizationUri(array $options = []): UriInterface
     {
+        /** @var UriFactoryInterface $uriFactory */
+        $uriFactory = $this->container->get(UriFactoryInterface::class);
+
         $params = $this->getAuthorizationParameters($options);
 
-        return (new DefaultUriFactory())
-            ->createUri($this->providerMetadata->authorizationEndpoint())
+        return $uriFactory->createUri($this->providerMetadata->authorizationEndpoint())
             ->withQuery($this->buildQueryString($params));
     }
 
