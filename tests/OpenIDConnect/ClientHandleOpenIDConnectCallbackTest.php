@@ -2,7 +2,10 @@
 
 namespace Tests\OpenIDConnect;
 
+use GuzzleHttp\ClientInterface;
 use OpenIDConnect\Client;
+use OpenIDConnect\Container\Container;
+use OpenIDConnect\OAuth2\Grant\GrantFactory;
 use Tests\TestCase;
 
 class ClientHandleOpenIDConnectCallbackTest extends TestCase
@@ -16,11 +19,12 @@ class ClientHandleOpenIDConnectCallbackTest extends TestCase
         $target = new Client(
             $this->createProviderMetadata(),
             $this->createClientMetadata(),
-            [
-                'httpClient' => $this->createHttpClient([
+            new Container([
+                ClientInterface::class => $this->createHttpClient([
                     $this->createFakeTokenEndpointResponse(['id_token' => 'whatever']),
                 ]),
-            ]
+                GrantFactory::class => new GrantFactory(),
+            ])
         );
 
         $actual = $target->handleOpenIDConnectCallback([

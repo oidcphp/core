@@ -4,47 +4,52 @@ declare(strict_types=1);
 
 namespace OpenIDConnect;
 
+use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\ClientInterface as HttpClientInterface;
+use OpenIDConnect\Container\Container;
 use OpenIDConnect\Metadata\ClientMetadata as ClientMeta;
 use OpenIDConnect\Metadata\MetadataAwareTraits;
 use OpenIDConnect\Metadata\ProviderMetadata as ProviderMeta;
+use OpenIDConnect\OAuth2\Grant\GrantFactory;
 use OpenIDConnect\Token\TokenSet;
-use OpenIDConnect\Traits\HttpClientAwareTrait;
+use Psr\Container\ContainerInterface;
 
 /**
  * Factory for create anything
  */
 class Factory
 {
-    use HttpClientAwareTrait;
     use MetadataAwareTraits;
+
+    /**
+     * @var ContainerInterface
+     */
+    private $container;
 
     /**
      * @param ProviderMeta $provider
      * @param ClientMeta $client
-     * @param HttpClientInterface|null $httpClient
+     * @param ContainerInterface|null $container
      */
-    public function __construct(ProviderMeta $provider, ClientMeta $client, HttpClientInterface $httpClient = null)
+    public function __construct(ProviderMeta $provider, ClientMeta $client, ContainerInterface $container = null)
     {
         $this->setProviderMetadata($provider);
         $this->setClientMetadata($client);
 
-        if (null !== $httpClient) {
-            $this->setHttpClient($httpClient);
+        if (null === $container) {
+            $this->container = new Container([
+                GrantFactory::class => new GrantFactory(),
+                HttpClientInterface::class => new HttpClient(),
+            ]);
         }
     }
 
     /**
-     * @param array $collaborators
      * @return Client
      */
-    public function createOpenIDConnectClient(array $collaborators = []): Client
+    public function createOpenIDConnectClient(): Client
     {
-        if (empty($collaborators['httpClient'])) {
-            $collaborators['httpClient'] = $this->getHttpClient();
-        }
-
-        return new Client($this->providerMetadata, $this->clientMetadata, $collaborators);
+        return new Client($this->providerMetadata, $this->clientMetadata, $this->container);
     }
 
     /**

@@ -3,8 +3,10 @@
 namespace OpenIDConnect;
 
 use GuzzleHttp\Client as HttpClient;
+use GuzzleHttp\ClientInterface as HttpClientInterface;
 use GuzzleHttp\Exception\BadResponseException;
 use InvalidArgumentException;
+use OpenIDConnect\Container\Container;
 use OpenIDConnect\Exceptions\OpenIDProviderException;
 use OpenIDConnect\Exceptions\RelyingPartyException;
 use OpenIDConnect\Http\DefaultUriFactory;
@@ -14,11 +16,10 @@ use OpenIDConnect\Metadata\ClientMetadata;
 use OpenIDConnect\Metadata\MetadataAwareTraits;
 use OpenIDConnect\Metadata\ProviderMetadata;
 use OpenIDConnect\OAuth2\Grant\GrantFactory;
-use OpenIDConnect\OAuth2\Grant\GrantFactoryAwareTrait;
 use OpenIDConnect\Token\TokenSet;
 use OpenIDConnect\Token\TokenSetInterface;
 use OpenIDConnect\Traits\ClientAuthenticationAwareTrait;
-use OpenIDConnect\Traits\HttpClientAwareTrait;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\UriInterface;
 
 /**
@@ -27,10 +28,13 @@ use Psr\Http\Message\UriInterface;
 class Client
 {
     use ClientAuthenticationAwareTrait;
-    use GrantFactoryAwareTrait;
-    use HttpClientAwareTrait;
     use MetadataAwareTraits;
     use QueryProcessorTrait;
+
+    /**
+     * @var ContainerInterface
+     */
+    private $container;
 
     /**
      * @var string
@@ -40,22 +44,24 @@ class Client
     /**
      * @param ProviderMetadata $providerMetadata
      * @param ClientMetadata $clientMetadata
-     * @param array $collaborators
+     * @param ContainerInterface|null $container The container implements PSR-11
      */
-    public function __construct(ProviderMetadata $providerMetadata, ClientMetadata $clientMetadata, $collaborators = [])
-    {
+    public function __construct(
+        ProviderMetadata $providerMetadata,
+        ClientMetadata $clientMetadata,
+        ContainerInterface $container = null
+    ) {
         $this->setProviderMetadata($providerMetadata);
         $this->setClientMetadata($clientMetadata);
 
-        if (empty($collaborators['grantFactory'])) {
-            $collaborators['grantFactory'] = new GrantFactory();
+        if (null === $container) {
+            $container = new Container([
+                GrantFactory::class => new GrantFactory(),
+                HttpClientInterface::class => new HttpClient(),
+            ]);
         }
-        $this->setGrantFactory($collaborators['grantFactory']);
 
-        if (empty($collaborators['httpClient'])) {
-            $collaborators['httpClient'] = new HttpClient();
-        }
-        $this->setHttpClient($collaborators['httpClient']);
+        $this->container = $container;
     }
 
     /**
@@ -97,8 +103,6 @@ HTML;
 
     protected function getRandomState($length = 32): string
     {
-        // Converting bytes to hex will always double length. Hence, we can reduce
-        // the amount of bytes by half to produce the correct length.
         return bin2hex(random_bytes($length / 2));
     }
 
@@ -170,7 +174,10 @@ HTML;
      */
     private function getTokenSet($grant, array $options = []): TokenSetInterface
     {
-        $grant = $this->grantFactory->getGrant($grant);
+        /** @var GrantFactory $grantFactory */
+        $grantFactory = $this->container->get(GrantFactory::class);
+
+        $grant = $grantFactory->getGrant($grant);
 
         $params = array_merge([
             'client_id' => $this->clientMetadata->id(),
@@ -190,8 +197,11 @@ HTML;
             $this->clientMetadata->secret()
         );
 
+        /** @var HttpClientInterface $httpClient */
+        $httpClient = $this->container->get(HttpClientInterface::class);
+
         try {
-            $response = $this->getHttpClient()->send($appendedRequest);
+            $response = $httpClient->send($appendedRequest);
         } catch (BadResponseException $e) {
             throw new OpenIDProviderException('OpenID Connect provider error');
         }
