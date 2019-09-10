@@ -18,11 +18,13 @@ use OpenIDConnect\Token\TokenSet;
 use OpenIDConnect\Token\TokenSetInterface;
 use OpenIDConnect\Traits\ClientAuthenticationAwareTrait;
 use Psr\Container\ContainerInterface;
+use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Message\UriFactoryInterface;
 use Psr\Http\Message\UriInterface;
+use function GuzzleHttp\json_decode;
 
 /**
  * OpenID Connect Client
@@ -252,7 +254,7 @@ HTML;
         if (strpos($response->getHeaderLine('urlencoded'), 'urlencoded') !== false) {
             parse_str($content, $parsed);
         } else {
-            $parsed = \GuzzleHttp\json_decode($content, true);
+            $parsed = json_decode($content, true);
         }
 
         if (is_array($parsed) && !empty($parsed['error'])) {
@@ -274,5 +276,34 @@ HTML;
         }
 
         return $tokenSet;
+    }
+
+    /**
+     * @param string $accessToken
+     * @return array
+     */
+    public function getUserInfo(string $accessToken): array
+    {
+        /** @var RequestFactoryInterface $requestFactory */
+        $requestFactory = $this->container->get(RequestFactoryInterface::class);
+
+        /** @var UriFactoryInterface $uriFactory */
+        $uriFactory = $this->container->get(UriFactoryInterface::class);
+
+        if (null === $this->providerMetadata->userInfoEndpoint()) {
+            throw new OpenIDProviderException('Provider does not support user info endpoint');
+        }
+
+        $uri = $uriFactory->createUri($this->providerMetadata->userInfoEndpoint());
+
+        $request = $requestFactory->createRequest('GET', $uri)
+            ->withHeader('Authorization', 'Bearer ' . $accessToken);
+
+        /** @var HttpClientInterface $httpClient */
+        $httpClient = $this->container->get(HttpClientInterface::class);
+
+        $response = $httpClient->send($request);
+
+        return json_decode((string)$response->getBody(), true);
     }
 }
