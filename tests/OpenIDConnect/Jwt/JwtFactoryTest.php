@@ -5,6 +5,8 @@ namespace Tests\OpenIDConnect\Metadata;
 use InvalidArgumentException;
 use Jose\Component\Checker\InvalidHeaderException;
 use Jose\Component\Core\Util\JsonConverter;
+use Jose\Component\Encryption\Algorithm\ContentEncryption\A128GCM;
+use Jose\Component\Encryption\Algorithm\ContentEncryption\A192CBCHS384;
 use Jose\Component\KeyManagement\JWKFactory;
 use Jose\Component\Signature\Algorithm\ES256;
 use Jose\Component\Signature\Algorithm\PS256;
@@ -32,6 +34,7 @@ class JwtFactoryTest extends TestCase
         $this->assertInstanceOf(RS256::class, $actual->get('RS256'));
         $this->assertInstanceOf(ES256::class, $actual->get('ES256'));
     }
+
     /**
      * @test
      */
@@ -53,15 +56,17 @@ class JwtFactoryTest extends TestCase
     public function shouldReturnAlgorithmManagerContainEncryptionAlgorithms(): void
     {
         $target = new JwtFactory($this->createProviderMetadata([
-            'id_token_encryption_alg_values_supported' => ['RS256', 'ES256', 'PS256'],
             'id_token_signing_alg_values_supported' => ['RS256', 'ES256'],
+            'id_token_encryption_alg_values_supported' => ['A128GCM'],
+            'id_token_encryption_enc_values_supported' => ['A192CBC-HS384'],
         ]), $this->createClientRegistration());
 
         $actual = $target->createAlgorithmManager();
 
         $this->assertInstanceOf(RS256::class, $actual->get('RS256'));
         $this->assertInstanceOf(ES256::class, $actual->get('ES256'));
-        $this->assertInstanceOf(PS256::class, $actual->get('PS256'));
+        $this->assertInstanceOf(A128GCM::class, $actual->get('A128GCM'));
+        $this->assertInstanceOf(A192CBCHS384::class, $actual->get('A192CBC-HS384'));
     }
 
     /**

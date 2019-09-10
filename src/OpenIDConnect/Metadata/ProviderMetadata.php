@@ -101,17 +101,23 @@ class ProviderMetadata implements ArrayAccess, JsonSerializable
     {
         $signing = $this->idTokenSigningAlgValuesSupported();
 
-        $encryption = $this->idTokenEncryptionAlgValuesSupported() ?? [];
-
-        return array_unique(array_merge($signing, $encryption));
+        return array_unique($signing);
     }
 
     /**
-     * @return array|null
+     * @return array
      */
-    public function idTokenEncryptionAlgValuesSupported(): ?array
+    public function idTokenEncryptionAlgValuesSupported(): array
     {
-        return $this->metadata['id_token_encryption_alg_values_supported'] ?? null;
+        return $this->metadata['id_token_encryption_alg_values_supported'] ?? [];
+    }
+
+    /**
+     * @return array
+     */
+    public function idTokenEncryptionEncValuesSupported(): array
+    {
+        return $this->metadata['id_token_encryption_enc_values_supported'] ?? [];
     }
 
     /**

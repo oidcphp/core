@@ -46,7 +46,7 @@ class JwtFactory
     public function createAlgorithmManager(): AlgorithmManager
     {
         return AlgorithmManager::create(
-            $this->createSignatureAlgorithms($this->resolveAlgorithms())
+            $this->createAlgorithms($this->resolveAlgorithms())
         );
     }
 
@@ -138,10 +138,12 @@ class JwtFactory
         return $this;
     }
 
-    private function resolveAlgorithms()
+    private function resolveAlgorithms(): array
     {
         return array_unique(array_merge(
             $this->providerMetadata->idTokenAlgValuesSupported(),
+            $this->providerMetadata->idTokenEncryptionAlgValuesSupported(),
+            $this->providerMetadata->idTokenEncryptionEncValuesSupported(),
             $this->algorithms
         ));
     }

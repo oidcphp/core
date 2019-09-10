@@ -29,7 +29,7 @@ class AlgorithmFactoryTraitTest extends TestCase
      */
     public function shouldReturnInstanceWhenCallCreateSignatureAlgorithm(): void
     {
-        $this->assertInstanceOf(RS256::class, $this->target->createSignatureAlgorithm('RS256'));
+        $this->assertInstanceOf(RS256::class, $this->target->createAlgorithm('RS256'));
     }
 
     /**
@@ -37,7 +37,7 @@ class AlgorithmFactoryTraitTest extends TestCase
      */
     public function shouldReturnInstancesWhenCallCreateSignatureAlgorithms(): void
     {
-        $actual = $this->target->createSignatureAlgorithms([
+        $actual = $this->target->createAlgorithms([
             'ES256',
             'RS256',
         ]);
