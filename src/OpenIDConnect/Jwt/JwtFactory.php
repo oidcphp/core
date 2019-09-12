@@ -18,6 +18,7 @@ use Jose\Component\Signature\JWSTokenSupport;
 use Jose\Component\Signature\JWSVerifier;
 use Jose\Component\Signature\Serializer\CompactSerializer;
 use Jose\Component\Signature\Serializer\JWSSerializerManager;
+use OpenIDConnect\Jwt\Checker\NonceChecker;
 use OpenIDConnect\Metadata\ClientRegistration;
 use OpenIDConnect\Metadata\MetadataAwareTraits;
 use OpenIDConnect\Metadata\ProviderMetadata;
@@ -51,16 +52,18 @@ class JwtFactory
     }
 
     /**
+     * @param array $check
      * @return ClaimCheckerManager
-     * @see https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation
+     * @link https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation
      */
-    public function createClaimCheckerManager(): ClaimCheckerManager
+    public function createClaimCheckerManager($check = []): ClaimCheckerManager
     {
         return ClaimCheckerManager::create([
             new AudienceChecker($this->clientRegistration->id()),
             new ExpirationTimeChecker(),
             new IssuedAtChecker(),
             new NotBeforeChecker(),
+            new NonceChecker($check['nonce'] ?? null),
         ]);
     }
 

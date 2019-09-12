@@ -62,10 +62,12 @@ interface TokenSetInterface extends JsonSerializable
     /**
      * Verified claim from ID token string
      *
-     * @see https://openid.net/specs/openid-connect-core-1_0.html#IDToken
+     * @param array $extraMandatoryClaims
+     * @param array $check
      * @return Claims
+     * @link https://openid.net/specs/openid-connect-core-1_0.html#IDToken
      */
-    public function idTokenClaims(): Claims;
+    public function idTokenClaims($extraMandatoryClaims = [], $check = []): Claims;
 
     /**
      * The raw ID token string

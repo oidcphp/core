@@ -5,6 +5,7 @@ namespace OpenIDConnect\Token\Concerns;
 use Jose\Component\Core\Util\JsonConverter;
 use OpenIDConnect\Claims;
 use OpenIDConnect\Exceptions\RelyingPartyException;
+use OpenIDConnect\Jwt\JwtFactory;
 use RangeException;
 use UnexpectedValueException;
 
@@ -15,7 +16,7 @@ trait IdToken
      */
     private $claims;
 
-    public function idTokenClaims($extraMandatoryClaims = []): Claims
+    public function idTokenClaims($extraMandatoryClaims = [], $check = []): Claims
     {
         if (null !== $this->claims) {
             return $this->claims;
@@ -27,6 +28,7 @@ trait IdToken
             throw new RangeException('No ID token');
         }
 
+        /** @var JwtFactory $jwtFactory */
         $jwtFactory = $this->createJwtFactory();
 
         $loader = $jwtFactory->createJwsLoader();
@@ -45,7 +47,7 @@ trait IdToken
             throw new UnexpectedValueException('JWT has no payload');
         }
 
-        $claimCheckerManager = $jwtFactory->createClaimCheckerManager();
+        $claimCheckerManager = $jwtFactory->createClaimCheckerManager($check);
 
         try {
             $mandatoryClaims = array_unique(array_merge(static::REQUIRED_CLAIMS, $extraMandatoryClaims));
