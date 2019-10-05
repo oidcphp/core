@@ -212,6 +212,14 @@ HTML;
     }
 
     /**
+     * @return string
+     */
+    public function getState(): string
+    {
+        return $this->state;
+    }
+
+    /**
      * @param mixed $grant
      * @param array $options
      * @return TokenSetInterface
