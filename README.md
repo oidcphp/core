@@ -17,7 +17,7 @@ OpenID Connect Core Library implementation for PHP.
 
 * [OpenID Connect Core 1.0][spec-openid-core]
 * [OpenID Connect Discovery 1.0][spec-openid-discovery]
-* [RFC 6749 - The OAuth 2.0 Authorization Framework][spec-rfc6749] (based on [`league/oauth2-client`](https://oauth2-client.thephpleague.com/))
+* [RFC 6749 - The OAuth 2.0 Authorization Framework][spec-rfc6749]
 
 [spec-openid-core]: https://openid.net/specs/openid-connect-core-1_0.html
 [spec-openid-discovery]: https://openid.net/specs/openid-connect-discovery-1_0.html
