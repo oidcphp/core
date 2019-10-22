@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OpenIDConnect\Container;
 
+use OpenIDConnect\Exceptions\EntryNotFoundException;
 use OpenIDConnect\OAuth2\Grant\GrantFactory;
 use Psr\Container\ContainerInterface;
 
@@ -40,7 +41,7 @@ class Container implements ContainerInterface
             return $this->instance[$id];
         }
 
-        throw new NotFoundException("The entry '{$id}' is not found");
+        throw new EntryNotFoundException("The entry '{$id}' is not found");
     }
 
     /**
