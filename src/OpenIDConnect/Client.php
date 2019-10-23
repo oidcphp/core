@@ -61,58 +61,10 @@ class Client
     }
 
     /**
-     * Create PSR-7 response with form post
-     *
-     * @param array $options
-     * @return ResponseInterface
-     */
-    public function createAuthorizeFormPostResponse(array $options = []): ResponseInterface
-    {
-        /** @var ResponseFactoryInterface $responseFactory */
-        $responseFactory = $this->container->get(ResponseFactoryInterface::class);
-
-        /** @var StreamFactoryInterface $streamFactory */
-        $streamFactory = $this->container->get(StreamFactoryInterface::class);
-
-        return $responseFactory->createResponse()
-            ->withBody($streamFactory->createStream($this->getAuthorizationPost($options)));
-    }
-
-    /**
-     * Create PSR-7 response with redirect info
-     *
-     * @param array $options
-     * @return ResponseInterface
-     */
-    public function createAuthorizeRedirectResponse(array $options = []): ResponseInterface
-    {
-        /** @var ResponseFactoryInterface $responseFactory */
-        $responseFactory = $this->container->get(ResponseFactoryInterface::class);
-
-        return $responseFactory->createResponse(302)
-            ->withHeader('Location', (string)$this->getAuthorizationUri($options));
-    }
-
-    /**
-     * @param array $options
-     * @return UriInterface
-     */
-    public function getAuthorizationUri(array $options = []): UriInterface
-    {
-        /** @var UriFactoryInterface $uriFactory */
-        $uriFactory = $this->container->get(UriFactoryInterface::class);
-
-        $params = $this->getAuthorizationParameters($options);
-
-        return $uriFactory->createUri($this->providerMetadata->authorizationEndpoint())
-            ->withQuery($this->buildQueryString($params));
-    }
-
-    /**
      * @param array $options
      * @return string
      */
-    public function getAuthorizationPost(array $options = []): string
+    public function createAuthorizeForm(array $options = []): string
     {
         $baseAuthorizationUrl = $this->providerMetadata->authorizationEndpoint();
 
@@ -132,15 +84,75 @@ class Client
 HTML;
     }
 
-    protected function getRandomState($length = 32): string
+    /**
+     * Create PSR-7 response with form post
+     *
+     * @param array $options
+     * @return ResponseInterface
+     */
+    public function createAuthorizeFormPostResponse(array $options = []): ResponseInterface
     {
-        return bin2hex(random_bytes($length / 2));
+        /** @var ResponseFactoryInterface $responseFactory */
+        $responseFactory = $this->container->get(ResponseFactoryInterface::class);
+
+        /** @var StreamFactoryInterface $streamFactory */
+        $streamFactory = $this->container->get(StreamFactoryInterface::class);
+
+        return $responseFactory->createResponse()
+            ->withBody($streamFactory->createStream($this->createAuthorizeForm($options)));
     }
 
+    /**
+     * Create PSR-7 response with redirect info
+     *
+     * @param array $options
+     * @return ResponseInterface
+     */
+    public function createAuthorizeRedirectResponse(array $options = []): ResponseInterface
+    {
+        /** @var ResponseFactoryInterface $responseFactory */
+        $responseFactory = $this->container->get(ResponseFactoryInterface::class);
+
+        return $responseFactory->createResponse(302)
+            ->withHeader('Location', (string)$this->createAuthorizeUri($options));
+    }
+
+    /**
+     * @param array $options
+     * @return UriInterface
+     */
+    public function createAuthorizeUri(array $options = []): UriInterface
+    {
+        /** @var UriFactoryInterface $uriFactory */
+        $uriFactory = $this->container->get(UriFactoryInterface::class);
+
+        $params = $this->getAuthorizationParameters($options);
+
+        return $uriFactory->createUri($this->providerMetadata->authorizationEndpoint())
+            ->withQuery($this->buildQueryString($params));
+    }
+
+    /**
+     * Generate and store the state as it may need to be accessed later on.
+     *
+     * @param int $length
+     * @return string
+     */
+    protected function generateRandomState($length = 32): string
+    {
+        $this->state = bin2hex(random_bytes($length / 2));
+
+        return $this->state;
+    }
+
+    /**
+     * @param array $options
+     * @return array
+     */
     protected function getAuthorizationParameters(array $options): array
     {
         if (empty($options['state'])) {
-            $options['state'] = $this->getRandomState();
+            $options['state'] = $this->generateRandomState();
         }
 
         if (empty($options['scope'])) {
@@ -155,9 +167,6 @@ HTML;
             $options['scope'] = implode(' ', $options['scope']);
         }
 
-        // Store the state as it may need to be accessed later on.
-        $this->state = $options['state'];
-
         // Business code layer might set a different redirect_uri parameter
         // depending on the context, leave it as-is
         if (!isset($options['redirect_uri'])) {
@@ -167,43 +176,6 @@ HTML;
         $options['client_id'] = $this->clientRegistration->id();
 
         return $options;
-    }
-
-    /**
-     * @param array $parameters
-     * @param array $checks
-     * @return TokenSetInterface
-     */
-    public function handleOpenIDConnectCallback(array $parameters, array $checks = []): TokenSetInterface
-    {
-        if (!isset($parameters['code'])) {
-            throw new InvalidArgumentException("'code' missing from the response");
-        }
-
-        if (!isset($checks['redirect_uri'])) {
-            throw new InvalidArgumentException("'redirect_uri' argument is missing");
-        }
-
-        if (isset($parameters['state']) && !isset($checks['state'])) {
-            throw new InvalidArgumentException("'state' argument is missing");
-        }
-
-        if (!isset($parameters['state']) && isset($checks['state'])) {
-            throw new RelyingPartyException("'state' missing from the response");
-        }
-
-        if (isset($parameters['state'], $checks['state']) && ($checks['state'] !== $parameters['state'])) {
-            throw new RelyingPartyException(sprintf(
-                'State mismatch, expected %s, got: %s',
-                $checks['state'],
-                $parameters['state']
-            ));
-        }
-
-        return $this->getTokenSet('authorization_code', [
-            'code' => $parameters['code'],
-            'redirect_uri' => $checks['redirect_uri'],
-        ]);
     }
 
     /**
@@ -306,6 +278,43 @@ HTML;
         $response = $httpClient->send($request);
 
         return json_decode((string)$response->getBody(), true);
+    }
+
+    /**
+     * @param array $parameters
+     * @param array $checks
+     * @return TokenSetInterface
+     */
+    public function handleOpenIDConnectCallback(array $parameters, array $checks = []): TokenSetInterface
+    {
+        if (!isset($parameters['code'])) {
+            throw new InvalidArgumentException("'code' missing from the response");
+        }
+
+        if (!isset($checks['redirect_uri'])) {
+            throw new InvalidArgumentException("'redirect_uri' argument is missing");
+        }
+
+        if (isset($parameters['state']) && !isset($checks['state'])) {
+            throw new InvalidArgumentException("'state' argument is missing");
+        }
+
+        if (!isset($parameters['state']) && isset($checks['state'])) {
+            throw new RelyingPartyException("'state' missing from the response");
+        }
+
+        if (isset($parameters['state'], $checks['state']) && ($checks['state'] !== $parameters['state'])) {
+            throw new RelyingPartyException(sprintf(
+                'State mismatch, expected %s, got: %s',
+                $checks['state'],
+                $parameters['state']
+            ));
+        }
+
+        return $this->getTokenSet('authorization_code', [
+            'code' => $parameters['code'],
+            'redirect_uri' => $checks['redirect_uri'],
+        ]);
     }
 
     /**

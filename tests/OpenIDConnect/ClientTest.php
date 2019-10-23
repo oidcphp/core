@@ -32,7 +32,7 @@ class ClientTest extends TestCase
      */
     public function shouldReturnAuthorizationUrlWhenCallSame(): void
     {
-        $actual = $this->target->getAuthorizationUri();
+        $actual = $this->target->createAuthorizeUri();
 
         $this->assertStringStartsWith('https://somewhere/auth', (string)$actual);
         $this->assertStringContainsStringIgnoringCase('state=', (string)$actual);
@@ -64,7 +64,7 @@ class ClientTest extends TestCase
      */
     public function shouldReturnAuthorizationPostFormWhenCallSame(): void
     {
-        $actual = $this->target->getAuthorizationPost();
+        $actual = $this->target->createAuthorizeForm();
 
         $this->assertStringContainsStringIgnoringCase('<form method="post" action="https://somewhere/auth">', $actual);
         $this->assertStringContainsStringIgnoringCase('name="state"', $actual);
