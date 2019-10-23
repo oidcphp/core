@@ -41,10 +41,6 @@ class TokenSet implements TokenSetInterface
         ProviderMetadata $providerMetadata,
         ClientRegistration $clientRegistration
     ) {
-        if (empty($parameters['access_token'])) {
-            throw new InvalidArgumentException('Required "access_token" but not passed');
-        }
-
         $this->parameters = $parameters;
         $this->setProviderMetadata($providerMetadata);
         $this->setClientRegistration($clientRegistration);
