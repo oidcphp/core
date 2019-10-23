@@ -11,7 +11,6 @@ use Http\Factory\Guzzle\ResponseFactory;
 use Http\Factory\Guzzle\StreamFactory;
 use Http\Factory\Guzzle\UriFactory;
 use OpenIDConnect\Container\Container;
-use OpenIDConnect\Exceptions\EntryNotFoundException;
 use OpenIDConnect\Metadata\ClientRegistration;
 use OpenIDConnect\Metadata\MetadataAwareTraits;
 use OpenIDConnect\Metadata\ProviderMetadata;
@@ -43,6 +42,39 @@ class Builder
     public static function create(ProviderMetadata $provider, ClientRegistration $client): Builder
     {
         return new static($provider, $client);
+    }
+
+    /**
+     * @param array $instances
+     * @return Container
+     */
+    public static function createDefaultContainer($instances = []): Container
+    {
+        if (empty($instances[GrantFactory::class])) {
+            $instances[GrantFactory::class] = new GrantFactory();
+        }
+
+        if (empty($instances[ClientInterface::class])) {
+            $instances[ClientInterface::class] = new HttpClient();
+        }
+
+        if (empty($instances[StreamFactoryInterface::class])) {
+            $instances[StreamFactoryInterface::class] = new StreamFactory();
+        }
+
+        if (empty($instances[ResponseFactoryInterface::class])) {
+            $instances[ResponseFactoryInterface::class] = new ResponseFactory();
+        }
+
+        if (empty($instances[RequestFactoryInterface::class])) {
+            $instances[RequestFactoryInterface::class] = new RequestFactory();
+        }
+
+        if (empty($instances[UriFactoryInterface::class])) {
+            $instances[UriFactoryInterface::class] = new UriFactory();
+        }
+
+        return new Container($instances);
     }
 
     /**
@@ -78,21 +110,6 @@ class Builder
      */
     public function setContainer(ContainerInterface $container): Builder
     {
-        $entries = [
-            GrantFactory::class,
-            ClientInterface::class,
-            StreamFactoryInterface::class,
-            ResponseFactoryInterface::class,
-            RequestFactoryInterface::class,
-            UriFactoryInterface::class,
-        ];
-
-        foreach ($entries as $entry) {
-            if (!$container->has($entry)) {
-                throw new EntryNotFoundException("The entry '$entry' is not found");
-            }
-        }
-
         $this->container = $container;
 
         return $this;
@@ -103,13 +120,6 @@ class Builder
      */
     public function useDefaultContainer(): Builder
     {
-        return $this->setContainer(new Container([
-            GrantFactory::class => new GrantFactory(),
-            ClientInterface::class => new HttpClient(),
-            StreamFactoryInterface::class => new StreamFactory(),
-            ResponseFactoryInterface::class => new ResponseFactory(),
-            RequestFactoryInterface::class => new RequestFactory(),
-            UriFactoryInterface::class => new UriFactory(),
-        ]));
+        return $this->setContainer(static::createDefaultContainer());
     }
 }

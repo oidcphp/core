@@ -2,6 +2,7 @@
 
 namespace Tests\OpenIDConnect;
 
+use OpenIDConnect\Builder;
 use OpenIDConnect\Client;
 use Tests\TestCase;
 
@@ -16,7 +17,8 @@ class ClientTest extends TestCase
     {
         $this->target = new Client(
             $this->createProviderMetadata(),
-            $this->createClientRegistration([], 'https://someredirect')
+            $this->createClientRegistration([], 'https://someredirect'),
+            Builder::createDefaultContainer()
         );
     }
 

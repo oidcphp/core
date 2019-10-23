@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace OpenIDConnect\Container;
 
 use OpenIDConnect\Exceptions\EntryNotFoundException;
-use OpenIDConnect\OAuth2\Grant\GrantFactory;
 use Psr\Container\ContainerInterface;
 
 class Container implements ContainerInterface
@@ -14,18 +13,6 @@ class Container implements ContainerInterface
      * @var array
      */
     private $instance;
-
-    public static function createDefaultInstance()
-    {
-        return new static([
-            GrantFactory::class => new GrantFactory(),
-            \GuzzleHttp\ClientInterface::class => new \GuzzleHttp\Client(),
-            \Psr\Http\Message\StreamFactoryInterface::class => new \Http\Factory\Guzzle\StreamFactory(),
-            \Psr\Http\Message\ResponseFactoryInterface::class => new \Http\Factory\Guzzle\ResponseFactory(),
-            \Psr\Http\Message\RequestFactoryInterface::class => new \Http\Factory\Guzzle\RequestFactory(),
-            \Psr\Http\Message\UriFactoryInterface::class => new \Http\Factory\Guzzle\UriFactory(),
-        ]);
-    }
 
     /**
      * @param array $instance

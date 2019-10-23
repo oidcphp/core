@@ -5,7 +5,7 @@ namespace OpenIDConnect;
 use GuzzleHttp\ClientInterface as HttpClientInterface;
 use GuzzleHttp\Exception\BadResponseException;
 use InvalidArgumentException;
-use OpenIDConnect\Container\Container;
+use OpenIDConnect\Exceptions\EntryNotFoundException;
 use OpenIDConnect\Exceptions\OpenIDProviderException;
 use OpenIDConnect\Exceptions\RelyingPartyException;
 use OpenIDConnect\Http\QueryProcessorTrait;
@@ -48,21 +48,16 @@ class Client
     /**
      * @param ProviderMetadata $providerMetadata
      * @param ClientRegistration $clientRegistration
-     * @param ContainerInterface|null $container The container implements PSR-11
+     * @param ContainerInterface $container The container implements PSR-11
      */
     public function __construct(
         ProviderMetadata $providerMetadata,
         ClientRegistration $clientRegistration,
-        ContainerInterface $container = null
+        ContainerInterface $container
     ) {
         $this->setProviderMetadata($providerMetadata);
         $this->setClientRegistration($clientRegistration);
-
-        if (null === $container) {
-            $container = Container::createDefaultInstance();
-        }
-
-        $this->container = $container;
+        $this->setContainer($container);
     }
 
     /**
@@ -313,5 +308,31 @@ HTML;
         $response = $httpClient->send($request);
 
         return json_decode((string)$response->getBody(), true);
+    }
+
+    /**
+     * @param ContainerInterface $container
+     * @return Client
+     */
+    public function setContainer(ContainerInterface $container): Client
+    {
+        $entries = [
+            GrantFactory::class,
+            HttpClientInterface::class,
+            StreamFactoryInterface::class,
+            ResponseFactoryInterface::class,
+            RequestFactoryInterface::class,
+            UriFactoryInterface::class,
+        ];
+
+        foreach ($entries as $entry) {
+            if (!$container->has($entry)) {
+                throw new EntryNotFoundException("The entry '$entry' is not found");
+            }
+        }
+
+        $this->container = $container;
+
+        return $this;
     }
 }

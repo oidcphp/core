@@ -25,7 +25,8 @@ class BuilderTest extends TestCase
      */
     public function shouldReturnClient(): void
     {
-        $factory = new Builder($this->createProviderMetadata(), $this->createClientRegistration());
+        $factory = Builder::create($this->createProviderMetadata(), $this->createClientRegistration())
+            ->useDefaultContainer();
 
         $this->assertInstanceOf(Client::class, $factory->createOpenIDConnectClient());
     }
