@@ -291,16 +291,13 @@ HTML;
         /** @var RequestFactoryInterface $requestFactory */
         $requestFactory = $this->container->get(RequestFactoryInterface::class);
 
-        /** @var UriFactoryInterface $uriFactory */
-        $uriFactory = $this->container->get(UriFactoryInterface::class);
+        $userInfoEndpoint = $this->providerMetadata->userInfoEndpoint();
 
-        if (null === $this->providerMetadata->userInfoEndpoint()) {
+        if (null === $userInfoEndpoint) {
             throw new OpenIDProviderException('Provider does not support user info endpoint');
         }
 
-        $uri = $uriFactory->createUri($this->providerMetadata->userInfoEndpoint());
-
-        $request = $requestFactory->createRequest('GET', $uri)
+        $request = $requestFactory->createRequest('GET', $userInfoEndpoint)
             ->withHeader('Authorization', 'Bearer ' . $accessToken);
 
         /** @var HttpClientInterface $httpClient */
