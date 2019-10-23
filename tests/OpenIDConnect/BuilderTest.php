@@ -3,19 +3,19 @@
 namespace Tests\OpenIDConnect;
 
 use OpenIDConnect\Client;
-use OpenIDConnect\Factory;
+use OpenIDConnect\Builder;
 use OpenIDConnect\Jwt\JwtFactory;
 use OpenIDConnect\Token\TokenSet;
 use Tests\TestCase;
 
-class FactoryTest extends TestCase
+class BuilderTest extends TestCase
 {
     /**
      * @test
      */
     public function shouldReturnJwtFactory(): void
     {
-        $factory = new Factory($this->createProviderMetadata(), $this->createClientRegistration());
+        $factory = new Builder($this->createProviderMetadata(), $this->createClientRegistration());
 
         $this->assertInstanceOf(JwtFactory::class, $factory->createJwtFactory());
     }
@@ -25,7 +25,7 @@ class FactoryTest extends TestCase
      */
     public function shouldReturnClient(): void
     {
-        $factory = new Factory($this->createProviderMetadata(), $this->createClientRegistration());
+        $factory = new Builder($this->createProviderMetadata(), $this->createClientRegistration());
 
         $this->assertInstanceOf(Client::class, $factory->createOpenIDConnectClient());
     }
@@ -35,7 +35,7 @@ class FactoryTest extends TestCase
      */
     public function shouldReturnTokenSet(): void
     {
-        $factory = new Factory($this->createProviderMetadata(), $this->createClientRegistration());
+        $factory = new Builder($this->createProviderMetadata(), $this->createClientRegistration());
 
         $this->assertInstanceOf(TokenSet::class, $factory->createTokenSet([
             'access_token' => 'whatever',

@@ -7,7 +7,7 @@ use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response as HttpResponse;
-use OpenIDConnect\Factory;
+use OpenIDConnect\Builder;
 use OpenIDConnect\Metadata\ClientRegistration;
 use OpenIDConnect\Metadata\ProviderMetadata;
 use Psr\Http\Message\ResponseInterface;
@@ -43,11 +43,11 @@ class TestCase extends \PHPUnit\Framework\TestCase
      * @param array $client
      * @param array $httpMock
      * @param array $history
-     * @return Factory
+     * @return Builder
      */
-    protected function createFactory($provider = [], $client = [], $httpMock = [], $history = []): Factory
+    protected function createFactory($provider = [], $client = [], $httpMock = [], $history = []): Builder
     {
-        return new Factory(
+        return new Builder(
             $this->createProviderMetadata($provider),
             $this->createClientRegistration($client),
             $this->createHttpClient($httpMock, $history)
