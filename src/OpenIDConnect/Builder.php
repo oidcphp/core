@@ -4,13 +4,24 @@ declare(strict_types=1);
 
 namespace OpenIDConnect;
 
+use GuzzleHttp\Client as HttpClient;
+use GuzzleHttp\ClientInterface;
+use Http\Factory\Guzzle\RequestFactory;
+use Http\Factory\Guzzle\ResponseFactory;
+use Http\Factory\Guzzle\StreamFactory;
+use Http\Factory\Guzzle\UriFactory;
 use OpenIDConnect\Container\Container;
+use OpenIDConnect\Exceptions\EntryNotFoundException;
 use OpenIDConnect\Metadata\ClientRegistration;
 use OpenIDConnect\Metadata\MetadataAwareTraits;
 use OpenIDConnect\Metadata\ProviderMetadata;
 use OpenIDConnect\OAuth2\Grant\GrantFactory;
 use OpenIDConnect\Token\TokenSet;
 use Psr\Container\ContainerInterface;
+use Psr\Http\Message\RequestFactoryInterface;
+use Psr\Http\Message\ResponseFactoryInterface;
+use Psr\Http\Message\StreamFactoryInterface;
+use Psr\Http\Message\UriFactoryInterface;
 
 /**
  * Factory for create anything
@@ -67,6 +78,21 @@ class Builder
      */
     public function setContainer(ContainerInterface $container): Builder
     {
+        $entries = [
+            GrantFactory::class,
+            ClientInterface::class,
+            StreamFactoryInterface::class,
+            ResponseFactoryInterface::class,
+            RequestFactoryInterface::class,
+            UriFactoryInterface::class,
+        ];
+
+        foreach ($entries as $entry) {
+            if (!$container->has($entry)) {
+                throw new EntryNotFoundException("The entry '$entry' is not found");
+            }
+        }
+
         $this->container = $container;
 
         return $this;
@@ -79,11 +105,11 @@ class Builder
     {
         return $this->setContainer(new Container([
             GrantFactory::class => new GrantFactory(),
-            \GuzzleHttp\ClientInterface::class => new \GuzzleHttp\Client(),
-            \Psr\Http\Message\StreamFactoryInterface::class => new \Http\Factory\Guzzle\StreamFactory(),
-            \Psr\Http\Message\ResponseFactoryInterface::class => new \Http\Factory\Guzzle\ResponseFactory(),
-            \Psr\Http\Message\RequestFactoryInterface::class => new \Http\Factory\Guzzle\RequestFactory(),
-            \Psr\Http\Message\UriFactoryInterface::class => new \Http\Factory\Guzzle\UriFactory(),
+            ClientInterface::class => new HttpClient(),
+            StreamFactoryInterface::class => new StreamFactory(),
+            ResponseFactoryInterface::class => new ResponseFactory(),
+            RequestFactoryInterface::class => new RequestFactory(),
+            UriFactoryInterface::class => new UriFactory(),
         ]));
     }
 }
