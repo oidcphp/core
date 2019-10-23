@@ -249,7 +249,8 @@ HTML;
         try {
             $response = $httpClient->send($appendedRequest);
         } catch (BadResponseException $e) {
-            throw new OpenIDProviderException('OpenID Connect provider error');
+            $msg = 'OpenID Connect provider error: ' . $e->getMessage();
+            throw new OpenIDProviderException($msg, 0, $e);
         }
 
         $content = (string)$response->getBody();
