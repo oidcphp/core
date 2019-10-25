@@ -10,9 +10,13 @@
     "authors": [
         {
             "name": "MilesChou",
-            "email": "jangconan@gmail.com"
+            "email": "jangconan@gmail.com",
+            "role": "Developer"
         }
     ],
+    "support": {
+        "issues": "https://github.com/oidcphp/core/issues"
+    },
     "require": {
         "php": ">=7.1",
         "ext-json": "*",
