@@ -133,125 +133,11 @@ HTML;
     }
 
     /**
-     * Generate and store the state as it may need to be accessed later on.
-     *
-     * @param int $length
-     * @return string
-     */
-    protected function generateRandomState($length = 32): string
-    {
-        $this->state = bin2hex(random_bytes($length / 2));
-
-        return $this->state;
-    }
-
-    /**
-     * @param array $options
-     * @return array
-     */
-    protected function getAuthorizationParameters(array $options): array
-    {
-        if (empty($options['state'])) {
-            $options['state'] = $this->generateRandomState();
-        }
-
-        if (empty($options['scope'])) {
-            $options['scope'] = ['openid'];
-        }
-
-        $options += [
-            'response_type' => 'code',
-        ];
-
-        if (is_array($options['scope'])) {
-            $options['scope'] = implode(' ', $options['scope']);
-        }
-
-        // Business code layer might set a different redirect_uri parameter
-        // depending on the context, leave it as-is
-        if (!isset($options['redirect_uri'])) {
-            $options['redirect_uri'] = $this->clientRegistration->redirectUri();
-        }
-
-        $options['client_id'] = $this->clientRegistration->id();
-
-        return $options;
-    }
-
-    /**
      * @return string
      */
     public function getState(): string
     {
         return $this->state;
-    }
-
-    /**
-     * @param mixed $grant
-     * @param array $options
-     * @return TokenSetInterface
-     */
-    private function getTokenSet($grant, array $options = []): TokenSetInterface
-    {
-        /** @var GrantFactory $grantFactory */
-        $grantFactory = $this->container->get(GrantFactory::class);
-
-        $grant = $grantFactory->getGrant($grant);
-
-        $params = array_merge([
-            'client_id' => $this->clientRegistration->id(),
-            'client_secret' => $this->clientRegistration->secret(),
-        ], $options);
-
-        $params = $grant->prepareRequestParameters($params);
-
-        $request = (new TokenRequestFactory($this->providerMetadata->tokenEndpoint()))
-            ->createRequest($params);
-
-        $appender = $this->getTokenRequestAppender();
-        $appendedRequest = $appender->withClientAuthentication(
-            $request,
-            $this->clientRegistration->id(),
-            $this->clientRegistration->secret()
-        );
-
-        /** @var HttpClientInterface $httpClient */
-        $httpClient = $this->container->get(HttpClientInterface::class);
-
-        try {
-            $response = $httpClient->send($appendedRequest);
-        } catch (BadResponseException $e) {
-            $msg = 'OpenID Connect provider error: ' . $e->getMessage();
-            throw new OpenIDProviderException($msg, 0, $e);
-        }
-
-        $content = (string)$response->getBody();
-
-        if (strpos($response->getHeaderLine('urlencoded'), 'urlencoded') !== false) {
-            parse_str($content, $parsed);
-        } else {
-            $parsed = json_decode($content, true);
-        }
-
-        if (is_array($parsed) && !empty($parsed['error'])) {
-            $error = $parsed['error'];
-
-            throw new OpenIDProviderException($error);
-        }
-
-        if (!is_array($parsed)) {
-            throw new OpenIDProviderException(
-                'Invalid response received from OpenID Provider. Expected JSON.'
-            );
-        }
-
-        $tokenSet = new TokenSet($parsed, $this->providerMetadata, $this->clientRegistration);
-
-        if (!$tokenSet->hasIdToken()) {
-            throw new OpenIDProviderException("'id_token' missing from the token endpoint response");
-        }
-
-        return $tokenSet;
     }
 
     /**
@@ -341,5 +227,119 @@ HTML;
         $this->container = $container;
 
         return $this;
+    }
+
+    /**
+     * Generate and store the state as it may need to be accessed later on.
+     *
+     * @param int $length
+     * @return string
+     */
+    protected function generateRandomState($length = 32): string
+    {
+        $this->state = bin2hex(random_bytes($length / 2));
+
+        return $this->state;
+    }
+
+    /**
+     * @param array $options
+     * @return array
+     */
+    protected function getAuthorizationParameters(array $options): array
+    {
+        if (empty($options['state'])) {
+            $options['state'] = $this->generateRandomState();
+        }
+
+        if (empty($options['scope'])) {
+            $options['scope'] = ['openid'];
+        }
+
+        $options += [
+            'response_type' => 'code',
+        ];
+
+        if (is_array($options['scope'])) {
+            $options['scope'] = implode(' ', $options['scope']);
+        }
+
+        // Business code layer might set a different redirect_uri parameter
+        // depending on the context, leave it as-is
+        if (!isset($options['redirect_uri'])) {
+            $options['redirect_uri'] = $this->clientRegistration->redirectUri();
+        }
+
+        $options['client_id'] = $this->clientRegistration->id();
+
+        return $options;
+    }
+
+    /**
+     * @param mixed $grant
+     * @param array $options
+     * @return TokenSetInterface
+     */
+    private function getTokenSet($grant, array $options = []): TokenSetInterface
+    {
+        /** @var GrantFactory $grantFactory */
+        $grantFactory = $this->container->get(GrantFactory::class);
+
+        $grant = $grantFactory->getGrant($grant);
+
+        $params = array_merge([
+            'client_id' => $this->clientRegistration->id(),
+            'client_secret' => $this->clientRegistration->secret(),
+        ], $options);
+
+        $params = $grant->prepareRequestParameters($params);
+
+        $request = (new TokenRequestFactory($this->providerMetadata->tokenEndpoint()))
+            ->createRequest($params);
+
+        $appender = $this->getTokenRequestAppender();
+        $appendedRequest = $appender->withClientAuthentication(
+            $request,
+            $this->clientRegistration->id(),
+            $this->clientRegistration->secret()
+        );
+
+        /** @var HttpClientInterface $httpClient */
+        $httpClient = $this->container->get(HttpClientInterface::class);
+
+        try {
+            $response = $httpClient->send($appendedRequest);
+        } catch (BadResponseException $e) {
+            $msg = 'OpenID Connect provider error: ' . $e->getMessage();
+            throw new OpenIDProviderException($msg, 0, $e);
+        }
+
+        $content = (string)$response->getBody();
+
+        if (strpos($response->getHeaderLine('urlencoded'), 'urlencoded') !== false) {
+            parse_str($content, $parsed);
+        } else {
+            $parsed = json_decode($content, true);
+        }
+
+        if (is_array($parsed) && !empty($parsed['error'])) {
+            $error = $parsed['error'];
+
+            throw new OpenIDProviderException($error);
+        }
+
+        if (!is_array($parsed)) {
+            throw new OpenIDProviderException(
+                'Invalid response received from OpenID Provider. Expected JSON.'
+            );
+        }
+
+        $tokenSet = new TokenSet($parsed, $this->providerMetadata, $this->clientRegistration);
+
+        if (!$tokenSet->hasIdToken()) {
+            throw new OpenIDProviderException("'id_token' missing from the token endpoint response");
+        }
+
+        return $tokenSet;
     }
 }
