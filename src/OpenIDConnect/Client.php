@@ -41,7 +41,12 @@ class Client
     private $container;
 
     /**
-     * @var string
+     * @var null|string
+     */
+    private $nonce;
+
+    /**
+     * @var null|string
      */
     private $state;
 
@@ -133,9 +138,17 @@ HTML;
     }
 
     /**
-     * @return string
+     * @return null|string
      */
-    public function getState(): string
+    public function getNonce(): ?string
+    {
+        return $this->nonce;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getState(): ?string
     {
         return $this->state;
     }
@@ -204,6 +217,30 @@ HTML;
     }
 
     /**
+     * Initial the authorization parameters
+     *
+     * @param array $options
+     */
+    public function initAuthorizationParameters(array $options = []): void
+    {
+        if (!empty($options['nonce'])) {
+            $this->nonce = $options['nonce'];
+        }
+
+        if (null === $this->nonce) {
+            $this->nonce = $this->generateRandomString();
+        }
+
+        if (!empty($options['state'])) {
+            $this->state = $options['state'];
+        }
+
+        if (null === $this->state) {
+            $this->state = $this->generateRandomString();
+        }
+    }
+
+    /**
      * @param ContainerInterface $container
      * @return Client
      */
@@ -230,16 +267,14 @@ HTML;
     }
 
     /**
-     * Generate and store the state as it may need to be accessed later on.
+     * Generate the random string
      *
      * @param int $length
      * @return string
      */
-    protected function generateRandomState($length = 32): string
+    protected function generateRandomString(int $length = 32): string
     {
-        $this->state = bin2hex(random_bytes($length / 2));
-
-        return $this->state;
+        return bin2hex(random_bytes($length / 2));
     }
 
     /**
@@ -248,9 +283,10 @@ HTML;
      */
     protected function getAuthorizationParameters(array $options): array
     {
-        if (empty($options['state'])) {
-            $options['state'] = $this->generateRandomState();
-        }
+        $this->initAuthorizationParameters($options);
+
+        $options['nonce'] = $this->nonce;
+        $options['state'] = $this->state;
 
         if (empty($options['scope'])) {
             $options['scope'] = ['openid'];
