@@ -47,6 +47,10 @@ trait IdToken
             throw new UnexpectedValueException('JWT has no payload');
         }
 
+        if ($this->has('nonce')) {
+            $check['nonce'] = $this->values('nonce');
+        }
+
         $claimCheckerManager = $jwtFactory->createClaimCheckerManager($check);
 
         try {

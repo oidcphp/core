@@ -131,10 +131,10 @@ HTML;
         /** @var UriFactoryInterface $uriFactory */
         $uriFactory = $this->container->get(UriFactoryInterface::class);
 
-        $params = $this->getAuthorizationParameters($options);
+        $parameters = $this->getAuthorizationParameters($options);
 
         return $uriFactory->createUri($this->providerMetadata->authorizationEndpoint())
-            ->withQuery($this->buildQueryString($params));
+            ->withQuery($this->buildQueryString($parameters));
     }
 
     /**
@@ -321,9 +321,7 @@ HTML;
 
         $grant = $grantFactory->getGrant($grant);
 
-        $parameters = array_merge($parameters, $checks);
-
-        $parameters = $grant->prepareRequestParameters($parameters);
+        $parameters = $grant->prepareRequestParameters(array_merge($parameters, $checks));
 
         $request = (new TokenRequestFactory($parameters))
             ->createRequest('POST', $this->providerMetadata->tokenEndpoint());
