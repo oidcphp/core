@@ -9,11 +9,11 @@ use OpenIDConnect\Exceptions\EntryNotFoundException;
 use OpenIDConnect\Exceptions\OpenIDProviderException;
 use OpenIDConnect\Exceptions\RelyingPartyException;
 use OpenIDConnect\Http\QueryProcessorTrait;
-use OpenIDConnect\Http\TokenRequestFactory;
 use OpenIDConnect\Metadata\ClientRegistration;
 use OpenIDConnect\Metadata\MetadataAwareTraits;
 use OpenIDConnect\Metadata\ProviderMetadata;
 use OpenIDConnect\OAuth2\Grant\GrantFactory;
+use OpenIDConnect\OAuth2\TokenRequestFactory;
 use OpenIDConnect\Token\TokenSet;
 use OpenIDConnect\Token\TokenSetInterface;
 use OpenIDConnect\Traits\ClientAuthenticationAwareTrait;
@@ -325,8 +325,8 @@ HTML;
 
         $parameters = $grant->prepareRequestParameters($parameters);
 
-        $request = (new TokenRequestFactory($this->providerMetadata->tokenEndpoint()))
-            ->createRequest($parameters);
+        $request = (new TokenRequestFactory($parameters))
+            ->createRequest('POST', $this->providerMetadata->tokenEndpoint());
 
         $appender = $this->getTokenRequestAppender();
         $appendedRequest = $appender->withClientAuthentication(
