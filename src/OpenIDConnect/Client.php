@@ -210,10 +210,7 @@ HTML;
             ));
         }
 
-        return $this->getTokenSet('authorization_code', [
-            'code' => $parameters['code'],
-            'redirect_uri' => $checks['redirect_uri'],
-        ]);
+        return $this->getTokenSet('authorization_code', $parameters, $checks);
     }
 
     /**
@@ -313,25 +310,23 @@ HTML;
 
     /**
      * @param mixed $grant
-     * @param array $options
+     * @param array $parameters
+     * @param array $checks
      * @return TokenSetInterface
      */
-    private function getTokenSet($grant, array $options = []): TokenSetInterface
+    private function getTokenSet($grant, array $parameters = [], array $checks = []): TokenSetInterface
     {
         /** @var GrantFactory $grantFactory */
         $grantFactory = $this->container->get(GrantFactory::class);
 
         $grant = $grantFactory->getGrant($grant);
 
-        $params = array_merge([
-            'client_id' => $this->clientRegistration->id(),
-            'client_secret' => $this->clientRegistration->secret(),
-        ], $options);
+        $parameters = array_merge($parameters, $checks);
 
-        $params = $grant->prepareRequestParameters($params);
+        $parameters = $grant->prepareRequestParameters($parameters);
 
         $request = (new TokenRequestFactory($this->providerMetadata->tokenEndpoint()))
-            ->createRequest($params);
+            ->createRequest($parameters);
 
         $appender = $this->getTokenRequestAppender();
         $appendedRequest = $appender->withClientAuthentication(
@@ -370,7 +365,7 @@ HTML;
             );
         }
 
-        $tokenSet = new TokenSet($parsed, $this->providerMetadata, $this->clientRegistration);
+        $tokenSet = new TokenSet(array_merge($checks, $parsed), $this->providerMetadata, $this->clientRegistration);
 
         if (!$tokenSet->hasIdToken()) {
             throw new OpenIDProviderException("'id_token' missing from the token endpoint response");
