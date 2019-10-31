@@ -2,7 +2,7 @@
 
 namespace OpenIDConnect\Core\ClientAuthentication;
 
-use OpenIDConnect\Core\Http\QueryProcessorTrait;
+use OpenIDConnect\Support\Http\Query;
 use Psr\Http\Message\RequestInterface as Request;
 use function GuzzleHttp\Psr7\stream_for;
 
@@ -15,16 +15,14 @@ use function GuzzleHttp\Psr7\stream_for;
  */
 class ClientSecretPost implements RequestAppender
 {
-    use QueryProcessorTrait;
-
     public function withClientAuthentication(Request $request, string $client, string $secret): Request
     {
         $body = (string)$request->getBody();
 
-        $parsedBody = $this->parseQueryString($body);
+        $parsedBody = Query::parse($body);
         $parsedBody['client_id'] = $client;
         $parsedBody['client_secret'] = $secret;
 
-        return $request->withBody(stream_for($this->buildQueryString($parsedBody)));
+        return $request->withBody(stream_for(Query::build($parsedBody)));
     }
 }

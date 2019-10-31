@@ -3,7 +3,7 @@
 namespace OpenIDConnect\Core\OAuth2;
 
 use GuzzleHttp\Psr7\Request;
-use OpenIDConnect\Core\Http\QueryProcessorTrait;
+use OpenIDConnect\Support\Http\Query;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\RequestInterface;
 use function GuzzleHttp\Psr7\stream_for;
@@ -13,8 +13,6 @@ use function GuzzleHttp\Psr7\stream_for;
  */
 class TokenRequestFactory implements RequestFactoryInterface
 {
-    use QueryProcessorTrait;
-
     /**
      * @var array
      */
@@ -32,6 +30,6 @@ class TokenRequestFactory implements RequestFactoryInterface
     {
         return (new Request($method, $uri))
             ->withHeader('content-type', 'application/x-www-form-urlencoded')
-            ->withBody(stream_for($this->buildQueryString($this->parameters)));
+            ->withBody(stream_for(Query::build($this->parameters)));
     }
 }

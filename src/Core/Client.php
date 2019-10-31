@@ -8,7 +8,6 @@ use InvalidArgumentException;
 use OpenIDConnect\Core\Exceptions\EntryNotFoundException;
 use OpenIDConnect\Core\Exceptions\OpenIDProviderException;
 use OpenIDConnect\Core\Exceptions\RelyingPartyException;
-use OpenIDConnect\Core\Http\QueryProcessorTrait;
 use OpenIDConnect\Core\Metadata\ClientRegistration;
 use OpenIDConnect\Core\Metadata\MetadataAwareTraits;
 use OpenIDConnect\Core\Metadata\ProviderMetadata;
@@ -17,6 +16,7 @@ use OpenIDConnect\Core\OAuth2\TokenRequestFactory;
 use OpenIDConnect\Core\Token\TokenSet;
 use OpenIDConnect\Core\Token\TokenSetInterface;
 use OpenIDConnect\Core\Traits\ClientAuthenticationAwareTrait;
+use OpenIDConnect\Support\Http\Query;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
@@ -33,7 +33,6 @@ class Client
 {
     use ClientAuthenticationAwareTrait;
     use MetadataAwareTraits;
-    use QueryProcessorTrait;
 
     /**
      * @var ContainerInterface
@@ -134,7 +133,7 @@ HTML;
         $parameters = $this->getAuthorizationParameters($options);
 
         return $uriFactory->createUri($this->providerMetadata->authorizationEndpoint())
-            ->withQuery($this->buildQueryString($parameters));
+            ->withQuery(Query::build($parameters));
     }
 
     /**
