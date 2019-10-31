@@ -2,7 +2,7 @@
 
 namespace App\Commands;
 
-use OpenIDConnect\Issuer;
+use OpenIDConnect\Core\Issuer;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;

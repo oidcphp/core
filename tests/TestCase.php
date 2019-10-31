@@ -10,9 +10,9 @@ use GuzzleHttp\Psr7\Response as HttpResponse;
 use Jose\Component\Core\JWKSet;
 use Jose\Component\Core\Util\JsonConverter;
 use Jose\Component\KeyManagement\JWKFactory;
-use OpenIDConnect\Builder;
-use OpenIDConnect\Metadata\ClientRegistration;
-use OpenIDConnect\Metadata\ProviderMetadata;
+use OpenIDConnect\Core\Builder;
+use OpenIDConnect\Core\Metadata\ClientRegistration;
+use OpenIDConnect\Core\Metadata\ProviderMetadata;
 use Psr\Http\Message\ResponseInterface;
 use function GuzzleHttp\json_encode;
 
