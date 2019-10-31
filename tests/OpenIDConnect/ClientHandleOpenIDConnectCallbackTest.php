@@ -24,10 +24,7 @@ class ClientHandleOpenIDConnectCallbackTest extends TestCase
      */
     public function shouldReturnTokenSetWhenEverythingOkay(): void
     {
-        $jwk = JWKFactory::createRSAKey(1024, ['alg' => 'RS256']);
-        $jwks = JsonConverter::encode(new JWKSet([$jwk]));
-
-        $providerMetadata = new ProviderMetadata($this->createProviderMetadataConfig(), JsonConverter::decode($jwks));
+        $providerMetadata = $this->createProviderMetadata();
 
         $clientMetadata = $this->createClientRegistration([
             'client_id' => 'some-aud',
@@ -44,7 +41,7 @@ class ClientHandleOpenIDConnectCallbackTest extends TestCase
 
         $jws = $providerMetadata->createJwtFactory($clientMetadata)->createJwsBuilder()
             ->withPayload(JsonConverter::encode($payload))
-            ->addSignature($jwk, ['alg' => 'RS256'])
+            ->addSignature($providerMetadata->jwkSet()->get(0), ['alg' => 'RS256'])
             ->build();
 
         $expectedIdToken = (new CompactSerializer())->serialize($jws);
@@ -85,10 +82,7 @@ class ClientHandleOpenIDConnectCallbackTest extends TestCase
     {
         $this->expectException(RelyingPartyException::class);
 
-        $jwk = JWKFactory::createRSAKey(1024, ['alg' => 'RS256']);
-        $jwks = JsonConverter::encode(new JWKSet([$jwk]));
-
-        $providerMetadata = new ProviderMetadata($this->createProviderMetadataConfig(), JsonConverter::decode($jwks));
+        $providerMetadata = $this->createProviderMetadata();
 
         $clientMetadata = $this->createClientRegistration([
             'client_id' => 'some-aud',
@@ -105,7 +99,7 @@ class ClientHandleOpenIDConnectCallbackTest extends TestCase
 
         $jws = $providerMetadata->createJwtFactory($clientMetadata)->createJwsBuilder()
             ->withPayload(JsonConverter::encode($payload))
-            ->addSignature($jwk, ['alg' => 'RS256'])
+            ->addSignature($providerMetadata->jwkSet()->get(0), ['alg' => 'RS256'])
             ->build();
 
         /** @var Client $target */

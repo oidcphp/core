@@ -7,6 +7,9 @@ use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response as HttpResponse;
+use Jose\Component\Core\JWKSet;
+use Jose\Component\Core\Util\JsonConverter;
+use Jose\Component\KeyManagement\JWKFactory;
 use OpenIDConnect\Builder;
 use OpenIDConnect\Metadata\ClientRegistration;
 use OpenIDConnect\Metadata\ProviderMetadata;
@@ -111,14 +114,21 @@ class TestCase extends \PHPUnit\Framework\TestCase
         ];
     }
 
-    /**
-     * @param array $overwrite
-     * @param array|null $jwks
-     * @return ProviderMetadata
-     */
+    protected function createJwkSet($jwks = []): JWKSet
+    {
+        if (empty($jwks)) {
+            $jwks = [JWKFactory::createRSAKey(1024, ['alg' => 'RS256'])];
+        }
+
+        return new JWKSet($jwks);
+    }
+
     protected function createProviderMetadata($overwrite = [], $jwks = null): ProviderMetadata
     {
-        return new ProviderMetadata($this->createProviderMetadataConfig($overwrite), $jwks);
+        return new ProviderMetadata(
+            $this->createProviderMetadataConfig($overwrite),
+            JsonConverter::decode(JsonConverter::encode($this->createJwkSet($jwks)))
+        );
     }
 
     /**
