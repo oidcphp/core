@@ -7,38 +7,73 @@ use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response as HttpResponse;
+use Http\Factory\Guzzle\RequestFactory;
+use Http\Factory\Guzzle\ResponseFactory;
+use Http\Factory\Guzzle\StreamFactory;
+use Http\Factory\Guzzle\UriFactory;
 use Jose\Component\Core\JWKSet;
 use Jose\Component\Core\Util\JsonConverter;
 use Jose\Component\KeyManagement\JWKFactory;
 use OpenIDConnect\Core\Builder;
-use OpenIDConnect\Core\Metadata\ClientRegistration;
-use OpenIDConnect\Core\Metadata\ProviderMetadata;
+use OpenIDConnect\Core\Token\TokenFactory;
+use OpenIDConnect\OAuth2\Metadata\ClientInformation;
+use OpenIDConnect\OAuth2\Metadata\ProviderMetadata;
+use OpenIDConnect\OAuth2\Token\TokenFactoryInterface;
+use OpenIDConnect\Support\Container\Container;
+use OpenIDConnect\Support\Http\GuzzlePsr18Client;
+use Psr\Container\ContainerInterface;
+use Psr\Http\Client\ClientInterface;
+use Psr\Http\Message\RequestFactoryInterface;
+use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\StreamFactoryInterface;
+use Psr\Http\Message\UriFactoryInterface;
 use function GuzzleHttp\json_encode;
 
 class TestCase extends \PHPUnit\Framework\TestCase
 {
-    /**
-     * @param array $overwrite
-     * @param string|null $redirectUri
-     * @return ClientRegistration
-     */
-    protected function createClientRegistration($overwrite = [], string $redirectUri = null): ClientRegistration
+    protected function createClientInformation($overwrite = []): ClientInformation
     {
-        return new ClientRegistration($this->createClientRegistrationConfig($overwrite), $redirectUri);
+        return new ClientInformation($this->createClientInformationConfig($overwrite));
     }
 
-    /**
-     * @param array $overwrite
-     * @return array
-     */
-    protected function createClientRegistrationConfig($overwrite = []): array
+    protected function createClientInformationConfig($overwrite = []): array
     {
         return array_merge([
             'client_id' => 'some_id',
             'client_secret' => 'some_secret',
+            'redirect_uri' => 'https://someredirect',
             'redirect_uris' => ['https://someredirect'],
         ], $overwrite);
+    }
+
+    protected function createContainer(array $instances = []): ContainerInterface
+    {
+        if (empty($instances[ClientInterface::class])) {
+            $instances[ClientInterface::class] = $this->createHttpClient();
+        }
+
+        if (empty($instances[StreamFactoryInterface::class])) {
+            $instances[StreamFactoryInterface::class] = new StreamFactory();
+        }
+
+        if (empty($instances[ResponseFactoryInterface::class])) {
+            $instances[ResponseFactoryInterface::class] = new ResponseFactory();
+        }
+
+        if (empty($instances[RequestFactoryInterface::class])) {
+            $instances[RequestFactoryInterface::class] = new RequestFactory();
+        }
+
+        if (empty($instances[UriFactoryInterface::class])) {
+            $instances[UriFactoryInterface::class] = new UriFactory();
+        }
+
+        if (empty($instances[TokenFactoryInterface::class])) {
+            $instances[TokenFactoryInterface::class] = new TokenFactory();
+        }
+
+        return new Container($instances);
     }
 
     /**
@@ -52,7 +87,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
     {
         return new Builder(
             $this->createProviderMetadata($provider),
-            $this->createClientRegistration($client),
+            $this->createClientInformation($client),
             $this->createHttpClient($httpMock, $history)
         );
     }
@@ -81,11 +116,11 @@ class TestCase extends \PHPUnit\Framework\TestCase
      *
      * @param ResponseInterface|ResponseInterface[] $responses
      * @param array $history
-     * @return HttpClient
+     * @return ClientInterface
      */
-    protected function createHttpClient($responses = [], &$history = []): HttpClient
+    protected function createHttpClient($responses = [], &$history = []): ClientInterface
     {
-        return new HttpClient($this->createHttpMockOption($responses, $history));
+        return new GuzzlePsr18Client(new HttpClient($this->createHttpMockOption($responses, $history)));
     }
 
     /**
@@ -127,7 +162,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
     {
         return new ProviderMetadata(
             $this->createProviderMetadataConfig($overwrite),
-            JsonConverter::decode(JsonConverter::encode($this->createJwkSet($jwks)))
+            new \OpenIDConnect\OAuth2\Metadata\JwkSet(JsonConverter::decode(JsonConverter::encode($this->createJwkSet($jwks))))
         );
     }
 

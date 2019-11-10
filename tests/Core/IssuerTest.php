@@ -3,7 +3,7 @@
 namespace Tests\Core;
 
 use OpenIDConnect\Core\Issuer;
-use OpenIDConnect\Core\Metadata\ProviderMetadata;
+use Psr\Http\Client\ClientInterface;
 use Tests\TestCase;
 
 class IssuerTest extends TestCase
@@ -71,8 +71,9 @@ class IssuerTest extends TestCase
             $this->createHttpJsonResponse(['keys' => []]),
         ]);
 
-        /** @var ProviderMetadata $actual */
-        $actual = Issuer::create('http://somewhere', 'whatever', $mockHttpClient)->discover();
+        $actual = Issuer::create($this->createContainer([
+            ClientInterface::class => $mockHttpClient,
+        ]))->discover('http://somewhere');
 
         $this->assertSame('https://accounts.google.com', $actual->issuer());
         $this->assertSame('https://accounts.google.com/o/oauth2/v2/auth', $actual->authorizationEndpoint());

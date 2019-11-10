@@ -19,14 +19,16 @@ use Jose\Component\Signature\JWSVerifier;
 use Jose\Component\Signature\Serializer\CompactSerializer;
 use Jose\Component\Signature\Serializer\JWSSerializerManager;
 use OpenIDConnect\Core\Jwt\Checker\NonceChecker;
-use OpenIDConnect\Core\Metadata\ClientRegistration;
-use OpenIDConnect\Core\Metadata\MetadataAwareTraits;
-use OpenIDConnect\Core\Metadata\ProviderMetadata;
+use OpenIDConnect\OAuth2\Metadata\ClientInformation;
+use OpenIDConnect\OAuth2\Metadata\ClientInformationAwaitTrait;
+use OpenIDConnect\OAuth2\Metadata\ProviderMetadata;
+use OpenIDConnect\OAuth2\Metadata\ProviderMetadataAwaitTrait;
 
 class JwtFactory
 {
     use AlgorithmFactoryTrait;
-    use MetadataAwareTraits;
+    use ClientInformationAwaitTrait;
+    use ProviderMetadataAwaitTrait;
 
     /**
      * Addition algorithms
@@ -35,10 +37,10 @@ class JwtFactory
      */
     private $algorithms = [];
 
-    public function __construct(ProviderMetadata $providerMetadata, ClientRegistration $clientRegistration)
+    public function __construct(ProviderMetadata $providerMetadata, ClientInformation $clientInformation)
     {
         $this->setProviderMetadata($providerMetadata);
-        $this->setClientRegistration($clientRegistration);
+        $this->setClientInformation($clientInformation);
     }
 
     /**
@@ -59,7 +61,7 @@ class JwtFactory
     public function createClaimCheckerManager($check = []): ClaimCheckerManager
     {
         return ClaimCheckerManager::create([
-            new AudienceChecker($this->clientRegistration->id()),
+            new AudienceChecker($this->clientInformation->id()),
             new ExpirationTimeChecker(),
             new IssuedAtChecker(),
             new NotBeforeChecker(),
@@ -74,13 +76,13 @@ class JwtFactory
     {
         $tokenTypesSupport = [new JWSTokenSupport()];
 
-        if (null !== $this->providerMetadata->idTokenEncryptionAlgValuesSupported()) {
+        if (null !== $this->providerMetadata->get('id_token_encryption_alg_values_supported')) {
             $tokenTypesSupport[] = new JWETokenSupport();
         }
 
         return HeaderCheckerManager::create([
             new AlgorithmChecker($this->resolveAlgorithms()),
-            new IssuerChecker($this->providerMetadata->issuer()),
+            new IssuerChecker($this->providerMetadata->require('issuer')),
         ], $tokenTypesSupport);
     }
 
@@ -144,9 +146,9 @@ class JwtFactory
     private function resolveAlgorithms(): array
     {
         return array_unique(array_merge(
-            $this->providerMetadata->idTokenAlgValuesSupported(),
-            $this->providerMetadata->idTokenEncryptionAlgValuesSupported(),
-            $this->providerMetadata->idTokenEncryptionEncValuesSupported(),
+            $this->providerMetadata->require('id_token_signing_alg_values_supported'),
+            $this->providerMetadata->get('id_token_encryption_alg_values_supported', []),
+            $this->providerMetadata->get('id_token_encryption_enc_values_supported', []),
             $this->algorithms
         ));
     }

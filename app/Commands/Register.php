@@ -4,7 +4,7 @@ namespace App\Commands;
 
 use GuzzleHttp\Exception\RequestException;
 use OpenIDConnect\Core\Issuer;
-use OpenIDConnect\Core\Metadata\ClientMetadata;
+use OpenIDConnect\OAuth2\Metadata\ClientMetadata;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;

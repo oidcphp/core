@@ -2,15 +2,18 @@
 
 namespace OpenIDConnect\Core;
 
-use GuzzleHttp\ClientInterface as HttpClientInterface;
 use OpenIDConnect\Core\Exceptions\OpenIDProviderException;
 use OpenIDConnect\Core\Exceptions\RelyingPartyException;
-use OpenIDConnect\Core\Metadata\ClientMetadata;
-use OpenIDConnect\Core\Metadata\ClientRegistration;
-use OpenIDConnect\Core\Metadata\ProviderMetadata;
-use OpenIDConnect\Core\Traits\HttpClientAwareTrait;
+use OpenIDConnect\OAuth2\Metadata\ClientInformation;
+use OpenIDConnect\OAuth2\Metadata\ClientMetadata;
+use OpenIDConnect\OAuth2\Metadata\JwkSet;
+use OpenIDConnect\OAuth2\Metadata\ProviderMetadata;
+use Psr\Container\ContainerInterface;
+use Psr\Http\Client\ClientExceptionInterface;
+use Psr\Http\Client\ClientInterface;
+use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
-use function GuzzleHttp\json_decode;
+use Psr\Http\Message\StreamFactoryInterface;
 
 /**
  * OpenID Provider Issuer Discovery
@@ -19,96 +22,80 @@ use function GuzzleHttp\json_decode;
  */
 class Issuer
 {
-    use HttpClientAwareTrait;
-
     /**
      * @see https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfig
      */
     public const OPENID_CONNECT_DISCOVERY = '/.well-known/openid-configuration';
 
     /**
-     * @var string
+     * @var ContainerInterface
      */
-    private $baseUrl;
+    private $container;
 
     /**
-     * @var string|null
-     */
-    private $jwksUri;
-
-    /**
-     * @var ProviderMetadata
-     */
-    private $providerMetadata;
-
-    /**
-     * @param string $baseUrl
-     * @param string|null $jwksUri
-     * @param HttpClientInterface|null $httpClient
+     * @param ContainerInterface $container
      * @return static
      */
-    public static function create(string $baseUrl, ?string $jwksUri = null, ?HttpClientInterface $httpClient = null)
+    public static function create(ContainerInterface $container): Issuer
     {
-        return new static($baseUrl, $jwksUri, $httpClient);
+        return new static($container);
     }
 
     /**
-     * @param string $baseUrl
-     * @param string|null $jwksUri
-     * @param HttpClientInterface|null $httpClient
+     * @param ContainerInterface $container
      */
-    public function __construct(string $baseUrl, ?string $jwksUri = null, ?HttpClientInterface $httpClient = null)
+    public function __construct(ContainerInterface $container)
     {
-        $this->baseUrl = $baseUrl;
-        $this->jwksUri = $jwksUri;
-
-        if (null !== $httpClient) {
-            $this->setHttpClient($httpClient);
-        }
+        $this->container = $container;
     }
 
     /**
      * Discover the OpenID Connect provider
      *
+     * @param string $baseUrl
      * @return ProviderMetadata
+     * @throws ClientExceptionInterface
      */
-    public function discover(): ProviderMetadata
+    public function discover(string $baseUrl): ProviderMetadata
     {
-        if (null !== $this->providerMetadata) {
-            return $this->providerMetadata;
-        }
+        $discoveryUri = $this->normalizeUrl($baseUrl) . self::OPENID_CONNECT_DISCOVERY;
 
-        $httpClient = $this->getHttpClient();
+        $discoverResponse = $this->sendRequestDiscovery($discoveryUri);
+        $jwksResponse = $this->sendRequestDiscovery($discoverResponse['jwks_uri']);
 
-        $discoveryUri = $this->normalizeUrl($this->baseUrl) . self::OPENID_CONNECT_DISCOVERY;
-
-        $discoverResponse = $this->processResponse($httpClient->request('GET', $discoveryUri));
-        $jwksResponse = $this->processResponse($httpClient->request('GET', $this->resolveJwksUri($discoverResponse)));
-
-        return $this->providerMetadata = new ProviderMetadata($discoverResponse, $jwksResponse);
+        return new ProviderMetadata($discoverResponse, new JwkSet($jwksResponse));
     }
 
     /**
+     * @param ProviderMetadata $providerMetadata
      * @param ClientMetadata $clientMetadata
-     * @return ClientRegistration
+     * @return ClientInformation
+     * @throws ClientExceptionInterface
      */
-    public function register(ClientMetadata $clientMetadata): ClientRegistration
+    public function register(ProviderMetadata $providerMetadata, ClientMetadata $clientMetadata): ClientInformation
     {
-        $registrationEndpoint = $this->discover()->registrationEndpoint();
+        $registrationEndpoint = $providerMetadata->registrationEndpoint();
 
         if (empty($registrationEndpoint)) {
-            $msg = 'Cannot use dynamic client registration on issuer: ' . $this->discover()->issuer();
+            $msg = 'Cannot use dynamic client registration on issuer: ' . $providerMetadata->issuer();
 
             throw new RelyingPartyException($msg);
         }
 
-        $httpClient = $this->getHttpClient();
+        /** @var ClientInterface $httpClient */
+        $httpClient = $this->container->get(ClientInterface::class);
 
-        $registrationResponse = $this->processResponse($httpClient->request('POST', $registrationEndpoint, [
-            'json' => $clientMetadata->jsonSerialize(),
-        ]));
+        /** @var RequestFactoryInterface $requestFactory */
+        $requestFactory = $this->container->get(RequestFactoryInterface::class);
 
-        return new ClientRegistration($registrationResponse);
+        /** @var StreamFactoryInterface $streamFactory */
+        $streamFactory = $this->container->get(StreamFactoryInterface::class);
+
+        $request = $requestFactory->createRequest('POST', $registrationEndpoint)
+            ->withHeader('content-type', 'application/json')
+            ->withBody($streamFactory->createStream((string)json_encode($clientMetadata)));
+
+        return new ClientInformation($this->processResponse($httpClient->sendRequest($request)));
     }
 
     /**
@@ -124,6 +111,26 @@ class Issuer
     }
 
     /**
+     * Send request to discovery endpoint and process response
+     *
+     * @param string $uri
+     * @return array
+     * @throws ClientExceptionInterface
+     */
+    private function sendRequestDiscovery(string $uri): array
+    {
+        /** @var ClientInterface $httpClient */
+        $httpClient = $this->container->get(ClientInterface::class);
+
+        /** @var RequestFactoryInterface $requestFactory */
+        $requestFactory = $this->container->get(RequestFactoryInterface::class);
+
+        $response = $httpClient->sendRequest($requestFactory->createRequest('GET', $uri));
+
+        return $this->processResponse($response);
+    }
+
+    /**
      * @param ResponseInterface $response
      * @return array
      */
@@ -135,22 +142,5 @@ class Issuer
         }
 
         return json_decode((string)$response->getBody(), true);
-    }
-
-    /**
-     * @param array $discoverResponse
-     * @return string
-     */
-    private function resolveJwksUri(array $discoverResponse): string
-    {
-        if (null === $this->jwksUri && empty($discoverResponse['jwks_uri'])) {
-            throw new RelyingPartyException("Missing 'jwks_url` metadata");
-        }
-
-        if (null === $this->jwksUri) {
-            return $discoverResponse['jwks_uri'];
-        }
-
-        return $this->jwksUri;
     }
 }
