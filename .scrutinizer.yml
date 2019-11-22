@@ -1,0 +1,8 @@
+filter:
+  excluded_paths:
+    - 'app/*'
+    - 'bin/*'
+    - 'tests/*'
+
+tools:
+  external_code_coverage: true
