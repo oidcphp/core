@@ -33,7 +33,6 @@
     },
     "require-dev": {
         "codacy/coverage": "^1.4",
-        "php-coveralls/php-coveralls": "^2.1",
         "phpstan/phpstan": "^0.11.8",
         "phpunit/phpunit": "^7 | ^8",
         "squizlabs/php_codesniffer": "^3.4",
