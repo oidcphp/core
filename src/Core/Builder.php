@@ -1,22 +1,22 @@
-<?php
-
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace OpenIDConnect\Core;
 
 use GuzzleHttp\Client as HttpClient;
-use GuzzleHttp\ClientInterface;
 use Http\Factory\Guzzle\RequestFactory;
 use Http\Factory\Guzzle\ResponseFactory;
 use Http\Factory\Guzzle\StreamFactory;
 use Http\Factory\Guzzle\UriFactory;
-use OpenIDConnect\Core\Metadata\ClientRegistration;
-use OpenIDConnect\Core\Metadata\MetadataAwareTraits;
-use OpenIDConnect\Core\Metadata\ProviderMetadata;
-use OpenIDConnect\Core\OAuth2\Grant\GrantFactory;
-use OpenIDConnect\Core\Token\TokenSet;
+use OpenIDConnect\Core\Token\TokenFactory;
+use OpenIDConnect\OAuth2\Metadata\ClientInformation;
+use OpenIDConnect\OAuth2\Metadata\ClientInformationAwaitTrait;
+use OpenIDConnect\OAuth2\Metadata\ProviderMetadata;
+use OpenIDConnect\OAuth2\Metadata\ProviderMetadataAwaitTrait;
+use OpenIDConnect\OAuth2\Token\TokenFactoryInterface;
 use OpenIDConnect\Support\Container\Container;
+use OpenIDConnect\Support\Http\GuzzlePsr18Client;
 use Psr\Container\ContainerInterface;
+use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
@@ -27,7 +27,8 @@ use Psr\Http\Message\UriFactoryInterface;
  */
 class Builder
 {
-    use MetadataAwareTraits;
+    use ProviderMetadataAwaitTrait;
+    use ClientInformationAwaitTrait;
 
     /**
      * @var ContainerInterface
@@ -36,10 +37,10 @@ class Builder
 
     /**
      * @param ProviderMetadata $provider
-     * @param ClientRegistration $client
+     * @param ClientInformation $client
      * @return static
      */
-    public static function create(ProviderMetadata $provider, ClientRegistration $client): Builder
+    public static function create(ProviderMetadata $provider, ClientInformation $client): Builder
     {
         return new static($provider, $client);
     }
@@ -50,12 +51,8 @@ class Builder
      */
     public static function createDefaultContainer($instances = []): Container
     {
-        if (empty($instances[GrantFactory::class])) {
-            $instances[GrantFactory::class] = new GrantFactory();
-        }
-
         if (empty($instances[ClientInterface::class])) {
-            $instances[ClientInterface::class] = new HttpClient();
+            $instances[ClientInterface::class] = new GuzzlePsr18Client(new HttpClient());
         }
 
         if (empty($instances[StreamFactoryInterface::class])) {
@@ -74,17 +71,21 @@ class Builder
             $instances[UriFactoryInterface::class] = new UriFactory();
         }
 
+        if (empty($instances[TokenFactoryInterface::class])) {
+            $instances[TokenFactoryInterface::class] = new TokenFactory();
+        }
+
         return new Container($instances);
     }
 
     /**
      * @param ProviderMetadata $provider
-     * @param ClientRegistration $client
+     * @param ClientInformation $client
      */
-    public function __construct(ProviderMetadata $provider, ClientRegistration $client)
+    public function __construct(ProviderMetadata $provider, ClientInformation $client)
     {
         $this->setProviderMetadata($provider);
-        $this->setClientRegistration($client);
+        $this->setClientInformation($client);
     }
 
     /**
@@ -92,16 +93,7 @@ class Builder
      */
     public function createOpenIDConnectClient(): Client
     {
-        return new Client($this->providerMetadata, $this->clientRegistration, $this->container);
-    }
-
-    /**
-     * @param array $parameters
-     * @return TokenSet
-     */
-    public function createTokenSet(array $parameters): TokenSet
-    {
-        return new TokenSet($parameters, $this->providerMetadata, $this->clientRegistration);
+        return new Client($this->providerMetadata, $this->clientInformation, $this->container);
     }
 
     /**

@@ -2,13 +2,16 @@
 
 namespace Tests\Core;
 
-use GuzzleHttp\ClientInterface;
+use Jose\Component\Core\JWK;
 use Jose\Component\Core\Util\JsonConverter;
+use Jose\Component\KeyManagement\JWKFactory;
 use Jose\Component\Signature\Serializer\CompactSerializer;
 use OpenIDConnect\Core\Builder;
 use OpenIDConnect\Core\Claims;
 use OpenIDConnect\Core\Client;
 use OpenIDConnect\Core\Exceptions\RelyingPartyException;
+use OpenIDConnect\Core\Jwt\JwtFactory;
+use Psr\Http\Client\ClientInterface;
 use Tests\TestCase;
 
 class ClientHandleOpenIDConnectCallbackTest extends TestCase
@@ -20,7 +23,7 @@ class ClientHandleOpenIDConnectCallbackTest extends TestCase
     {
         $providerMetadata = $this->createProviderMetadata();
 
-        $clientMetadata = $this->createClientRegistration([
+        $clientInformation = $this->createClientInformation([
             'client_id' => 'some-aud',
         ]);
 
@@ -33,9 +36,11 @@ class ClientHandleOpenIDConnectCallbackTest extends TestCase
             'sub' => 'some-sub',
         ];
 
-        $jws = $providerMetadata->createJwtFactory($clientMetadata)->createJwsBuilder()
+        $factory = new JwtFactory($providerMetadata, $clientInformation);
+
+        $jws = $factory->createJwsBuilder()
             ->withPayload(JsonConverter::encode($payload))
-            ->addSignature($providerMetadata->jwkSet()->get(0), ['alg' => 'RS256'])
+            ->addSignature(new JWK($providerMetadata->jwkSet()->get(0)), ['alg' => 'RS256'])
             ->build();
 
         $expectedIdToken = (new CompactSerializer())->serialize($jws);
@@ -43,7 +48,7 @@ class ClientHandleOpenIDConnectCallbackTest extends TestCase
         /** @var Client $target */
         $target = new Client(
             $providerMetadata,
-            $clientMetadata,
+            $clientInformation,
             Builder::createDefaultContainer([
                 ClientInterface::class => $this->createHttpClient([
                     $this->createFakeTokenEndpointResponse([
@@ -78,7 +83,7 @@ class ClientHandleOpenIDConnectCallbackTest extends TestCase
 
         $providerMetadata = $this->createProviderMetadata();
 
-        $clientMetadata = $this->createClientRegistration([
+        $clientInformation = $this->createClientInformation([
             'client_id' => 'some-aud',
         ]);
 
@@ -91,15 +96,17 @@ class ClientHandleOpenIDConnectCallbackTest extends TestCase
             'sub' => 'some-sub',
         ];
 
-        $jws = $providerMetadata->createJwtFactory($clientMetadata)->createJwsBuilder()
+        $factory = new JwtFactory($providerMetadata, $clientInformation);
+
+        $jws = $factory->createJwsBuilder()
             ->withPayload(JsonConverter::encode($payload))
-            ->addSignature($providerMetadata->jwkSet()->get(0), ['alg' => 'RS256'])
+            ->addSignature(JWKFactory::createFromValues($providerMetadata->jwkSet()->get(0)), ['alg' => 'RS256'])
             ->build();
 
         /** @var Client $target */
         $target = new Client(
             $providerMetadata,
-            $clientMetadata,
+            $clientInformation,
             Builder::createDefaultContainer([
                 ClientInterface::class => $this->createHttpClient([
                     $this->createFakeTokenEndpointResponse([

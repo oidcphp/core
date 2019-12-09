@@ -2,19 +2,30 @@
 
 namespace OpenIDConnect\Core\Token\Concerns;
 
+use Jose\Component\Core\JWKSet;
 use Jose\Component\Core\Util\JsonConverter;
 use OpenIDConnect\Core\Claims;
 use OpenIDConnect\Core\Exceptions\RelyingPartyException;
 use OpenIDConnect\Core\Jwt\JwtFactory;
+use OpenIDConnect\OAuth2\Metadata\ClientInformationAwaitTrait;
+use OpenIDConnect\OAuth2\Metadata\ProviderMetadataAwaitTrait;
 use RangeException;
 use UnexpectedValueException;
 
 trait IdToken
 {
+    use ClientInformationAwaitTrait;
+    use ProviderMetadataAwaitTrait;
+
     /**
      * @var Claims
      */
     private $claims;
+
+    /**
+     * @var JwtFactory
+     */
+    private $jwtFactory;
 
     public function idTokenClaims($extraMandatoryClaims = [], $check = []): Claims
     {
@@ -28,16 +39,13 @@ trait IdToken
             throw new RangeException('No ID token');
         }
 
-        /** @var JwtFactory $jwtFactory */
-        $jwtFactory = $this->createJwtFactory();
-
-        $loader = $jwtFactory->createJwsLoader();
+        $loader = $this->jwtFactory->createJwsLoader();
 
         $signature = null;
 
         $jws = $loader->loadAndVerifyWithKeySet(
             $token,
-            $this->providerMetadata->jwkSet(),
+            JWKSet::createFromKeyData($this->providerMetadata->jwkSet()->toArray()),
             $signature
         );
 
@@ -48,10 +56,10 @@ trait IdToken
         }
 
         if ($this->has('nonce')) {
-            $check['nonce'] = $this->values('nonce');
+            $check['nonce'] = $this->get('nonce');
         }
 
-        $claimCheckerManager = $jwtFactory->createClaimCheckerManager($check);
+        $claimCheckerManager = $this->jwtFactory->createClaimCheckerManager($check);
 
         try {
             $mandatoryClaims = array_unique(array_merge(static::REQUIRED_CLAIMS, $extraMandatoryClaims));
@@ -62,5 +70,16 @@ trait IdToken
         }
 
         return $this->claims = Claims::createFromJWS($jws);
+    }
+
+    /**
+     * @param JwtFactory $jwtFactory
+     * @return static
+     */
+    public function setJwtFactory(JwtFactory $jwtFactory)
+    {
+        $this->jwtFactory = $jwtFactory;
+
+        return $this;
     }
 }
