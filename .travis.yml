@@ -23,8 +23,6 @@ script:
 after_success:
   - if [[ "7.3" == "${TRAVIS_PHP_VERSION}" ]]; then bash <(curl -s https://codecov.io/bash) ; fi
   - if [[ "7.3" == "${TRAVIS_PHP_VERSION}" ]]; then travis_retry php vendor/bin/codacycoverage clover ; fi
-  - if [[ "7.3" == "${TRAVIS_PHP_VERSION}" ]]; then travis_retry wget https://scrutinizer-ci.com/ocular.phar ; fi
-  - if [[ "7.3" == "${TRAVIS_PHP_VERSION}" ]]; then travis_retry php ocular.phar code-coverage:upload --format=php-clover build/logs/clover.xml ; fi
 
 cache:
   directories:
