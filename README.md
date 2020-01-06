@@ -42,6 +42,6 @@ OpenID Connect Core Library implementation for PHP.
 
 | IdP | well known |
 | --- | --- |
-| [Apple ID](https://developer.apple.com/sign-in-with-apple/) | [Discovery](https://appleid.apple.com/auth/.well-known/openid-configuration) |
+| [Apple ID](https://developer.apple.com/sign-in-with-apple/) | [Discovery](https://appleid.apple.com/.well-known/openid-configuration) |
 | [Google](https://developers.google.com/identity/protocols/OpenIDConnect) | [Discovery](https://accounts.google.com/.well-known/openid-configuration) |
 | [Line](https://developers.line.biz/en/docs/line-login/web/integrate-line-login/) | [Discovery](https://access.line.me/.well-known/openid-configuration) |
