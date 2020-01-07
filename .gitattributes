@@ -2,8 +2,6 @@
 * text=lf
 
 # Exclude unused files
-/app export-ignore
-/bin export-ignore
 /tests export-ignore
 /.codacy.yml export-ignore
 /.gitattributes export-ignore
