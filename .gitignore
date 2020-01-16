@@ -37,7 +37,6 @@ Desktop.ini
 /composer.lock
 
 # Config files
-/phpcs.xml
 /phpunit.xml
 
 # Artifacts files

@@ -69,7 +69,7 @@ trait AlgorithmFactoryTrait
 
         if (!isset($this->algorithmsInstance[$alias])) {
             $class = $aliases[$alias];
-            $this->algorithmsInstance[$alias] = new $class;
+            $this->algorithmsInstance[$alias] = new $class();
         }
 
         return $this->algorithmsInstance[$alias];

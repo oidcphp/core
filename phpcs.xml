@@ -11,7 +11,7 @@
     <rule ref="Generic.PHP.Syntax"/>
 
     <!-- inherit rules from: -->
-    <rule ref="PSR2"/>
+    <rule ref="PSR12"/>
 
     <!-- specific and just exclude rules in some file -->
     <rule ref="Generic.Files.LineLength.TooLong">
