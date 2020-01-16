@@ -80,16 +80,13 @@ class TestCase extends \PHPUnit\Framework\TestCase
     /**
      * @param array $provider
      * @param array $client
-     * @param array $httpMock
-     * @param array $history
      * @return Builder
      */
-    protected function createFactory($provider = [], $client = [], $httpMock = [], $history = []): Builder
+    protected function createFactory($provider = [], $client = []): Builder
     {
         return new Builder(
             $this->createProviderMetadata($provider),
-            $this->createClientInformation($client),
-            $this->createHttpClient($httpMock, $history)
+            $this->createClientInformation($client)
         );
     }
 
