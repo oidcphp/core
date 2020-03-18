@@ -8,7 +8,6 @@ use OpenIDConnect\OAuth2\Metadata\ClientInformation;
 use OpenIDConnect\OAuth2\Metadata\ClientMetadata;
 use OpenIDConnect\OAuth2\Metadata\JwkSet;
 use OpenIDConnect\OAuth2\Metadata\ProviderMetadata;
-use Psr\Container\ContainerInterface;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
@@ -28,25 +27,33 @@ class Issuer
     public const OPENID_CONNECT_DISCOVERY = '/.well-known/openid-configuration';
 
     /**
-     * @var ContainerInterface
+     * @var ClientInterface
      */
-    private $container;
+    private $client;
 
     /**
-     * @param ContainerInterface $container
-     * @return static
+     * @var RequestFactoryInterface
      */
-    public static function create(ContainerInterface $container): Issuer
-    {
-        return new static($container);
-    }
+    private $requestFactory;
 
     /**
-     * @param ContainerInterface $container
+     * @var StreamFactoryInterface
      */
-    public function __construct(ContainerInterface $container)
-    {
-        $this->container = $container;
+    private $streamFactory;
+
+    /**
+     * @param ClientInterface $client
+     * @param RequestFactoryInterface $requestFactory
+     * @param StreamFactoryInterface $streamFactory
+     */
+    public function __construct(
+        ClientInterface $client,
+        RequestFactoryInterface $requestFactory,
+        StreamFactoryInterface $streamFactory
+    ) {
+        $this->client = $client;
+        $this->requestFactory = $requestFactory;
+        $this->streamFactory = $streamFactory;
     }
 
     /**
@@ -82,20 +89,11 @@ class Issuer
             throw new RelyingPartyException($msg);
         }
 
-        /** @var ClientInterface $httpClient */
-        $httpClient = $this->container->get(ClientInterface::class);
-
-        /** @var RequestFactoryInterface $requestFactory */
-        $requestFactory = $this->container->get(RequestFactoryInterface::class);
-
-        /** @var StreamFactoryInterface $streamFactory */
-        $streamFactory = $this->container->get(StreamFactoryInterface::class);
-
-        $request = $requestFactory->createRequest('POST', $registrationEndpoint)
+        $request = $this->requestFactory->createRequest('POST', $registrationEndpoint)
             ->withHeader('content-type', 'application/json')
-            ->withBody($streamFactory->createStream((string)json_encode($clientMetadata)));
+            ->withBody($this->streamFactory->createStream((string)json_encode($clientMetadata)));
 
-        return new ClientInformation($this->processResponse($httpClient->sendRequest($request)));
+        return new ClientInformation($this->processResponse($this->client->sendRequest($request)));
     }
 
     /**
@@ -119,13 +117,7 @@ class Issuer
      */
     private function sendRequestDiscovery(string $uri): array
     {
-        /** @var ClientInterface $httpClient */
-        $httpClient = $this->container->get(ClientInterface::class);
-
-        /** @var RequestFactoryInterface $requestFactory */
-        $requestFactory = $this->container->get(RequestFactoryInterface::class);
-
-        $response = $httpClient->sendRequest($requestFactory->createRequest('GET', $uri));
+        $response = $this->client->sendRequest($this->requestFactory->createRequest('GET', $uri));
 
         return $this->processResponse($response);
     }
