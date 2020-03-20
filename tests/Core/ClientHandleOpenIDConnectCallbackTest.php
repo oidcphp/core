@@ -6,7 +6,6 @@ use Jose\Component\Core\JWK;
 use Jose\Component\Core\Util\JsonConverter;
 use Jose\Component\KeyManagement\JWKFactory;
 use Jose\Component\Signature\Serializer\CompactSerializer;
-use OpenIDConnect\Core\Builder;
 use OpenIDConnect\Core\Claims;
 use OpenIDConnect\Core\Client;
 use OpenIDConnect\Core\Exceptions\RelyingPartyException;
@@ -49,7 +48,7 @@ class ClientHandleOpenIDConnectCallbackTest extends TestCase
         $target = new Client(
             $providerMetadata,
             $clientInformation,
-            Builder::createDefaultContainer([
+            $this->createContainer([
                 ClientInterface::class => $this->createHttpClient([
                     $this->createFakeTokenEndpointResponse([
                         'id_token' => $expectedIdToken,
@@ -107,7 +106,7 @@ class ClientHandleOpenIDConnectCallbackTest extends TestCase
         $target = new Client(
             $providerMetadata,
             $clientInformation,
-            Builder::createDefaultContainer([
+            $this->createContainer([
                 ClientInterface::class => $this->createHttpClient([
                     $this->createFakeTokenEndpointResponse([
                         'id_token' => (new CompactSerializer())->serialize($jws),

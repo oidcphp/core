@@ -15,8 +15,6 @@ use OpenIDConnect\OAuth2\Metadata\ClientInformationAwaitTrait;
 use OpenIDConnect\OAuth2\Metadata\ProviderMetadata;
 use OpenIDConnect\OAuth2\Metadata\ProviderMetadataAwaitTrait;
 use OpenIDConnect\OAuth2\Token\TokenFactoryInterface;
-use OpenIDConnect\Support\Container\Container;
-use OpenIDConnect\Support\Http\GuzzlePsr18Client;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
@@ -48,39 +46,6 @@ class Builder
     }
 
     /**
-     * @param array $instances
-     * @return Container
-     */
-    public static function createDefaultContainer($instances = []): Container
-    {
-        if (empty($instances[ClientInterface::class])) {
-            $instances[ClientInterface::class] = new GuzzlePsr18Client(new HttpClient());
-        }
-
-        if (empty($instances[StreamFactoryInterface::class])) {
-            $instances[StreamFactoryInterface::class] = new StreamFactory();
-        }
-
-        if (empty($instances[ResponseFactoryInterface::class])) {
-            $instances[ResponseFactoryInterface::class] = new ResponseFactory();
-        }
-
-        if (empty($instances[RequestFactoryInterface::class])) {
-            $instances[RequestFactoryInterface::class] = new RequestFactory();
-        }
-
-        if (empty($instances[UriFactoryInterface::class])) {
-            $instances[UriFactoryInterface::class] = new UriFactory();
-        }
-
-        if (empty($instances[TokenFactoryInterface::class])) {
-            $instances[TokenFactoryInterface::class] = new TokenFactory();
-        }
-
-        return new Container($instances);
-    }
-
-    /**
      * @param ProviderMetadata $provider
      * @param ClientInformation $client
      */
@@ -107,13 +72,5 @@ class Builder
         $this->container = $container;
 
         return $this;
-    }
-
-    /**
-     * @return static
-     */
-    public function useDefaultContainer(): Builder
-    {
-        return $this->setContainer(static::createDefaultContainer());
     }
 }

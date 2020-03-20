@@ -18,7 +18,7 @@ class ClientTest extends TestCase
         $this->target = new Client(
             $this->createProviderMetadata(),
             $this->createClientInformation(),
-            Builder::createDefaultContainer()
+            $this->createContainer()
         );
     }
 
