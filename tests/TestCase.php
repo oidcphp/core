@@ -12,19 +12,26 @@ use Illuminate\Container\Container;
 use Jose\Component\Core\JWKSet;
 use Jose\Component\Core\Util\JsonConverter;
 use Jose\Component\KeyManagement\JWKFactory;
+use Laminas\Diactoros\RequestFactory;
+use Laminas\Diactoros\ResponseFactory;
+use Laminas\Diactoros\ServerRequestFactory;
+use Laminas\Diactoros\StreamFactory;
+use Laminas\Diactoros\UploadedFileFactory;
+use Laminas\Diactoros\UriFactory;
 use OpenIDConnect\Core\Builder;
 use OpenIDConnect\Core\Token\TokenFactory;
 use OpenIDConnect\OAuth2\Metadata\ClientInformation;
 use OpenIDConnect\OAuth2\Metadata\ProviderMetadata;
 use OpenIDConnect\OAuth2\Token\TokenFactoryInterface;
-use OpenIDConnect\Support\Laravel\HttpFactoryServiceProvider;
 use PHPUnit\Framework\TestCase as BaseTestCase;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
+use Psr\Http\Message\UploadedFileFactoryInterface;
 use Psr\Http\Message\UriFactoryInterface;
 
 use function GuzzleHttp\json_encode;
@@ -66,7 +73,12 @@ class TestCase extends BaseTestCase
             return $instances[TokenFactoryInterface::class];
         });
 
-        (new HttpFactoryServiceProvider($container))->register();
+        $container->singleton(ResponseFactoryInterface::class, ResponseFactory::class);
+        $container->singleton(RequestFactoryInterface::class, RequestFactory::class);
+        $container->singleton(ServerRequestFactoryInterface::class, ServerRequestFactory::class);
+        $container->singleton(StreamFactoryInterface::class, StreamFactory::class);
+        $container->singleton(UploadedFileFactoryInterface::class, UploadedFileFactory::class);
+        $container->singleton(UriFactoryInterface::class, UriFactory::class);
 
         if (isset($instances[StreamFactoryInterface::class])) {
             $container->instance(StreamFactoryInterface::class, $instances[StreamFactoryInterface::class]);
