@@ -6,7 +6,7 @@ namespace OpenIDConnect\OAuth2\Builder;
 
 use OpenIDConnect\OAuth2\ClientAuthentication\ClientAuthenticationAwareTrait;
 use OpenIDConnect\OAuth2\Grant\GrantType;
-use OpenIDConnect\OAuth2\Utils\Query;
+use OpenIDConnect\Utils\Query;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;

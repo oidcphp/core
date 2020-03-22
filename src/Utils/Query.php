@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OpenIDConnect\OAuth2\Utils;
+namespace OpenIDConnect\Utils;
 
 /**
  * General query builder and parser for process query and post body

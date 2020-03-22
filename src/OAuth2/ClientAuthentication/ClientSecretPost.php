@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace OpenIDConnect\OAuth2\ClientAuthentication;
 
-use OpenIDConnect\OAuth2\Utils\Query;
+use OpenIDConnect\Utils\Query;
 use Psr\Http\Message\RequestInterface;
 
 /**
