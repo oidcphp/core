@@ -1,17 +1,18 @@
-sudo: false
 os: linux
+dist: xenial
 language: php
 
 php:
   - 7.1
   - 7.2
   - 7.3
+  - 7.4
 
 branches:
   only:
     - master
     - /^\d+\.x$/
-    - /^\d+\.\d+\.\d+$/
+    - /^\v?d+\.\d+\.\d+$/
 
 install:
   - composer install --prefer-dist
@@ -21,8 +22,8 @@ script:
   - make analyse
 
 after_success:
-  - if [[ "7.3" == "${TRAVIS_PHP_VERSION}" ]]; then bash <(curl -s https://codecov.io/bash) ; fi
-  - if [[ "7.3" == "${TRAVIS_PHP_VERSION}" ]]; then travis_retry php vendor/bin/codacycoverage clover ; fi
+  - if [[ "7.4" == "${TRAVIS_PHP_VERSION}" ]]; then bash <(curl -s https://codecov.io/bash) ; fi
+  - if [[ "7.4" == "${TRAVIS_PHP_VERSION}" ]]; then travis_retry php vendor/bin/codacycoverage clover ; fi
 
 cache:
   directories:
