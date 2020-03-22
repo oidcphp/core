@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OpenIDConnect\OAuth2\Metadata;
+namespace OpenIDConnect\Config;
 
 /**
  * Client information

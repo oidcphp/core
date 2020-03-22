@@ -2,7 +2,6 @@
 
 namespace Tests\Core;
 
-use OpenIDConnect\Core\Builder;
 use OpenIDConnect\Core\Client;
 use Tests\TestCase;
 

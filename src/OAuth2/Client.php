@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace OpenIDConnect\OAuth2;
 
 use InvalidArgumentException;
+use OpenIDConnect\Config\ClientInformation;
+use OpenIDConnect\Config\ProviderMetadata;
 use OpenIDConnect\OAuth2\Builder\AuthorizationFormResponseBuilder;
 use OpenIDConnect\OAuth2\Builder\AuthorizationRedirectResponseBuilder;
 use OpenIDConnect\OAuth2\Builder\TokenRequestBuilder;
@@ -13,9 +15,7 @@ use OpenIDConnect\OAuth2\Exceptions\OAuth2ClientException;
 use OpenIDConnect\OAuth2\Exceptions\OAuth2ServerException;
 use OpenIDConnect\OAuth2\Grant\AuthorizationCode;
 use OpenIDConnect\OAuth2\Grant\GrantType;
-use OpenIDConnect\OAuth2\Metadata\ClientInformation;
 use OpenIDConnect\OAuth2\Metadata\ClientInformationAwaitTrait;
-use OpenIDConnect\OAuth2\Metadata\ProviderMetadata;
 use OpenIDConnect\OAuth2\Metadata\ProviderMetadataAwaitTrait;
 use OpenIDConnect\OAuth2\Token\TokenFactoryInterface;
 use OpenIDConnect\OAuth2\Token\TokenSetInterface;

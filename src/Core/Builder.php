@@ -4,23 +4,11 @@ declare(strict_types=1);
 
 namespace OpenIDConnect\Core;
 
-use GuzzleHttp\Client as HttpClient;
-use Http\Factory\Guzzle\RequestFactory;
-use Http\Factory\Guzzle\ResponseFactory;
-use Http\Factory\Guzzle\StreamFactory;
-use Http\Factory\Guzzle\UriFactory;
-use OpenIDConnect\Core\Token\TokenFactory;
-use OpenIDConnect\OAuth2\Metadata\ClientInformation;
+use OpenIDConnect\Config\ClientInformation;
+use OpenIDConnect\Config\ProviderMetadata;
 use OpenIDConnect\OAuth2\Metadata\ClientInformationAwaitTrait;
-use OpenIDConnect\OAuth2\Metadata\ProviderMetadata;
 use OpenIDConnect\OAuth2\Metadata\ProviderMetadataAwaitTrait;
-use OpenIDConnect\OAuth2\Token\TokenFactoryInterface;
 use Psr\Container\ContainerInterface;
-use Psr\Http\Client\ClientInterface;
-use Psr\Http\Message\RequestFactoryInterface;
-use Psr\Http\Message\ResponseFactoryInterface;
-use Psr\Http\Message\StreamFactoryInterface;
-use Psr\Http\Message\UriFactoryInterface;
 
 /**
  * Factory for create anything

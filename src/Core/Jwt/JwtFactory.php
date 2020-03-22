@@ -19,9 +19,9 @@ use Jose\Component\Signature\JWSVerifier;
 use Jose\Component\Signature\Serializer\CompactSerializer;
 use Jose\Component\Signature\Serializer\JWSSerializerManager;
 use OpenIDConnect\Core\Jwt\Checker\NonceChecker;
-use OpenIDConnect\OAuth2\Metadata\ClientInformation;
+use OpenIDConnect\Config\ClientInformation;
+use OpenIDConnect\Config\ProviderMetadata;
 use OpenIDConnect\OAuth2\Metadata\ClientInformationAwaitTrait;
-use OpenIDConnect\OAuth2\Metadata\ProviderMetadata;
 use OpenIDConnect\OAuth2\Metadata\ProviderMetadataAwaitTrait;
 
 class JwtFactory

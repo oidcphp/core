@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace OpenIDConnect\OAuth2\Metadata;
 
+use OpenIDConnect\Config\ClientInformation;
+
 trait ClientInformationAwaitTrait
 {
     /**

@@ -2,15 +2,12 @@
 
 declare(strict_types=1);
 
-namespace OpenIDConnect\OAuth2\Metadata;
+namespace OpenIDConnect\Config;
 
 use InvalidArgumentException;
 use JsonSerializable;
-use OpenIDConnect\OAuth2\Exceptions\OAuth2ServerException;
 
 /**
- * JWK Set
- *
  * @see https://tools.ietf.org/html/rfc7517#section-5
  */
 class JwkSet implements JsonSerializable

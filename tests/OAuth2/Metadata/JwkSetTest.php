@@ -3,11 +3,11 @@
 namespace Tests\OAuth2\Metadata;
 
 use InvalidArgumentException;
-use OpenIDConnect\OAuth2\Metadata\JwkSet;
+use OpenIDConnect\Config\JwkSet;
 use Tests\TestCase;
 
 /**
- * @covers \OpenIDConnect\OAuth2\Metadata\JwkSet
+ * @covers \OpenIDConnect\Config\JwkSet
  */
 class JwkSetTest extends TestCase
 {

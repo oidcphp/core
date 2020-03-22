@@ -2,7 +2,7 @@
 
 namespace Tests\OAuth2\Metadata;
 
-use OpenIDConnect\OAuth2\Metadata\ClientMetadata;
+use OpenIDConnect\Config\ClientMetadata;
 use Tests\TestCase;
 
 class ClientMetadataTest extends TestCase
