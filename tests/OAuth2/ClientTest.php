@@ -11,6 +11,8 @@ use OpenIDConnect\OAuth2\Exceptions\OAuth2ClientException;
 use OpenIDConnect\OAuth2\Exceptions\OAuth2ServerException;
 use OpenIDConnect\OAuth2\Grant\AuthorizationCode;
 use Psr\Http\Client\ClientInterface;
+use Psr\Http\Client\NetworkExceptionInterface;
+use Psr\Http\Message\RequestInterface;
 use Tests\TestCase;
 
 class ClientTest extends TestCase
@@ -116,15 +118,20 @@ class ClientTest extends TestCase
     {
         $this->expectException(OAuth2ServerException::class);
 
+        $exception = new class extends \Exception implements NetworkExceptionInterface {
+            public function getRequest(): RequestInterface
+            {
+                return new Request('whatever', 'GET');
+            }
+        };
+
         $target = new Client(
             $this->createProviderMetadata(),
             $this->createClientInformation([
                 'redirect_uri' => 'https://someredirect',
             ]),
             $this->createContainer([
-                ClientInterface::class => (new MockClient())->appendThrowable(
-                    new NetworkException('whatever', new Request('whatever', 'GET'))
-                ),
+                ClientInterface::class => (new MockClient())->appendThrowable($exception),
             ])
         );
 
