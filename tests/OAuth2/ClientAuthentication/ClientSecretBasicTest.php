@@ -2,7 +2,7 @@
 
 namespace Tests\OAuth2\ClientAuthentication;
 
-use Http\Factory\Guzzle\RequestFactory;
+use Laminas\Diactoros\RequestFactory;
 use OpenIDConnect\OAuth2\ClientAuthentication\ClientSecretBasic;
 use PHPUnit\Framework\TestCase;
 

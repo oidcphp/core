@@ -2,6 +2,7 @@
 
 namespace Tests\Core;
 
+use MilesChou\Mocker\Psr18\MockClient;
 use OpenIDConnect\Core\Issuer;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
@@ -68,10 +69,9 @@ class IssuerTest extends TestCase
      */
     public function shouldProviderMetadataWhenDiscover(): void
     {
-        $mockHttpClient = $this->createHttpClient([
-            $this->createHttpJsonResponse(self::GOOGLE_OPENID_CONNECT_CONFIG),
-            $this->createHttpJsonResponse(['keys' => []]),
-        ]);
+        $mockHttpClient = (new MockClient())
+            ->appendResponseWithJson(self::GOOGLE_OPENID_CONNECT_CONFIG)
+            ->appendResponseWithJson(['keys' => []]);
 
         $container = $this->createContainer([
             ClientInterface::class => $mockHttpClient,

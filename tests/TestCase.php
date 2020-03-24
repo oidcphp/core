@@ -2,12 +2,6 @@
 
 namespace Tests;
 
-use GuzzleHttp\Client as HttpClient;
-use GuzzleHttp\Handler\MockHandler;
-use GuzzleHttp\HandlerStack;
-use GuzzleHttp\Middleware;
-use GuzzleHttp\Psr7\Response as HttpResponse;
-use Http\Adapter\Guzzle6\Client as Psr18Client;
 use Illuminate\Container\Container;
 use Jose\Component\Core\JWKSet;
 use Jose\Component\Core\Util\JsonConverter;
@@ -18,23 +12,21 @@ use Laminas\Diactoros\ServerRequestFactory;
 use Laminas\Diactoros\StreamFactory;
 use Laminas\Diactoros\UploadedFileFactory;
 use Laminas\Diactoros\UriFactory;
-use OpenIDConnect\Core\Builder;
-use OpenIDConnect\Core\Token\TokenFactory;
+use MilesChou\Mocker\Psr18\MockClient;
 use OpenIDConnect\Config\ClientInformation;
 use OpenIDConnect\Config\ProviderMetadata;
+use OpenIDConnect\Core\Builder;
+use OpenIDConnect\Core\Token\TokenFactory;
 use OpenIDConnect\OAuth2\Token\TokenFactoryInterface;
 use PHPUnit\Framework\TestCase as BaseTestCase;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
-use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Message\UploadedFileFactoryInterface;
 use Psr\Http\Message\UriFactoryInterface;
-
-use function GuzzleHttp\json_encode;
 
 class TestCase extends BaseTestCase
 {
@@ -59,7 +51,7 @@ class TestCase extends BaseTestCase
 
         $container->singleton(ClientInterface::class, function () use ($instances) {
             if (empty($instances[ClientInterface::class])) {
-                return $this->createHttpClient();
+                return new MockClient();
             }
 
             return $instances[ClientInterface::class];
@@ -112,63 +104,6 @@ class TestCase extends BaseTestCase
         );
     }
 
-    /**
-     * Creates HTTP client.
-     *
-     * @param ResponseInterface|ResponseInterface[] $responses
-     * @param array $history
-     * @return HandlerStack
-     */
-    protected function createHandlerStack($responses = [], &$history = []): HandlerStack
-    {
-        if (!is_array($responses)) {
-            $responses = [$responses];
-        }
-
-        $handler = HandlerStack::create(new MockHandler($responses));
-        $handler->push(Middleware::history($history));
-
-        return $handler;
-    }
-
-    /**
-     * Creates HTTP client.
-     *
-     * @param ResponseInterface|ResponseInterface[] $responses
-     * @param array $history
-     * @return ClientInterface
-     */
-    protected function createHttpClient($responses = [], &$history = []): ClientInterface
-    {
-        return new Psr18Client(new HttpClient($this->createHttpMockOption($responses, $history)));
-    }
-
-    /**
-     * @param array $data
-     * @param int $status
-     * @param array $headers
-     * @return ResponseInterface
-     */
-    protected function createHttpJsonResponse(
-        array $data = [],
-        int $status = 200,
-        array $headers = []
-    ): ResponseInterface {
-        return new HttpResponse($status, $headers, json_encode($data));
-    }
-
-    /**
-     * @param ResponseInterface|ResponseInterface[] $responses
-     * @param array $history
-     * @return array
-     */
-    protected function createHttpMockOption($responses = [], &$history = []): array
-    {
-        return [
-            'handler' => $this->createHandlerStack($responses, $history),
-        ];
-    }
-
     protected function createJwkSet($jwks = []): JWKSet
     {
         if (empty($jwks)) {
@@ -201,17 +136,6 @@ class TestCase extends BaseTestCase
             'subject_types_supported' => ['public'],
             'id_token_signing_alg_values_supported' => ['RS256'],
         ], $overwrite);
-    }
-
-    /**
-     * @param array $overwrite
-     * @param int $status
-     * @param array $headers
-     * @return ResponseInterface
-     */
-    protected function createFakeTokenEndpointResponse($overwrite = [], $status = 200, $headers = []): ResponseInterface
-    {
-        return $this->createHttpJsonResponse($this->createFakeTokenSetParameter($overwrite), $status, $headers);
     }
 
     /**

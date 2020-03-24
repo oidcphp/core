@@ -6,9 +6,9 @@ use Jose\Component\Core\JWKSet;
 use Jose\Component\Core\Util\JsonConverter;
 use Jose\Component\KeyManagement\JWKFactory;
 use Jose\Component\Signature\Serializer\CompactSerializer;
+use OpenIDConnect\Config\ProviderMetadata;
 use OpenIDConnect\Core\Jwt\JwtFactory;
 use OpenIDConnect\Core\Token\TokenSet;
-use OpenIDConnect\Config\ProviderMetadata;
 use Tests\TestCase;
 
 class TokenSetTest extends TestCase
