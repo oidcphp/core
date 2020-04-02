@@ -2,6 +2,8 @@
 
 namespace Tests\OAuth2\Builder;
 
+use MilesChou\Mocker\Psr18\MockClient;
+use MilesChou\Psr\Http\Message\HttpFactory;
 use OpenIDConnect\OAuth2\Builder\AuthorizationRedirectResponseBuilder;
 use Tests\TestCase;
 
@@ -12,7 +14,7 @@ class AuthorizationRedirectResponseBuilderTest extends TestCase
      */
     public function shouldReturnRedirectResponseWhenCallBuild(): void
     {
-        $target = new AuthorizationRedirectResponseBuilder($this->createContainer());
+        $target = new AuthorizationRedirectResponseBuilder(new MockClient(), new HttpFactory());
 
         $actual = $target->setProviderMetadata($this->createProviderMetadata())
             ->setClientInformation($this->createClientInformation())

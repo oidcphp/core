@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace OpenIDConnect;
 
 use InvalidArgumentException;
+use MilesChou\Psr\Http\Client\HttpClientAwareTrait;
+use MilesChou\Psr\Http\Message\HttpFactoryAwareTrait;
+use MilesChou\Psr\Http\Message\HttpFactoryInterface;
 use OpenIDConnect\Config\ClientInformation;
 use OpenIDConnect\Config\ProviderMetadata;
 use OpenIDConnect\OAuth2\Builder\AuthorizationFormResponseBuilder;
@@ -29,6 +32,8 @@ use Psr\Http\Message\ResponseInterface;
  */
 class Client
 {
+    use HttpClientAwareTrait;
+    use HttpFactoryAwareTrait;
     use Core\Client;
     use ClientAuthenticationAwareTrait;
     use ClientInformationAwaitTrait;
@@ -57,6 +62,9 @@ class Client
         $this->setProviderMetadata($providerMetadata);
         $this->setClientInformation($clientRegistration);
         $this->setContainer($container);
+
+        $this->setHttpClient($this->container->get(ClientInterface::class));
+        $this->setHttpFactory($this->container->get(HttpFactoryInterface::class));
     }
 
     /**
@@ -67,7 +75,7 @@ class Client
      */
     public function createAuthorizeFormPostResponse(array $parameters = []): ResponseInterface
     {
-        return (new AuthorizationFormResponseBuilder($this->container))
+        return (new AuthorizationFormResponseBuilder($this->httpClient, $this->httpFactory))
             ->setClientInformation($this->clientInformation)
             ->setProviderMetadata($this->providerMetadata)
             ->build($this->generateAuthorizationParameters($parameters));
@@ -81,7 +89,7 @@ class Client
      */
     public function createAuthorizeRedirectResponse(array $parameters = []): ResponseInterface
     {
-        return (new AuthorizationRedirectResponseBuilder($this->container))
+        return (new AuthorizationRedirectResponseBuilder($this->httpClient, $this->httpFactory))
             ->setClientInformation($this->clientInformation)
             ->setProviderMetadata($this->providerMetadata)
             ->build($this->generateAuthorizationParameters($parameters));
@@ -132,17 +140,14 @@ class Client
     {
         $parameters = $grant->prepareTokenRequestParameters(array_merge($parameters, $checks));
 
-        $request = (new TokenRequestBuilder($this->container))
+        $request = (new TokenRequestBuilder($this->httpClient, $this->httpFactory))
             ->setProviderMetadata($this->providerMetadata)
             ->setClientAuthentication($this->clientAuthentication)
             ->setClientInformation($this->clientInformation)
             ->build($grant, $parameters);
 
-        /** @var ClientInterface $httpClient */
-        $httpClient = $this->container->get(ClientInterface::class);
-
         try {
-            $response = $httpClient->sendRequest($request);
+            $response = $request->send();
         } catch (ClientExceptionInterface $e) {
             $msg = 'Token endpoint return error: ' . $e->getMessage();
             throw new OAuth2ServerException($msg, 0, $e);

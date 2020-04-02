@@ -2,17 +2,16 @@
 
 namespace OpenIDConnect\Core;
 
-use OpenIDConnect\Core\Exceptions\OpenIDProviderException;
-use OpenIDConnect\Core\Exceptions\RelyingPartyException;
+use MilesChou\Psr\Http\Message\HttpFactoryInterface;
 use OpenIDConnect\Config\ClientInformation;
 use OpenIDConnect\Config\ClientMetadata;
 use OpenIDConnect\Config\JwkSet;
 use OpenIDConnect\Config\ProviderMetadata;
+use OpenIDConnect\Core\Exceptions\OpenIDProviderException;
+use OpenIDConnect\Core\Exceptions\RelyingPartyException;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
-use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\StreamFactoryInterface;
 
 /**
  * Discover provider config
@@ -25,34 +24,25 @@ class Issuer
     private $client;
 
     /**
-     * @var RequestFactoryInterface
+     * @var HttpFactoryInterface
      */
-    private $requestFactory;
-
-    /**
-     * @var StreamFactoryInterface
-     */
-    private $streamFactory;
+    private $httpFactory;
 
     /**
      * @param ClientInterface $client
-     * @param RequestFactoryInterface $requestFactory
-     * @param StreamFactoryInterface $streamFactory
+     * @param HttpFactoryInterface $httpFactory
      */
-    public function __construct(
-        ClientInterface $client,
-        RequestFactoryInterface $requestFactory,
-        StreamFactoryInterface $streamFactory
-    ) {
+    public function __construct(ClientInterface $client, HttpFactoryInterface $httpFactory)
+    {
         $this->client = $client;
-        $this->requestFactory = $requestFactory;
-        $this->streamFactory = $streamFactory;
+        $this->httpFactory = $httpFactory;
     }
 
     /**
      * Discover the OpenID Connect provider
      *
      * @param string $discoverUri
+     *
      * @return ProviderMetadata
      * @throws ClientExceptionInterface
      * @see https://tools.ietf.org/html/rfc8414#section-3
@@ -69,6 +59,7 @@ class Issuer
     /**
      * @param ProviderMetadata $providerMetadata
      * @param ClientMetadata $clientMetadata
+     *
      * @return ClientInformation
      * @throws ClientExceptionInterface
      */
@@ -82,9 +73,9 @@ class Issuer
             throw new RelyingPartyException($msg);
         }
 
-        $request = $this->requestFactory->createRequest('POST', $registrationEndpoint)
+        $request = $this->httpFactory->createRequest('POST', $registrationEndpoint)
             ->withHeader('content-type', 'application/json')
-            ->withBody($this->streamFactory->createStream((string)json_encode($clientMetadata)));
+            ->withBody($this->httpFactory->createStream((string)json_encode($clientMetadata)));
 
         return new ClientInformation($this->processResponse($this->client->sendRequest($request)));
     }
@@ -93,18 +84,20 @@ class Issuer
      * Send request to discovery endpoint and process response
      *
      * @param string $uri
+     *
      * @return array
      * @throws ClientExceptionInterface
      */
     private function sendRequestDiscovery(string $uri): array
     {
-        $response = $this->client->sendRequest($this->requestFactory->createRequest('GET', $uri));
+        $response = $this->client->sendRequest($this->httpFactory->createRequest('GET', $uri));
 
         return $this->processResponse($response);
     }
 
     /**
      * @param ResponseInterface $response
+     *
      * @return array
      */
     private function processResponse(ResponseInterface $response): array

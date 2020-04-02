@@ -13,6 +13,8 @@ use Laminas\Diactoros\StreamFactory;
 use Laminas\Diactoros\UploadedFileFactory;
 use Laminas\Diactoros\UriFactory;
 use MilesChou\Mocker\Psr18\MockClient;
+use MilesChou\Psr\Http\Message\HttpFactory;
+use MilesChou\Psr\Http\Message\HttpFactoryInterface;
 use OpenIDConnect\Config\ClientInformation;
 use OpenIDConnect\Config\ProviderMetadata;
 use OpenIDConnect\Core\Builder;
@@ -65,28 +67,7 @@ class TestCase extends BaseTestCase
             return $instances[TokenFactoryInterface::class];
         });
 
-        $container->singleton(ResponseFactoryInterface::class, ResponseFactory::class);
-        $container->singleton(RequestFactoryInterface::class, RequestFactory::class);
-        $container->singleton(ServerRequestFactoryInterface::class, ServerRequestFactory::class);
-        $container->singleton(StreamFactoryInterface::class, StreamFactory::class);
-        $container->singleton(UploadedFileFactoryInterface::class, UploadedFileFactory::class);
-        $container->singleton(UriFactoryInterface::class, UriFactory::class);
-
-        if (isset($instances[StreamFactoryInterface::class])) {
-            $container->instance(StreamFactoryInterface::class, $instances[StreamFactoryInterface::class]);
-        }
-
-        if (isset($instances[ResponseFactoryInterface::class])) {
-            $container->instance(ResponseFactoryInterface::class, $instances[ResponseFactoryInterface::class]);
-        }
-
-        if (isset($instances[RequestFactoryInterface::class])) {
-            $container->instance(RequestFactoryInterface::class, $instances[RequestFactoryInterface::class]);
-        }
-
-        if (isset($instances[UriFactoryInterface::class])) {
-            $container->instance(UriFactoryInterface::class, $instances[UriFactoryInterface::class]);
-        }
+        $container->singleton(HttpFactoryInterface::class, HttpFactory::class);
 
         return $container;
     }

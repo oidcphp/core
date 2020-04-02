@@ -3,10 +3,8 @@
 namespace Tests\Core;
 
 use MilesChou\Mocker\Psr18\MockClient;
+use MilesChou\Psr\Http\Message\HttpFactory;
 use OpenIDConnect\Core\Issuer;
-use Psr\Http\Client\ClientInterface;
-use Psr\Http\Message\RequestFactoryInterface;
-use Psr\Http\Message\StreamFactoryInterface;
 use Tests\TestCase;
 
 class IssuerTest extends TestCase
@@ -73,15 +71,8 @@ class IssuerTest extends TestCase
             ->appendResponseWithJson(self::GOOGLE_OPENID_CONNECT_CONFIG)
             ->appendResponseWithJson(['keys' => []]);
 
-        $container = $this->createContainer([
-            ClientInterface::class => $mockHttpClient,
-        ]);
-
-        $actual = (new Issuer(
-            $container->get(ClientInterface::class),
-            $container->get(RequestFactoryInterface::class),
-            $container->get(StreamFactoryInterface::class)
-        ))->discover('http://somewhere');
+        $actual = (new Issuer($mockHttpClient, new HttpFactory()))
+            ->discover('http://somewhere');
 
         $this->assertSame('https://accounts.google.com', $actual->issuer());
         $this->assertSame('https://accounts.google.com/o/oauth2/v2/auth', $actual->authorizationEndpoint());

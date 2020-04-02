@@ -2,6 +2,8 @@
 
 namespace Tests\OAuth2\Builder;
 
+use MilesChou\Mocker\Psr18\MockClient;
+use MilesChou\Psr\Http\Message\HttpFactory;
 use OpenIDConnect\OAuth2\Builder\TokenRequestBuilder;
 use OpenIDConnect\OAuth2\Grant\AuthorizationCode;
 use Tests\TestCase;
@@ -13,7 +15,7 @@ class TokenRequestBuilderTest extends TestCase
      */
     public function shouldReturnCorrectRequestInstance(): void
     {
-        $target = (new TokenRequestBuilder($this->createContainer()))
+        $target = (new TokenRequestBuilder(new MockClient(), new HttpFactory()))
             ->setProviderMetadata($this->createProviderMetadata())
             ->setClientInformation($this->createClientInformation());
 

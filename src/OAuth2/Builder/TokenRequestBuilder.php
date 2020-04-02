@@ -4,47 +4,41 @@ declare(strict_types=1);
 
 namespace OpenIDConnect\OAuth2\Builder;
 
+use MilesChou\Psr\Http\Message\PendingRequest;
+use OpenIDConnect\Http\Builder;
+use OpenIDConnect\Http\Query;
 use OpenIDConnect\OAuth2\ClientAuthentication\ClientAuthenticationAwareTrait;
 use OpenIDConnect\OAuth2\Grant\GrantType;
-use OpenIDConnect\Http\Query;
-use Psr\Http\Message\RequestFactoryInterface;
-use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\StreamFactoryInterface;
 
 /**
  * Generate Request for token endpoint
  *
  * @see https://tools.ietf.org/html/rfc6749#section-3.2
  */
-class TokenRequestBuilder
+class TokenRequestBuilder extends Builder
 {
-    use BuilderTrait;
     use ClientAuthenticationAwareTrait;
 
     /**
      * @param GrantType $grantType
      * @param array<mixed> $parameters
-     * @return RequestInterface
+     * @return PendingRequest
      */
-    public function build(GrantType $grantType, array $parameters): RequestInterface
+    public function build(GrantType $grantType, array $parameters): PendingRequest
     {
-        $parameters = $grantType->prepareTokenRequestParameters($parameters);
-
-        /** @var RequestFactoryInterface $requestFactory */
-        $requestFactory = $this->container->get(RequestFactoryInterface::class);
-
-        /** @var StreamFactoryInterface $streamFactory */
-        $streamFactory = $this->container->get(StreamFactoryInterface::class);
-
-        $request = $requestFactory->createRequest('POST', $this->providerMetadata->require('token_endpoint'))
-            ->withHeader('content-type', 'application/x-www-form-urlencoded')
-            ->withBody($streamFactory->createStream(Query::build($parameters)));
-
         $clientAuthentication = $this->resolveClientAuthenticationByDefault(
             $this->clientInformation->id(),
             $this->clientInformation->secret()
         );
 
-        return $clientAuthentication->processRequest($request);
+        $parameters = $grantType->prepareTokenRequestParameters($parameters);
+
+        $request = $this->httpFactory->createRequest('POST', $this->providerMetadata->require('token_endpoint'))
+            ->withHeader('content-type', 'application/x-www-form-urlencoded')
+            ->withBody($this->httpFactory->createStream(Query::build($parameters)));
+
+        $request = $clientAuthentication->processRequest($request);
+
+        return new PendingRequest($request, $this->httpClient);
     }
 }
