@@ -25,10 +25,11 @@ use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\ResponseInterface;
 
 /**
- * OpenID Connect Client
+ * OAuth 2.0 / OpenID Connect Client
  */
 class Client
 {
+    use Core\Client;
     use ClientAuthenticationAwareTrait;
     use ClientInformationAwaitTrait;
     use ProviderMetadataAwaitTrait;

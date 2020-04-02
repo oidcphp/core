@@ -1,14 +1,14 @@
 <?php
 
-namespace Tests\Core;
+namespace Tests\Unit;
 
 use Jose\Component\Core\JWK;
 use Jose\Component\Core\Util\JsonConverter;
 use Jose\Component\KeyManagement\JWKFactory;
 use Jose\Component\Signature\Serializer\CompactSerializer;
 use MilesChou\Mocker\Psr18\MockClient;
+use OpenIDConnect\Client;
 use OpenIDConnect\Core\Claims;
-use OpenIDConnect\Core\Client;
 use OpenIDConnect\Core\Exceptions\RelyingPartyException;
 use OpenIDConnect\Core\Jwt\JwtFactory;
 use Psr\Http\Client\ClientInterface;

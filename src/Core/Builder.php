@@ -42,23 +42,4 @@ class Builder
         $this->setProviderMetadata($provider);
         $this->setClientInformation($client);
     }
-
-    /**
-     * @return Client
-     */
-    public function createOpenIDConnectClient(): Client
-    {
-        return new Client($this->providerMetadata, $this->clientInformation, $this->container);
-    }
-
-    /**
-     * @param ContainerInterface $container
-     * @return static
-     */
-    public function setContainer(ContainerInterface $container): Builder
-    {
-        $this->container = $container;
-
-        return $this;
-    }
 }

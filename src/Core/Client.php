@@ -2,15 +2,14 @@
 
 namespace OpenIDConnect\Core;
 
-use OpenIDConnect\Client as OAuth2Client;
 use OpenIDConnect\Core\Jwt\JwtFactory;
 use OpenIDConnect\Core\Token\TokenSet;
 use OpenIDConnect\OAuth2\Token\TokenSetInterface;
 
 /**
- * OpenID Connect Client
+ * OpenID Connect addition method
  */
-class Client extends OAuth2Client
+trait Client
 {
     /**
      * @var null|string
