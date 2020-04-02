@@ -2,9 +2,9 @@
 
 namespace OpenIDConnect\Core;
 
+use OpenIDConnect\Client as OAuth2Client;
 use OpenIDConnect\Core\Jwt\JwtFactory;
 use OpenIDConnect\Core\Token\TokenSet;
-use OpenIDConnect\OAuth2\Client as OAuth2Client;
 use OpenIDConnect\OAuth2\Token\TokenSetInterface;
 
 /**

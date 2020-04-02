@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OpenIDConnect\OAuth2;
+namespace OpenIDConnect;
 
 use InvalidArgumentException;
 use OpenIDConnect\Config\ClientInformation;

@@ -1,12 +1,11 @@
 <?php
 
-namespace Tests\OAuth2;
+namespace Tests\Unit;
 
-use Http\Client\Exception\NetworkException;
 use InvalidArgumentException;
 use Laminas\Diactoros\Request;
 use MilesChou\Mocker\Psr18\MockClient;
-use OpenIDConnect\OAuth2\Client;
+use OpenIDConnect\Client;
 use OpenIDConnect\OAuth2\Exceptions\OAuth2ClientException;
 use OpenIDConnect\OAuth2\Exceptions\OAuth2ServerException;
 use OpenIDConnect\OAuth2\Grant\AuthorizationCode;
