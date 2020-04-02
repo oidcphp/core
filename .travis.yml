@@ -23,7 +23,6 @@ script:
 
 after_success:
   - if [[ "7.4" == "${TRAVIS_PHP_VERSION}" ]]; then bash <(curl -s https://codecov.io/bash) ; fi
-  - if [[ "7.4" == "${TRAVIS_PHP_VERSION}" ]]; then travis_retry php vendor/bin/codacycoverage clover ; fi
 
 cache:
   directories:
