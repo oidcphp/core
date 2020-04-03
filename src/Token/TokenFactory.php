@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace OpenIDConnect\Token;
 
+use OpenIDConnect\Contracts\TokenFactoryInterface;
+use OpenIDConnect\Contracts\TokenSetInterface;
+
 class TokenFactory implements TokenFactoryInterface
 {
     /**

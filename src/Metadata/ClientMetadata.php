@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace OpenIDConnect\Metadata;
 
 use JsonSerializable;
-use OpenIDConnect\OAuth2\Traits\ParameterTrait;
+use OpenIDConnect\Traits\ParameterTrait;
 
 /**
  * Client metadata

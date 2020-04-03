@@ -6,7 +6,7 @@ namespace OpenIDConnect\Metadata;
 
 use JsonSerializable;
 use OpenIDConnect\Jwt\JwkSet;
-use OpenIDConnect\OAuth2\Traits\ParameterTrait;
+use OpenIDConnect\Traits\ParameterTrait;
 
 /**
  * OAuth 2.0 Authorization Server Metadata

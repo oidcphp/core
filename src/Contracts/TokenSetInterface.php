@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OpenIDConnect\Token;
+namespace OpenIDConnect\Contracts;
 
 use DomainException;
 use JsonSerializable;

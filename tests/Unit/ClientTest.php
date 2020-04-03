@@ -6,8 +6,8 @@ use InvalidArgumentException;
 use Laminas\Diactoros\Request;
 use MilesChou\Mocker\Psr18\MockClient;
 use OpenIDConnect\Client;
-use OpenIDConnect\OAuth2\Exceptions\OAuth2ClientException;
-use OpenIDConnect\OAuth2\Exceptions\OAuth2ServerException;
+use OpenIDConnect\Exceptions\OAuth2ClientException;
+use OpenIDConnect\Exceptions\OAuth2ServerException;
 use OpenIDConnect\OAuth2\Grant\AuthorizationCode;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Client\NetworkExceptionInterface;
@@ -17,7 +17,7 @@ use Tests\TestCase;
 class ClientTest extends TestCase
 {
     /**
-     * @var \OpenIDConnect\Core\Client
+     * @var \OpenIDConnect\Exceptions\Client
      */
     private $target;
 

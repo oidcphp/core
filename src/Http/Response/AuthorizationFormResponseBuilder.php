@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace OpenIDConnect\Http\Response;
 
 use DomainException;
+use OpenIDConnect\Exceptions\OAuth2ServerException;
 use OpenIDConnect\Http\Builder;
-use OpenIDConnect\OAuth2\Exceptions\OAuth2ServerException;
 use Psr\Http\Message\ResponseInterface;
 
 class AuthorizationFormResponseBuilder extends Builder

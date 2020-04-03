@@ -5,7 +5,7 @@ namespace OpenIDConnect\Token\Concerns;
 use Jose\Component\Core\JWKSet;
 use Jose\Component\Core\Util\JsonConverter;
 use OpenIDConnect\Core\Claims;
-use OpenIDConnect\Core\Exceptions\RelyingPartyException;
+use OpenIDConnect\Exceptions\RelyingPartyException;
 use OpenIDConnect\Jwt\JwtFactory;
 use OpenIDConnect\Metadata\ClientInformationAwareTrait;
 use OpenIDConnect\Metadata\ProviderMetadataAwareTrait;
@@ -18,7 +18,7 @@ trait IdToken
     use ProviderMetadataAwareTrait;
 
     /**
-     * @var Claims
+     * @var \OpenIDConnect\Core\Claims
      */
     private $claims;
 

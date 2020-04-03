@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OpenIDConnect\Http\Authentication;
 
+use OpenIDConnect\Contracts\ClientAuthentication;
 use Psr\Http\Message\RequestInterface;
 
 /**

@@ -4,8 +4,8 @@ namespace Tests\Unit\Http\Response;
 
 use MilesChou\Mocker\Psr18\MockClient;
 use MilesChou\Psr\Http\Message\HttpFactory;
+use OpenIDConnect\Exceptions\OAuth2ServerException;
 use OpenIDConnect\Http\Response\AuthorizationFormResponseBuilder;
-use OpenIDConnect\OAuth2\Exceptions\OAuth2ServerException;
 use Tests\TestCase;
 
 class AuthorizationFormResponseBuilderTest extends TestCase

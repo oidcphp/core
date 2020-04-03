@@ -4,7 +4,7 @@ namespace Tests\Unit\OAuth2\Traits;
 
 use BadMethodCallException;
 use DomainException;
-use OpenIDConnect\OAuth2\Traits\ParameterTrait;
+use OpenIDConnect\Traits\ParameterTrait;
 use Tests\TestCase;
 
 class ParameterTraitTest extends TestCase

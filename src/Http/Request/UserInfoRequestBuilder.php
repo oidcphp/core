@@ -6,8 +6,8 @@ namespace OpenIDConnect\Http\Request;
 
 use DomainException;
 use MilesChou\Psr\Http\Message\PendingRequest;
+use OpenIDConnect\Exceptions\OAuth2ServerException;
 use OpenIDConnect\Http\Builder;
-use OpenIDConnect\OAuth2\Exceptions\OAuth2ServerException;
 
 /**
  * Generate Request for userinfo endpoint

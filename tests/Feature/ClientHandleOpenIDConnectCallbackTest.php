@@ -9,7 +9,7 @@ use Jose\Component\Signature\Serializer\CompactSerializer;
 use MilesChou\Mocker\Psr18\MockClient;
 use OpenIDConnect\Client;
 use OpenIDConnect\Core\Claims;
-use OpenIDConnect\Core\Exceptions\RelyingPartyException;
+use OpenIDConnect\Exceptions\RelyingPartyException;
 use OpenIDConnect\Jwt\JwtFactory;
 use Psr\Http\Client\ClientInterface;
 use Tests\TestCase;

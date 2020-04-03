@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace OpenIDConnect\Token;
 
-use OpenIDConnect\OAuth2\Traits\ParameterTrait;
+use OpenIDConnect\Contracts\TokenSetInterface;
 use OpenIDConnect\Token\Concerns\IdToken;
+use OpenIDConnect\Traits\ParameterTrait;
 
 class TokenSet implements TokenSetInterface
 {

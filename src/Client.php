@@ -8,20 +8,22 @@ use InvalidArgumentException;
 use MilesChou\Psr\Http\Client\HttpClientAwareTrait;
 use MilesChou\Psr\Http\Message\HttpFactoryAwareTrait;
 use MilesChou\Psr\Http\Message\HttpFactoryInterface;
+use OpenIDConnect\Contracts\TokenFactoryInterface;
+use OpenIDConnect\Contracts\TokenSetInterface;
+use OpenIDConnect\Exceptions\OAuth2ClientException;
+use OpenIDConnect\Exceptions\OAuth2ServerException;
 use OpenIDConnect\Http\Authentication\ClientAuthenticationAwareTrait;
 use OpenIDConnect\Http\Request\TokenRequestBuilder;
 use OpenIDConnect\Http\Response\AuthorizationFormResponseBuilder;
 use OpenIDConnect\Http\Response\AuthorizationRedirectResponseBuilder;
+use OpenIDConnect\Jwt\JwtFactory;
 use OpenIDConnect\Metadata\ClientInformation;
 use OpenIDConnect\Metadata\ClientInformationAwareTrait;
 use OpenIDConnect\Metadata\ProviderMetadata;
 use OpenIDConnect\Metadata\ProviderMetadataAwareTrait;
-use OpenIDConnect\OAuth2\Exceptions\OAuth2ClientException;
-use OpenIDConnect\OAuth2\Exceptions\OAuth2ServerException;
 use OpenIDConnect\OAuth2\Grant\AuthorizationCode;
 use OpenIDConnect\OAuth2\Grant\GrantType;
-use OpenIDConnect\Token\TokenFactoryInterface;
-use OpenIDConnect\Token\TokenSetInterface;
+use OpenIDConnect\Token\TokenSet;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
@@ -34,7 +36,6 @@ class Client
 {
     use HttpClientAwareTrait;
     use HttpFactoryAwareTrait;
-    use Core\Client;
     use ClientAuthenticationAwareTrait;
     use ClientInformationAwareTrait;
     use ProviderMetadataAwareTrait;
@@ -47,11 +48,16 @@ class Client
     /**
      * @var null|string
      */
+    private $nonce;
+
+    /**
+     * @var null|string
+     */
     private $state;
 
     /**
-     * @param \OpenIDConnect\Metadata\ProviderMetadata $providerMetadata
-     * @param \OpenIDConnect\Metadata\ClientInformation $clientRegistration
+     * @param ProviderMetadata $providerMetadata
+     * @param ClientInformation $clientRegistration
      * @param ContainerInterface $container The container implements PSR-11
      */
     public function __construct(
@@ -98,6 +104,14 @@ class Client
     /**
      * @return null|string
      */
+    public function getNonce(): ?string
+    {
+        return $this->nonce;
+    }
+
+    /**
+     * @return null|string
+     */
     public function getState(): ?string
     {
         return $this->state;
@@ -106,7 +120,8 @@ class Client
     /**
      * @param array<mixed> $parameters
      * @param array<mixed> $checks
-     * @return TokenSetInterface
+     *
+     * @return \OpenIDConnect\Contracts\TokenSetInterface
      */
     public function handleCallback(array $parameters, array $checks = []): TokenSetInterface
     {
@@ -131,10 +146,29 @@ class Client
     }
 
     /**
+     * @param array $parameters
+     * @param array $checks
+     *
+     * @return \OpenIDConnect\Contracts\TokenSetInterface
+     */
+    public function handleOpenIDConnectCallback(array $parameters, array $checks = []): TokenSetInterface
+    {
+        /** @var TokenSet $tokenSet */
+        $tokenSet = $this->handleCallback($parameters, $checks);
+
+        $tokenSet->setClientInformation($this->clientInformation);
+        $tokenSet->setProviderMetadata($this->providerMetadata);
+        $tokenSet->setJwtFactory(new JwtFactory($this->providerMetadata, $this->clientInformation));
+
+        return $tokenSet;
+    }
+
+    /**
      * @param GrantType $grant
      * @param array<mixed> $parameters
      * @param array<mixed> $checks
-     * @return TokenSetInterface
+     *
+     * @return \OpenIDConnect\Contracts\TokenSetInterface
      */
     public function sendTokenRequest(GrantType $grant, array $parameters = [], array $checks = []): TokenSetInterface
     {
@@ -155,7 +189,7 @@ class Client
 
         $parsed = $this->parseTokenResponse($response);
 
-        /** @var TokenFactoryInterface $tokenFactory */
+        /** @var \OpenIDConnect\Contracts\TokenFactoryInterface $tokenFactory */
         $tokenFactory = $this->container->get(TokenFactoryInterface::class);
 
         return $tokenFactory->create(array_merge($checks, $parsed));

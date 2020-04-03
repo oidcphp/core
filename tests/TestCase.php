@@ -9,11 +9,10 @@ use Jose\Component\KeyManagement\JWKFactory;
 use MilesChou\Mocker\Psr18\MockClient;
 use MilesChou\Psr\Http\Message\HttpFactory;
 use MilesChou\Psr\Http\Message\HttpFactoryInterface;
-use OpenIDConnect\Core\Builder;
+use OpenIDConnect\Contracts\TokenFactoryInterface;
 use OpenIDConnect\Metadata\ClientInformation;
 use OpenIDConnect\Metadata\ProviderMetadata;
 use OpenIDConnect\Token\TokenFactory;
-use OpenIDConnect\Token\TokenFactoryInterface;
 use PHPUnit\Framework\TestCase as BaseTestCase;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Client\ClientInterface;
@@ -57,19 +56,6 @@ class TestCase extends BaseTestCase
         $container->singleton(HttpFactoryInterface::class, HttpFactory::class);
 
         return $container;
-    }
-
-    /**
-     * @param array $provider
-     * @param array $client
-     * @return Builder
-     */
-    protected function createFactory($provider = [], $client = []): Builder
-    {
-        return new Builder(
-            $this->createProviderMetadata($provider),
-            $this->createClientInformation($client)
-        );
     }
 
     protected function createJwkSet($jwks = []): JWKSet

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OpenIDConnect\OAuth2\Exceptions;
+namespace OpenIDConnect\Contracts;
 
 interface OAuth2Exception extends \Throwable
 {

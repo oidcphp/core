@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OpenIDConnect\Http\Authentication;
+namespace OpenIDConnect\Contracts;
 
 use Psr\Http\Message\RequestInterface;
 

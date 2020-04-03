@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OpenIDConnect\OAuth2\Traits;
+namespace OpenIDConnect\Traits;
 
 use BadMethodCallException;
 use DomainException;
