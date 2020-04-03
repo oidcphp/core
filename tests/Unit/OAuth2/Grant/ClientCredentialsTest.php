@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\OAuth2\Grant;
+namespace Tests\Unit\OAuth2\Grant;
 
 use OpenIDConnect\OAuth2\Grant\ClientCredentials;
 use PHPUnit\Framework\TestCase;

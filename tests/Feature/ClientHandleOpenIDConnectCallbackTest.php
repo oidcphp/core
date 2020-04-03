@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit;
+namespace Tests\Feature;
 
 use Jose\Component\Core\JWK;
 use Jose\Component\Core\Util\JsonConverter;

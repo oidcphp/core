@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\OAuth2\Traits;
+namespace Tests\Unit\OAuth2\Traits;
 
 use BadMethodCallException;
 use DomainException;

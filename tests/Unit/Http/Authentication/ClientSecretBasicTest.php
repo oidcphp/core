@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\OAuth2\ClientAuthentication;
+namespace Tests\Unit\Http\Authentication;
 
 use Laminas\Diactoros\RequestFactory;
 use OpenIDConnect\Http\Authentication\ClientSecretBasic;
