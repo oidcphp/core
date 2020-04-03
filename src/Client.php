@@ -8,18 +8,18 @@ use InvalidArgumentException;
 use MilesChou\Psr\Http\Client\HttpClientAwareTrait;
 use MilesChou\Psr\Http\Message\HttpFactoryAwareTrait;
 use MilesChou\Psr\Http\Message\HttpFactoryInterface;
-use OpenIDConnect\Config\ClientInformation;
-use OpenIDConnect\Config\ProviderMetadata;
 use OpenIDConnect\Http\Authentication\ClientAuthenticationAwareTrait;
 use OpenIDConnect\Http\Request\TokenRequestBuilder;
 use OpenIDConnect\Http\Response\AuthorizationFormResponseBuilder;
 use OpenIDConnect\Http\Response\AuthorizationRedirectResponseBuilder;
+use OpenIDConnect\Metadata\ClientInformation;
+use OpenIDConnect\Metadata\ClientInformationAwareTrait;
+use OpenIDConnect\Metadata\ProviderMetadata;
+use OpenIDConnect\Metadata\ProviderMetadataAwareTrait;
 use OpenIDConnect\OAuth2\Exceptions\OAuth2ClientException;
 use OpenIDConnect\OAuth2\Exceptions\OAuth2ServerException;
 use OpenIDConnect\OAuth2\Grant\AuthorizationCode;
 use OpenIDConnect\OAuth2\Grant\GrantType;
-use OpenIDConnect\OAuth2\Metadata\ClientInformationAwaitTrait;
-use OpenIDConnect\OAuth2\Metadata\ProviderMetadataAwaitTrait;
 use OpenIDConnect\Token\TokenFactoryInterface;
 use OpenIDConnect\Token\TokenSetInterface;
 use Psr\Container\ContainerInterface;
@@ -36,8 +36,8 @@ class Client
     use HttpFactoryAwareTrait;
     use Core\Client;
     use ClientAuthenticationAwareTrait;
-    use ClientInformationAwaitTrait;
-    use ProviderMetadataAwaitTrait;
+    use ClientInformationAwareTrait;
+    use ProviderMetadataAwareTrait;
 
     /**
      * @var ContainerInterface
@@ -50,8 +50,8 @@ class Client
     private $state;
 
     /**
-     * @param ProviderMetadata $providerMetadata
-     * @param ClientInformation $clientRegistration
+     * @param \OpenIDConnect\Metadata\ProviderMetadata $providerMetadata
+     * @param \OpenIDConnect\Metadata\ClientInformation $clientRegistration
      * @param ContainerInterface $container The container implements PSR-11
      */
     public function __construct(

@@ -9,9 +9,9 @@ use Jose\Component\KeyManagement\JWKFactory;
 use MilesChou\Mocker\Psr18\MockClient;
 use MilesChou\Psr\Http\Message\HttpFactory;
 use MilesChou\Psr\Http\Message\HttpFactoryInterface;
-use OpenIDConnect\Config\ClientInformation;
-use OpenIDConnect\Config\ProviderMetadata;
 use OpenIDConnect\Core\Builder;
+use OpenIDConnect\Metadata\ClientInformation;
+use OpenIDConnect\Metadata\ProviderMetadata;
 use OpenIDConnect\Token\TokenFactory;
 use OpenIDConnect\Token\TokenFactoryInterface;
 use PHPUnit\Framework\TestCase as BaseTestCase;
@@ -85,7 +85,7 @@ class TestCase extends BaseTestCase
     {
         return new ProviderMetadata(
             $this->createProviderMetadataConfig($overwrite),
-            new \OpenIDConnect\Config\JwkSet(JsonConverter::decode(JsonConverter::encode($this->createJwkSet($jwks))))
+            new \OpenIDConnect\Jwt\JwkSet(JsonConverter::decode(JsonConverter::encode($this->createJwkSet($jwks))))
         );
     }
 

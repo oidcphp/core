@@ -2,11 +2,9 @@
 
 declare(strict_types=1);
 
-namespace OpenIDConnect\OAuth2\Metadata;
+namespace OpenIDConnect\Metadata;
 
-use OpenIDConnect\Config\ProviderMetadata;
-
-trait ProviderMetadataAwaitTrait
+trait ProviderMetadataAwareTrait
 {
     /**
      * @var ProviderMetadata
@@ -15,9 +13,9 @@ trait ProviderMetadataAwaitTrait
 
     /**
      * @param ProviderMetadata $providerMetadata
-     * @return static
+     * @return $this
      */
-    public function setProviderMetadata(ProviderMetadata $providerMetadata)
+    public function setProviderMetadata(ProviderMetadata $providerMetadata): self
     {
         $this->providerMetadata = $providerMetadata;
 

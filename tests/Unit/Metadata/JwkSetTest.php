@@ -1,13 +1,13 @@
 <?php
 
-namespace Tests\OAuth2\Metadata;
+namespace Tests\Unit\Metadata;
 
 use InvalidArgumentException;
-use OpenIDConnect\Config\JwkSet;
+use OpenIDConnect\Jwt\JwkSet;
 use Tests\TestCase;
 
 /**
- * @covers \OpenIDConnect\Config\JwkSet
+ * @covers \OpenIDConnect\Jwt\JwkSet
  */
 class JwkSetTest extends TestCase
 {

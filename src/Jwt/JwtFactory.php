@@ -18,17 +18,17 @@ use Jose\Component\Signature\JWSTokenSupport;
 use Jose\Component\Signature\JWSVerifier;
 use Jose\Component\Signature\Serializer\CompactSerializer;
 use Jose\Component\Signature\Serializer\JWSSerializerManager;
-use OpenIDConnect\Config\ClientInformation;
-use OpenIDConnect\Config\ProviderMetadata;
 use OpenIDConnect\Jwt\Checker\NonceChecker;
-use OpenIDConnect\OAuth2\Metadata\ClientInformationAwaitTrait;
-use OpenIDConnect\OAuth2\Metadata\ProviderMetadataAwaitTrait;
+use OpenIDConnect\Metadata\ClientInformation;
+use OpenIDConnect\Metadata\ClientInformationAwareTrait;
+use OpenIDConnect\Metadata\ProviderMetadata;
+use OpenIDConnect\Metadata\ProviderMetadataAwareTrait;
 
 class JwtFactory
 {
     use AlgorithmFactoryTrait;
-    use ClientInformationAwaitTrait;
-    use ProviderMetadataAwaitTrait;
+    use ClientInformationAwareTrait;
+    use ProviderMetadataAwareTrait;
 
     /**
      * Addition algorithms

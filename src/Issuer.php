@@ -3,12 +3,12 @@
 namespace OpenIDConnect;
 
 use MilesChou\Psr\Http\Message\HttpFactoryInterface;
-use OpenIDConnect\Config\ClientInformation;
-use OpenIDConnect\Config\ClientMetadata;
-use OpenIDConnect\Config\JwkSet;
-use OpenIDConnect\Config\ProviderMetadata;
 use OpenIDConnect\Core\Exceptions\OpenIDProviderException;
 use OpenIDConnect\Core\Exceptions\RelyingPartyException;
+use OpenIDConnect\Jwt\JwkSet;
+use OpenIDConnect\Metadata\ClientInformation;
+use OpenIDConnect\Metadata\ClientMetadata;
+use OpenIDConnect\Metadata\ProviderMetadata;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\ResponseInterface;

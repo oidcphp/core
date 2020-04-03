@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
-namespace OpenIDConnect\Config;
+namespace OpenIDConnect\Metadata;
 
 use JsonSerializable;
+use OpenIDConnect\Jwt\JwkSet;
 use OpenIDConnect\OAuth2\Traits\ParameterTrait;
 
 /**
@@ -40,13 +41,13 @@ class ProviderMetadata implements JsonSerializable
     use ParameterTrait;
 
     /**
-     * @var JwkSet
+     * @var \OpenIDConnect\Jwt\JwkSet
      */
     private $jwkSet;
 
     /**
      * @param array<mixed> $metadata
-     * @param JwkSet|null $jwkSet
+     * @param \OpenIDConnect\Jwt\JwkSet|null $jwkSet
      */
     public function __construct(array $metadata, ?JwkSet $jwkSet = null)
     {

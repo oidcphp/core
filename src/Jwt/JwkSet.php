@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OpenIDConnect\Config;
+namespace OpenIDConnect\Jwt;
 
 use InvalidArgumentException;
 use JsonSerializable;

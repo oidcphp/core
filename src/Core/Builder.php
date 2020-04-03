@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace OpenIDConnect\Core;
 
-use OpenIDConnect\Config\ClientInformation;
-use OpenIDConnect\Config\ProviderMetadata;
-use OpenIDConnect\OAuth2\Metadata\ClientInformationAwaitTrait;
-use OpenIDConnect\OAuth2\Metadata\ProviderMetadataAwaitTrait;
+use OpenIDConnect\Metadata\ClientInformation;
+use OpenIDConnect\Metadata\ClientInformationAwareTrait;
+use OpenIDConnect\Metadata\ProviderMetadata;
+use OpenIDConnect\Metadata\ProviderMetadataAwareTrait;
 use Psr\Container\ContainerInterface;
 
 /**
@@ -15,8 +15,8 @@ use Psr\Container\ContainerInterface;
  */
 class Builder
 {
-    use ProviderMetadataAwaitTrait;
-    use ClientInformationAwaitTrait;
+    use ProviderMetadataAwareTrait;
+    use ClientInformationAwareTrait;
 
     /**
      * @var ContainerInterface
@@ -25,7 +25,8 @@ class Builder
 
     /**
      * @param ProviderMetadata $provider
-     * @param ClientInformation $client
+     * @param \OpenIDConnect\Metadata\ClientInformation $client
+     *
      * @return static
      */
     public static function create(ProviderMetadata $provider, ClientInformation $client): Builder

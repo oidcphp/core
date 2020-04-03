@@ -1,8 +1,8 @@
 <?php
 
-namespace Tests\OAuth2\Metadata;
+namespace Tests\Unit\Metadata;
 
-use OpenIDConnect\Config\ClientInformation;
+use OpenIDConnect\Metadata\ClientInformation;
 use Tests\TestCase;
 
 class ClientInformationTest extends TestCase

@@ -7,8 +7,8 @@ use Jose\Component\Core\JWKSet;
 use Jose\Component\Core\Util\JsonConverter;
 use Jose\Component\KeyManagement\JWKFactory;
 use Jose\Component\Signature\Serializer\CompactSerializer;
-use OpenIDConnect\Config\ProviderMetadata;
 use OpenIDConnect\Jwt\JwtFactory;
+use OpenIDConnect\Metadata\ProviderMetadata;
 use OpenIDConnect\Token\TokenSet;
 use Tests\TestCase;
 
@@ -123,7 +123,7 @@ class TokenSetTest extends TestCase
 
         $additionJwk = JWKFactory::createFromSecret('whatever', ['alg' => 'HS256']);
 
-        $providerMetadata = new ProviderMetadata($this->createProviderMetadataConfig(), new \OpenIDConnect\Config\JwkSet(JsonConverter::decode($jwks)));
+        $providerMetadata = new ProviderMetadata($this->createProviderMetadataConfig(), new \OpenIDConnect\Jwt\JwkSet(JsonConverter::decode($jwks)));
 
         // Register addition JWK
         $providerMetadata->addJwk($additionJwk->jsonSerialize());
@@ -184,7 +184,7 @@ class TokenSetTest extends TestCase
         $jwk = JWKFactory::createRSAKey(1024, ['alg' => 'RS256']);
         $jwks = JsonConverter::encode(new JWKSet([$jwk]));
 
-        $providerMetadata = new ProviderMetadata($this->createProviderMetadataConfig(), new \OpenIDConnect\Config\JwkSet(JsonConverter::decode($jwks)));
+        $providerMetadata = new ProviderMetadata($this->createProviderMetadataConfig(), new \OpenIDConnect\Jwt\JwkSet(JsonConverter::decode($jwks)));
 
         $expectedExp = time() + 3600;
         $expectedIat = time();

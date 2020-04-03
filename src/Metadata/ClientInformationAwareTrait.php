@@ -2,11 +2,9 @@
 
 declare(strict_types=1);
 
-namespace OpenIDConnect\OAuth2\Metadata;
+namespace OpenIDConnect\Metadata;
 
-use OpenIDConnect\Config\ClientInformation;
-
-trait ClientInformationAwaitTrait
+trait ClientInformationAwareTrait
 {
     /**
      * @var ClientInformation
@@ -15,9 +13,9 @@ trait ClientInformationAwaitTrait
 
     /**
      * @param ClientInformation $clientInformation
-     * @return static
+     * @return $this
      */
-    public function setClientInformation(ClientInformation $clientInformation)
+    public function setClientInformation(ClientInformation $clientInformation): self
     {
         $this->clientInformation = $clientInformation;
 
