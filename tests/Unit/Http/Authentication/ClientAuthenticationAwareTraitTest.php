@@ -1,10 +1,10 @@
 <?php
 
-namespace Tests\OAuth2\ClientAuthentication;
+namespace Tests\Unit\Http\Authentication;
 
-use OpenIDConnect\OAuth2\ClientAuthentication\ClientAuthenticationAwareTrait;
-use OpenIDConnect\OAuth2\ClientAuthentication\ClientSecretBasic;
-use OpenIDConnect\OAuth2\ClientAuthentication\ClientSecretPost;
+use OpenIDConnect\Http\Authentication\ClientAuthenticationAwareTrait;
+use OpenIDConnect\Http\Authentication\ClientSecretBasic;
+use OpenIDConnect\Http\Authentication\ClientSecretPost;
 use PHPUnit\Framework\TestCase;
 
 class ClientAuthenticationAwareTraitTest extends TestCase
@@ -17,7 +17,7 @@ class ClientAuthenticationAwareTraitTest extends TestCase
         /** @var ClientAuthenticationAwareTrait $target */
         $target = $this->getMockForTrait(ClientAuthenticationAwareTrait::class);
 
-        $actual = $target->resolveClientAuthenticationByDefault('c', 's');
+        $actual = $target->resolveClientAuthentication('c', 's');
 
         $this->assertInstanceOf(ClientSecretBasic::class, $actual);
     }
@@ -31,7 +31,7 @@ class ClientAuthenticationAwareTraitTest extends TestCase
         $target = $this->getMockForTrait(ClientAuthenticationAwareTrait::class);
         $target->setClientAuthentication(new ClientSecretPost('c', 's'));
 
-        $actual = $target->resolveClientAuthenticationByDefault('c', 's');
+        $actual = $target->resolveClientAuthentication('c', 's');
 
         $this->assertInstanceOf(ClientSecretPost::class, $actual);
     }

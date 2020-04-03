@@ -3,7 +3,7 @@
 namespace Tests\OAuth2\ClientAuthentication;
 
 use Laminas\Diactoros\RequestFactory;
-use OpenIDConnect\OAuth2\ClientAuthentication\ClientSecretBasic;
+use OpenIDConnect\Http\Authentication\ClientSecretBasic;
 use PHPUnit\Framework\TestCase;
 
 class ClientSecretBasicTest extends TestCase

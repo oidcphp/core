@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OpenIDConnect\OAuth2\ClientAuthentication;
+namespace OpenIDConnect\Http\Authentication;
 
 trait ClientAuthenticationAwareTrait
 {
@@ -18,7 +18,7 @@ trait ClientAuthenticationAwareTrait
      * @param string $clientSecret
      * @return ClientAuthentication
      */
-    public function resolveClientAuthenticationByDefault(string $clientId, string $clientSecret): ClientAuthentication
+    public function resolveClientAuthentication(string $clientId, string $clientSecret): ClientAuthentication
     {
         if (null === $this->clientAuthentication) {
             return new ClientSecretBasic($clientId, $clientSecret);
@@ -29,9 +29,9 @@ trait ClientAuthenticationAwareTrait
 
     /**
      * @param ClientAuthentication|null $clientAuthentication
-     * @return static
+     * @return $this
      */
-    public function setClientAuthentication(?ClientAuthentication $clientAuthentication)
+    public function setClientAuthentication(?ClientAuthentication $clientAuthentication): self
     {
         $this->clientAuthentication = $clientAuthentication;
 

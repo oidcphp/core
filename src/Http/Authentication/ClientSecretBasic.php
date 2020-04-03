@@ -2,15 +2,16 @@
 
 declare(strict_types=1);
 
-namespace OpenIDConnect\OAuth2\ClientAuthentication;
+namespace OpenIDConnect\Http\Authentication;
 
-use OpenIDConnect\Http\Query;
 use Psr\Http\Message\RequestInterface;
 
 /**
+ * Default method for client authentication
+ *
  * @see https://tools.ietf.org/html/rfc6749#section-2.3.1
  */
-class ClientSecretPost implements ClientAuthentication
+class ClientSecretBasic implements ClientAuthentication
 {
     /**
      * @var string
@@ -37,15 +38,8 @@ class ClientSecretPost implements ClientAuthentication
      */
     public function processRequest(RequestInterface $request): RequestInterface
     {
-        $body = $request->getBody();
+        $encodedCredentials = base64_encode(sprintf('%s:%s', $this->client, $this->secret));
 
-        $parsedBody = Query::parse((string)$body);
-        $parsedBody['client_id'] = $this->client;
-        $parsedBody['client_secret'] = $this->secret;
-
-        $body->rewind();
-        $body->write(Query::build($parsedBody) . "\0");
-
-        return $request->withBody($body);
+        return $request->withHeader('Authorization', 'Basic ' . $encodedCredentials);
     }
 }

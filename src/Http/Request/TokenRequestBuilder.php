@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace OpenIDConnect\Http\Request;
 
 use MilesChou\Psr\Http\Message\PendingRequest;
+use OpenIDConnect\Http\Authentication\ClientAuthenticationAwareTrait;
 use OpenIDConnect\Http\Builder;
 use OpenIDConnect\Http\Query;
-use OpenIDConnect\OAuth2\ClientAuthentication\ClientAuthenticationAwareTrait;
 use OpenIDConnect\OAuth2\Grant\GrantType;
 
 /**
@@ -26,7 +26,7 @@ class TokenRequestBuilder extends Builder
      */
     public function build(GrantType $grantType, array $parameters): PendingRequest
     {
-        $clientAuthentication = $this->resolveClientAuthenticationByDefault(
+        $clientAuthentication = $this->resolveClientAuthentication(
             $this->clientInformation->id(),
             $this->clientInformation->secret()
         );
