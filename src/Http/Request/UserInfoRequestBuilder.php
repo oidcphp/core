@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OpenIDConnect\Core\Builder;
+namespace OpenIDConnect\Http\Request;
 
 use DomainException;
 use MilesChou\Psr\Http\Message\PendingRequest;

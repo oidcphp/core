@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OpenIDConnect\OAuth2\Builder;
+namespace OpenIDConnect\Http\Response;
 
 use OpenIDConnect\Http\Builder;
 use OpenIDConnect\Http\Query;

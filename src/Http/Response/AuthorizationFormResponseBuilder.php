@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OpenIDConnect\OAuth2\Builder;
+namespace OpenIDConnect\Http\Response;
 
 use DomainException;
 use OpenIDConnect\Http\Builder;

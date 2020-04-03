@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OpenIDConnect\OAuth2\Builder;
+namespace OpenIDConnect\Http\Request;
 
 use MilesChou\Psr\Http\Message\PendingRequest;
 use OpenIDConnect\Http\Builder;

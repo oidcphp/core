@@ -1,10 +1,10 @@
 <?php
 
-namespace Tests\OAuth2\Builder;
+namespace Tests\Unit\Http\Response;
 
 use MilesChou\Mocker\Psr18\MockClient;
 use MilesChou\Psr\Http\Message\HttpFactory;
-use OpenIDConnect\OAuth2\Builder\AuthorizationFormResponseBuilder;
+use OpenIDConnect\Http\Response\AuthorizationFormResponseBuilder;
 use OpenIDConnect\OAuth2\Exceptions\OAuth2ServerException;
 use Tests\TestCase;
 
@@ -37,7 +37,7 @@ class AuthorizationFormResponseBuilderTest extends TestCase
     {
         $this->expectException(OAuth2ServerException::class);
 
-        $target = new AuthorizationFormResponseBuilder(new MockClient(), new HttpFactory());
+        $target = new \OpenIDConnect\Http\Response\AuthorizationFormResponseBuilder(new MockClient(), new HttpFactory());
 
         $target->setProviderMetadata($this->createProviderMetadata([
             'authorization_endpoint' => null,

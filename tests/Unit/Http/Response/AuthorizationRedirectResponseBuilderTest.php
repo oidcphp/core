@@ -1,10 +1,10 @@
 <?php
 
-namespace Tests\OAuth2\Builder;
+namespace Tests\Unit\Http\Response;
 
 use MilesChou\Mocker\Psr18\MockClient;
 use MilesChou\Psr\Http\Message\HttpFactory;
-use OpenIDConnect\OAuth2\Builder\AuthorizationRedirectResponseBuilder;
+use OpenIDConnect\Http\Response\AuthorizationRedirectResponseBuilder;
 use Tests\TestCase;
 
 class AuthorizationRedirectResponseBuilderTest extends TestCase

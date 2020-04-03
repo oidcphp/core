@@ -1,10 +1,10 @@
 <?php
 
-namespace Tests\OAuth2\Builder;
+namespace Tests\Unit\Http\Request;
 
 use MilesChou\Mocker\Psr18\MockClient;
 use MilesChou\Psr\Http\Message\HttpFactory;
-use OpenIDConnect\OAuth2\Builder\TokenRequestBuilder;
+use OpenIDConnect\Http\Request\TokenRequestBuilder;
 use OpenIDConnect\OAuth2\Grant\AuthorizationCode;
 use Tests\TestCase;
 
