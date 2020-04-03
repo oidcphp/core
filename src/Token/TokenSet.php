@@ -2,12 +2,14 @@
 
 declare(strict_types=1);
 
-namespace OpenIDConnect\OAuth2\Token;
+namespace OpenIDConnect\Token;
 
 use OpenIDConnect\OAuth2\Traits\ParameterTrait;
+use OpenIDConnect\Token\Concerns\IdToken;
 
 class TokenSet implements TokenSetInterface
 {
+    use IdToken;
     use ParameterTrait;
 
     /**
@@ -18,33 +20,26 @@ class TokenSet implements TokenSetInterface
         $this->parameters = $parameters;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function accessToken(): string
     {
         return $this->require('access_token');
     }
 
-    /**
-     * @inheritDoc
-     */
     public function expiresIn(): ?int
     {
         return $this->get('expires_in');
     }
 
-    /**
-     * @inheritDoc
-     */
+    public function idToken(): ?string
+    {
+        return $this->get('id_token');
+    }
+
     public function refreshToken(): ?string
     {
         return $this->get('refresh_token');
     }
 
-    /**
-     * @inheritDoc
-     */
     public function scope(): ?array
     {
         if (!$this->has('scope')) {

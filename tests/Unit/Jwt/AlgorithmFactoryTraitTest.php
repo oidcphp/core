@@ -1,10 +1,10 @@
 <?php
 
-namespace Tests\Core\Jwt;
+namespace Tests\Unit\Jwt;
 
 use Jose\Component\Signature\Algorithm\ES256;
 use Jose\Component\Signature\Algorithm\RS256;
-use OpenIDConnect\Core\Jwt\AlgorithmFactoryTrait;
+use OpenIDConnect\Jwt\AlgorithmFactoryTrait;
 use PHPUnit\Framework\TestCase;
 
 class AlgorithmFactoryTraitTest extends TestCase

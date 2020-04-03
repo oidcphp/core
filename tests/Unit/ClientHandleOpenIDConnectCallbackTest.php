@@ -10,7 +10,7 @@ use MilesChou\Mocker\Psr18\MockClient;
 use OpenIDConnect\Client;
 use OpenIDConnect\Core\Claims;
 use OpenIDConnect\Core\Exceptions\RelyingPartyException;
-use OpenIDConnect\Core\Jwt\JwtFactory;
+use OpenIDConnect\Jwt\JwtFactory;
 use Psr\Http\Client\ClientInterface;
 use Tests\TestCase;
 

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OpenIDConnect\Core\Jwt\Checker;
+namespace OpenIDConnect\Jwt\Checker;
 
 use Jose\Component\Checker\ClaimChecker;
 use Jose\Component\Checker\InvalidClaimException;

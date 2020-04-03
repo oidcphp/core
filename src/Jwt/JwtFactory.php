@@ -1,6 +1,6 @@
 <?php
 
-namespace OpenIDConnect\Core\Jwt;
+namespace OpenIDConnect\Jwt;
 
 use Jose\Component\Checker\AlgorithmChecker;
 use Jose\Component\Checker\AudienceChecker;
@@ -18,9 +18,9 @@ use Jose\Component\Signature\JWSTokenSupport;
 use Jose\Component\Signature\JWSVerifier;
 use Jose\Component\Signature\Serializer\CompactSerializer;
 use Jose\Component\Signature\Serializer\JWSSerializerManager;
-use OpenIDConnect\Core\Jwt\Checker\NonceChecker;
 use OpenIDConnect\Config\ClientInformation;
 use OpenIDConnect\Config\ProviderMetadata;
+use OpenIDConnect\Jwt\Checker\NonceChecker;
 use OpenIDConnect\OAuth2\Metadata\ClientInformationAwaitTrait;
 use OpenIDConnect\OAuth2\Metadata\ProviderMetadataAwaitTrait;
 

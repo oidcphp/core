@@ -1,12 +1,12 @@
 <?php
 
-namespace OpenIDConnect\Core\Token\Concerns;
+namespace OpenIDConnect\Token\Concerns;
 
 use Jose\Component\Core\JWKSet;
 use Jose\Component\Core\Util\JsonConverter;
 use OpenIDConnect\Core\Claims;
 use OpenIDConnect\Core\Exceptions\RelyingPartyException;
-use OpenIDConnect\Core\Jwt\JwtFactory;
+use OpenIDConnect\Jwt\JwtFactory;
 use OpenIDConnect\OAuth2\Metadata\ClientInformationAwaitTrait;
 use OpenIDConnect\OAuth2\Metadata\ProviderMetadataAwaitTrait;
 use RangeException;

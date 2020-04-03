@@ -1,8 +1,8 @@
 <?php
 
-namespace Tests\OAuth2\Token;
+namespace Tests\Unit\Token;
 
-use OpenIDConnect\OAuth2\Token\TokenFactory;
+use OpenIDConnect\Token\TokenFactory;
 use Tests\TestCase;
 
 class TokenFactoryTest extends TestCase

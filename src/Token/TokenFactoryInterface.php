@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OpenIDConnect\OAuth2\Token;
+namespace OpenIDConnect\Token;
 
 interface TokenFactoryInterface
 {

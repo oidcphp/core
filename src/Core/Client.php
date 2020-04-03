@@ -2,9 +2,9 @@
 
 namespace OpenIDConnect\Core;
 
-use OpenIDConnect\Core\Jwt\JwtFactory;
-use OpenIDConnect\Core\Token\TokenSet;
-use OpenIDConnect\OAuth2\Token\TokenSetInterface;
+use OpenIDConnect\Jwt\JwtFactory;
+use OpenIDConnect\Token\TokenSet;
+use OpenIDConnect\Token\TokenSetInterface;
 
 /**
  * OpenID Connect addition method

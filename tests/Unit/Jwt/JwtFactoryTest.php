@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Core\Metadata;
+namespace Tests\Unit\Jwt;
 
 use InvalidArgumentException;
 use Jose\Component\Checker\InvalidHeaderException;
@@ -11,7 +11,7 @@ use Jose\Component\KeyManagement\JWKFactory;
 use Jose\Component\Signature\Algorithm\ES256;
 use Jose\Component\Signature\Algorithm\RS256;
 use Jose\Component\Signature\Serializer\CompactSerializer;
-use OpenIDConnect\Core\Jwt\JwtFactory;
+use OpenIDConnect\Jwt\JwtFactory;
 use OutOfRangeException;
 use Tests\TestCase;
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace OpenIDConnect\Core\Jwt;
+namespace OpenIDConnect\Jwt;
 
 use Jose\Component\Core\Algorithm;
 use OutOfRangeException;

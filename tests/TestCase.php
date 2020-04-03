@@ -6,29 +6,17 @@ use Illuminate\Container\Container;
 use Jose\Component\Core\JWKSet;
 use Jose\Component\Core\Util\JsonConverter;
 use Jose\Component\KeyManagement\JWKFactory;
-use Laminas\Diactoros\RequestFactory;
-use Laminas\Diactoros\ResponseFactory;
-use Laminas\Diactoros\ServerRequestFactory;
-use Laminas\Diactoros\StreamFactory;
-use Laminas\Diactoros\UploadedFileFactory;
-use Laminas\Diactoros\UriFactory;
 use MilesChou\Mocker\Psr18\MockClient;
 use MilesChou\Psr\Http\Message\HttpFactory;
 use MilesChou\Psr\Http\Message\HttpFactoryInterface;
 use OpenIDConnect\Config\ClientInformation;
 use OpenIDConnect\Config\ProviderMetadata;
 use OpenIDConnect\Core\Builder;
-use OpenIDConnect\Core\Token\TokenFactory;
-use OpenIDConnect\OAuth2\Token\TokenFactoryInterface;
+use OpenIDConnect\Token\TokenFactory;
+use OpenIDConnect\Token\TokenFactoryInterface;
 use PHPUnit\Framework\TestCase as BaseTestCase;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Client\ClientInterface;
-use Psr\Http\Message\RequestFactoryInterface;
-use Psr\Http\Message\ResponseFactoryInterface;
-use Psr\Http\Message\ServerRequestFactoryInterface;
-use Psr\Http\Message\StreamFactoryInterface;
-use Psr\Http\Message\UploadedFileFactoryInterface;
-use Psr\Http\Message\UriFactoryInterface;
 
 class TestCase extends BaseTestCase
 {
