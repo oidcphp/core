@@ -62,13 +62,13 @@ class ClientTest extends TestCase
     {
         $target = new Client(
             $this->createProviderMetadata(),
-            $this->createClientInformation([
-                'redirect_uri' => 'https://someredirect',
-            ]),
+            $this->createClientInformation(),
             $this->createContainer()
         );
 
-        $actual = $target->createAuthorizeFormPostResponse();
+        $actual = $target->createAuthorizeFormPostResponse([
+            'redirect_uri' => 'https://someredirect',
+        ]);
 
         $this->assertStringContainsString('action="https://somewhere/auth"', (string)$actual->getBody());
         $this->assertStringContainsString('name="state"', (string)$actual->getBody());
@@ -87,13 +87,13 @@ class ClientTest extends TestCase
     {
         $target = new Client(
             $this->createProviderMetadata(),
-            $this->createClientInformation([
-                'redirect_uri' => 'https://someredirect',
-            ]),
+            $this->createClientInformation(),
             $this->createContainer()
         );
 
-        $actual = $target->createAuthorizeRedirectResponse();
+        $actual = $target->createAuthorizeRedirectResponse([
+            'redirect_uri' => 'https://someredirect',
+        ]);
 
         $actualLocation = $actual->getHeaderLine('Location');
 
@@ -351,7 +351,9 @@ class ClientTest extends TestCase
      */
     public function shouldReturnAuthorizationUrlWhenCallCreateAuthorizeRedirectResponse(): void
     {
-        $actual = $this->target->createAuthorizeRedirectResponse();
+        $actual = $this->target->createAuthorizeRedirectResponse([
+            'redirect_uri' => 'https://someredirect',
+        ]);
 
         $this->assertSame(302, $actual->getStatusCode());
 
@@ -369,7 +371,9 @@ class ClientTest extends TestCase
      */
     public function shouldReturnAuthorizationPostFormWhenCallCreateAuthorizeFormPostResponse(): void
     {
-        $actual = $this->target->createAuthorizeFormPostResponse();
+        $actual = $this->target->createAuthorizeFormPostResponse([
+            'redirect_uri' => 'https://someredirect',
+        ]);
 
         $this->assertStringContainsStringIgnoringCase('<form method="post" action="https://somewhere/auth">', (string)$actual->getBody());
         $this->assertStringContainsStringIgnoringCase('name="state"', (string)$actual->getBody());

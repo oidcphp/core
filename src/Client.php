@@ -222,7 +222,7 @@ class Client
         }
 
         if (!isset($parameters['redirect_uri'])) {
-            $parameters['redirect_uri'] = $this->clientInformation->redirectUri();
+            throw new OAuth2ClientException("Missing parameter 'redirect_uri'");
         }
 
         $parameters['client_id'] = $this->clientInformation->id();

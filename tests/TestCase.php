@@ -42,7 +42,6 @@ class TestCase extends BaseTestCase
         return array_merge([
             'client_id' => 'some_id',
             'client_secret' => 'some_secret',
-            'redirect_uri' => 'https://someredirect',
             'redirect_uris' => ['https://someredirect'],
         ], $overwrite);
     }

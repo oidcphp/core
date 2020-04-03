@@ -7,8 +7,6 @@ namespace OpenIDConnect\Config;
 /**
  * Client information
  *
- * @method string redirectUri() Default redirect URI
- *
  * @see https://tools.ietf.org/html/rfc7591#section-3.2.1
  */
 class ClientInformation extends ClientMetadata
