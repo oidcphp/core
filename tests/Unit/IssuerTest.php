@@ -1,10 +1,10 @@
 <?php
 
-namespace Tests\Core;
+namespace Tests\Unit;
 
 use MilesChou\Mocker\Psr18\MockClient;
 use MilesChou\Psr\Http\Message\HttpFactory;
-use OpenIDConnect\Core\Issuer;
+use OpenIDConnect\Issuer;
 use Tests\TestCase;
 
 class IssuerTest extends TestCase

@@ -1,6 +1,6 @@
 <?php
 
-namespace OpenIDConnect\Core;
+namespace OpenIDConnect;
 
 use MilesChou\Psr\Http\Message\HttpFactoryInterface;
 use OpenIDConnect\Config\ClientInformation;
