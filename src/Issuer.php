@@ -3,11 +3,11 @@
 namespace OpenIDConnect;
 
 use MilesChou\Psr\Http\Message\HttpFactoryInterface;
+use OpenIDConnect\Contracts\ClientMetadataInterface;
+use OpenIDConnect\Contracts\ProviderMetadataInterface;
 use OpenIDConnect\Exceptions\OpenIDProviderException;
 use OpenIDConnect\Exceptions\RelyingPartyException;
 use OpenIDConnect\Jwt\JwkSet;
-use OpenIDConnect\Metadata\ClientInformation;
-use OpenIDConnect\Metadata\ClientMetadata;
 use OpenIDConnect\Metadata\ProviderMetadata;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
@@ -42,7 +42,6 @@ class Issuer
      * Discover the OpenID Connect provider
      *
      * @param string $discoverUri
-     *
      * @return ProviderMetadata
      * @throws ClientExceptionInterface
      * @see https://tools.ietf.org/html/rfc8414#section-3
@@ -57,34 +56,36 @@ class Issuer
     }
 
     /**
-     * @param ProviderMetadata $providerMetadata
-     * @param ClientMetadata $clientMetadata
-     *
-     * @return ClientInformation
+     * @param ProviderMetadataInterface $providerMetadata
+     * @param ClientMetadataInterface $clientMetadata
+     * @return ClientMetadataInterface
      * @throws ClientExceptionInterface
      */
-    public function register(ProviderMetadata $providerMetadata, ClientMetadata $clientMetadata): ClientInformation
-    {
-        $registrationEndpoint = $providerMetadata->registrationEndpoint();
-
-        if (empty($registrationEndpoint)) {
-            $msg = 'Cannot use dynamic client registration on issuer: ' . $providerMetadata->issuer();
+    public function register(
+        ProviderMetadataInterface $providerMetadata,
+        ClientMetadataInterface $clientMetadata
+    ): ClientMetadataInterface {
+        if (!$providerMetadata->has('registration_endpoint')) {
+            $msg = 'Cannot use dynamic client registration on issuer: ' . $providerMetadata->get('issuer');
 
             throw new RelyingPartyException($msg);
         }
+
+        $registrationEndpoint = $providerMetadata->get('registration_endpoint');
 
         $request = $this->httpFactory->createRequest('POST', $registrationEndpoint)
             ->withHeader('content-type', 'application/json')
             ->withBody($this->httpFactory->createStream((string)json_encode($clientMetadata)));
 
-        return new ClientInformation($this->processResponse($this->client->sendRequest($request)));
+        $response = $this->processResponse($this->client->sendRequest($request));
+
+        return $clientMetadata->merge($response);
     }
 
     /**
      * Send request to discovery endpoint and process response
      *
      * @param string $uri
-     *
      * @return array
      * @throws ClientExceptionInterface
      */
@@ -97,7 +98,6 @@ class Issuer
 
     /**
      * @param ResponseInterface $response
-     *
      * @return array
      */
     private function processResponse(ResponseInterface $response): array

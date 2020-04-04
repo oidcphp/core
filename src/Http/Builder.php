@@ -7,7 +7,7 @@ namespace OpenIDConnect\Http;
 use MilesChou\Psr\Http\Client\HttpClientAwareTrait;
 use MilesChou\Psr\Http\Message\HttpFactoryAwareTrait;
 use MilesChou\Psr\Http\Message\HttpFactoryInterface;
-use OpenIDConnect\Metadata\ClientInformationAwareTrait;
+use OpenIDConnect\Metadata\ClientMetadataAwareTrait;
 use OpenIDConnect\Metadata\ProviderMetadataAwareTrait;
 use Psr\Http\Client\ClientInterface;
 
@@ -16,7 +16,7 @@ abstract class Builder
     use HttpClientAwareTrait;
     use HttpFactoryAwareTrait;
     use ProviderMetadataAwareTrait;
-    use ClientInformationAwareTrait;
+    use ClientMetadataAwareTrait;
 
     /**
      * @param ClientInterface $httpClient

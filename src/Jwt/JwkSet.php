@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace OpenIDConnect\Jwt;
 
 use InvalidArgumentException;
-use JsonSerializable;
+use OpenIDConnect\Contracts\JwkSetInterface;
 
 /**
  * @see https://tools.ietf.org/html/rfc7517#section-5
  */
-class JwkSet implements JsonSerializable
+class JwkSet implements JwkSetInterface
 {
     /**
      * @var array<mixed>
@@ -27,9 +27,9 @@ class JwkSet implements JsonSerializable
 
     /**
      * @param array<mixed> $jwkSet
-     * @return JwkSet
+     * @return JwkSetInterface
      */
-    public function init(array $jwkSet): JwkSet
+    public function init(array $jwkSet): JwkSetInterface
     {
         if (isset($jwkSet['keys'])) {
             foreach ($jwkSet['keys'] as $key) {
@@ -42,9 +42,9 @@ class JwkSet implements JsonSerializable
 
     /**
      * @param array<mixed> $jwk
-     * @return JwkSet
+     * @return JwkSetInterface
      */
-    public function add(array $jwk): JwkSet
+    public function add(array $jwk): JwkSetInterface
     {
         if (isset($jwk['kid'])) {
             $this->keys[$jwk['kid']] = $jwk;

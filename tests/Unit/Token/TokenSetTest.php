@@ -131,7 +131,7 @@ class TokenSetTest extends TestCase
         $expectedExp = time() + 3600;
         $expectedIat = time();
 
-        $clientInformation = $this->createClientInformation([
+        $clientInformation = $this->createClientMetadata([
             'client_id' => 'some-aud',
         ]);
 
@@ -156,7 +156,7 @@ class TokenSetTest extends TestCase
             'id_token' => (new CompactSerializer())->serialize($jws),
         ]));
 
-        $target->setClientInformation($clientInformation);
+        $target->setClientMetadata($clientInformation);
         $target->setProviderMetadata($providerMetadata);
         $target->setJwtFactory(new JwtFactory($providerMetadata, $clientInformation));
 
@@ -189,7 +189,7 @@ class TokenSetTest extends TestCase
         $expectedExp = time() + 3600;
         $expectedIat = time();
 
-        $clientInformation = $this->createClientInformation([
+        $clientInformation = $this->createClientMetadata([
             'client_id' => 'some-aud',
         ]);
 
@@ -212,7 +212,7 @@ class TokenSetTest extends TestCase
             'id_token' => (new CompactSerializer())->serialize($jws),
         ]));
 
-        $target->setClientInformation($clientInformation);
+        $target->setClientMetadata($clientInformation);
         $target->setProviderMetadata($providerMetadata);
         $target->setJwtFactory(new JwtFactory($providerMetadata, $clientInformation));
 

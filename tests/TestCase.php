@@ -9,8 +9,9 @@ use Jose\Component\KeyManagement\JWKFactory;
 use MilesChou\Mocker\Psr18\MockClient;
 use MilesChou\Psr\Http\Message\HttpFactory;
 use MilesChou\Psr\Http\Message\HttpFactoryInterface;
+use OpenIDConnect\Config;
 use OpenIDConnect\Contracts\TokenFactoryInterface;
-use OpenIDConnect\Metadata\ClientInformation;
+use OpenIDConnect\Metadata\ClientMetadata;
 use OpenIDConnect\Metadata\ProviderMetadata;
 use OpenIDConnect\Token\TokenFactory;
 use PHPUnit\Framework\TestCase as BaseTestCase;
@@ -19,12 +20,20 @@ use Psr\Http\Client\ClientInterface;
 
 class TestCase extends BaseTestCase
 {
-    protected function createClientInformation($overwrite = []): ClientInformation
+    protected function createConfig($providerMetadata = [], $clientMetadata = []): Config
     {
-        return new ClientInformation($this->createClientInformationConfig($overwrite));
+        return new Config(
+            $this->createProviderMetadata($providerMetadata),
+            $this->createClientMetadata($clientMetadata)
+        );
     }
 
-    protected function createClientInformationConfig($overwrite = []): array
+    protected function createClientMetadata($overwrite = []): ClientMetadata
+    {
+        return new ClientMetadata($this->createClientMetadataConfig($overwrite));
+    }
+
+    protected function createClientMetadataConfig($overwrite = []): array
     {
         return array_merge([
             'client_id' => 'some_id',

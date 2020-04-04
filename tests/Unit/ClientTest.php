@@ -24,8 +24,7 @@ class ClientTest extends TestCase
     protected function setUp(): void
     {
         $this->target = new Client(
-            $this->createProviderMetadata(),
-            $this->createClientInformation(),
+            $this->createConfig(),
             $this->createContainer()
         );
     }
@@ -41,8 +40,7 @@ class ClientTest extends TestCase
     public function shouldReturnPreparedStateWhenInitParameters(): void
     {
         $target = new Client(
-            $this->createProviderMetadata(),
-            $this->createClientInformation([
+            $this->createConfig([], [
                 'redirect_uri' => 'https://someredirect',
             ]),
             $this->createContainer()
@@ -61,8 +59,7 @@ class ClientTest extends TestCase
     public function shouldReturnHtmlWhenCallCreateFormPost(): void
     {
         $target = new Client(
-            $this->createProviderMetadata(),
-            $this->createClientInformation(),
+            $this->createConfig(),
             $this->createContainer()
         );
 
@@ -86,8 +83,9 @@ class ClientTest extends TestCase
     public function shouldReturnRedirectWhenCallCreateRedirect(): void
     {
         $target = new Client(
-            $this->createProviderMetadata(),
-            $this->createClientInformation(),
+            $this->createConfig([], [
+                'redirect_uri' => 'https://someredirect',
+            ]),
             $this->createContainer()
         );
 
@@ -110,8 +108,7 @@ class ClientTest extends TestCase
     public function shouldReturnTokenSetInstanceWhenCallSendTokenRequest(): void
     {
         $target = new Client(
-            $this->createProviderMetadata(),
-            $this->createClientInformation([
+            $this->createConfig([], [
                 'redirect_uri' => 'https://someredirect',
             ]),
             $this->createContainer([
@@ -144,8 +141,7 @@ class ClientTest extends TestCase
         };
 
         $target = new Client(
-            $this->createProviderMetadata(),
-            $this->createClientInformation([
+            $this->createConfig([], [
                 'redirect_uri' => 'https://someredirect',
             ]),
             $this->createContainer([
@@ -167,8 +163,7 @@ class ClientTest extends TestCase
         $this->expectException(OAuth2ServerException::class);
 
         $target = new Client(
-            $this->createProviderMetadata(),
-            $this->createClientInformation([
+            $this->createConfig([], [
                 'redirect_uri' => 'https://someredirect',
             ]),
             $this->createContainer([
@@ -190,8 +185,7 @@ class ClientTest extends TestCase
         $this->expectException(OAuth2ServerException::class);
 
         $target = new Client(
-            $this->createProviderMetadata(),
-            $this->createClientInformation([
+            $this->createConfig([], [
                 'redirect_uri' => 'https://someredirect',
             ]),
             $this->createContainer([
@@ -213,8 +207,7 @@ class ClientTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
 
         $target = new Client(
-            $this->createProviderMetadata(),
-            $this->createClientInformation(),
+            $this->createConfig(),
             $this->createContainer()
         );
 
@@ -229,8 +222,7 @@ class ClientTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
 
         $target = new Client(
-            $this->createProviderMetadata(),
-            $this->createClientInformation(),
+            $this->createConfig(),
             $this->createContainer([
                 ClientInterface::class => (new MockClient())->appendResponseWithJson(
                     $this->createFakeTokenSetParameter(['access_token' => 'some-access-token'])
@@ -253,8 +245,7 @@ class ClientTest extends TestCase
         $this->expectException(OAuth2ClientException::class);
 
         $target = new Client(
-            $this->createProviderMetadata(),
-            $this->createClientInformation(),
+            $this->createConfig(),
             $this->createContainer([
                 ClientInterface::class => (new MockClient())->appendResponseWithJson(
                     $this->createFakeTokenSetParameter(['access_token' => 'some-access-token'])
@@ -278,8 +269,7 @@ class ClientTest extends TestCase
         $this->expectException(OAuth2ClientException::class);
 
         $target = new Client(
-            $this->createProviderMetadata(),
-            $this->createClientInformation(),
+            $this->createConfig(),
             $this->createContainer([
                 ClientInterface::class => (new MockClient())->appendResponseWithJson(
                     $this->createFakeTokenSetParameter(['access_token' => 'some-access-token'])
@@ -302,8 +292,7 @@ class ClientTest extends TestCase
     public function shouldReturnTokenWhenHandleCallbackWithStateIsNotGiven(): void
     {
         $target = new Client(
-            $this->createProviderMetadata(),
-            $this->createClientInformation(),
+            $this->createConfig(),
             $this->createContainer([
                 ClientInterface::class => (new MockClient())->appendResponseWithJson(
                     $this->createFakeTokenSetParameter(['access_token' => 'some-access-token'])
@@ -325,8 +314,7 @@ class ClientTest extends TestCase
     public function shouldReturnTokenWhenHandleCallbackWithBothGivenAndSame(): void
     {
         $target = new Client(
-            $this->createProviderMetadata(),
-            $this->createClientInformation(),
+            $this->createConfig(),
             $this->createContainer([
                 ClientInterface::class => (new MockClient())->appendResponseWithJson(
                     $this->createFakeTokenSetParameter(['access_token' => 'some-access-token'])

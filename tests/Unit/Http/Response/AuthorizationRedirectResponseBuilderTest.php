@@ -17,7 +17,7 @@ class AuthorizationRedirectResponseBuilderTest extends TestCase
         $target = new AuthorizationRedirectResponseBuilder(new MockClient(), new HttpFactory());
 
         $actual = $target->setProviderMetadata($this->createProviderMetadata())
-            ->setClientInformation($this->createClientInformation())
+            ->setClientMetadata($this->createClientMetadata())
             ->build([
                 'foo' => 'a',
                 'bar' => 'b',

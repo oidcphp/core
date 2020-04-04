@@ -8,6 +8,8 @@ use InvalidArgumentException;
 use MilesChou\Psr\Http\Client\HttpClientAwareTrait;
 use MilesChou\Psr\Http\Message\HttpFactoryAwareTrait;
 use MilesChou\Psr\Http\Message\HttpFactoryInterface;
+use OpenIDConnect\Contracts\ConfigAwareInterface;
+use OpenIDConnect\Contracts\ConfigInterface;
 use OpenIDConnect\Contracts\TokenFactoryInterface;
 use OpenIDConnect\Contracts\TokenSetInterface;
 use OpenIDConnect\Exceptions\OAuth2ClientException;
@@ -17,13 +19,10 @@ use OpenIDConnect\Http\Request\TokenRequestBuilder;
 use OpenIDConnect\Http\Response\AuthorizationFormResponseBuilder;
 use OpenIDConnect\Http\Response\AuthorizationRedirectResponseBuilder;
 use OpenIDConnect\Jwt\JwtFactory;
-use OpenIDConnect\Metadata\ClientInformation;
-use OpenIDConnect\Metadata\ClientInformationAwareTrait;
-use OpenIDConnect\Metadata\ProviderMetadata;
-use OpenIDConnect\Metadata\ProviderMetadataAwareTrait;
 use OpenIDConnect\OAuth2\Grant\AuthorizationCode;
 use OpenIDConnect\OAuth2\Grant\GrantType;
 use OpenIDConnect\Token\TokenSet;
+use OpenIDConnect\Traits\ConfigAwareTrait;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
@@ -32,13 +31,12 @@ use Psr\Http\Message\ResponseInterface;
 /**
  * OAuth 2.0 / OpenID Connect Client
  */
-class Client
+class Client implements ConfigAwareInterface
 {
+    use ConfigAwareTrait;
     use HttpClientAwareTrait;
     use HttpFactoryAwareTrait;
     use ClientAuthenticationAwareTrait;
-    use ClientInformationAwareTrait;
-    use ProviderMetadataAwareTrait;
 
     /**
      * @var ContainerInterface
@@ -56,17 +54,12 @@ class Client
     private $state;
 
     /**
-     * @param ProviderMetadata $providerMetadata
-     * @param ClientInformation $clientRegistration
+     * @param ConfigInterface $config
      * @param ContainerInterface $container The container implements PSR-11
      */
-    public function __construct(
-        ProviderMetadata $providerMetadata,
-        ClientInformation $clientRegistration,
-        ContainerInterface $container
-    ) {
-        $this->setProviderMetadata($providerMetadata);
-        $this->setClientInformation($clientRegistration);
+    public function __construct(ConfigInterface $config, ContainerInterface $container)
+    {
+        $this->setConfig($config);
         $this->setContainer($container);
 
         $this->setHttpClient($this->container->get(ClientInterface::class));
@@ -82,8 +75,8 @@ class Client
     public function createAuthorizeFormPostResponse(array $parameters = []): ResponseInterface
     {
         return (new AuthorizationFormResponseBuilder($this->httpClient, $this->httpFactory))
-            ->setClientInformation($this->clientInformation)
-            ->setProviderMetadata($this->providerMetadata)
+            ->setClientMetadata($this->config->clientMetadata())
+            ->setProviderMetadata($this->config->providerMetadata())
             ->build($this->generateAuthorizationParameters($parameters));
     }
 
@@ -96,8 +89,8 @@ class Client
     public function createAuthorizeRedirectResponse(array $parameters = []): ResponseInterface
     {
         return (new AuthorizationRedirectResponseBuilder($this->httpClient, $this->httpFactory))
-            ->setClientInformation($this->clientInformation)
-            ->setProviderMetadata($this->providerMetadata)
+            ->setClientMetadata($this->config->clientMetadata())
+            ->setProviderMetadata($this->config->providerMetadata())
             ->build($this->generateAuthorizationParameters($parameters));
     }
 
@@ -156,9 +149,9 @@ class Client
         /** @var TokenSet $tokenSet */
         $tokenSet = $this->handleCallback($parameters, $checks);
 
-        $tokenSet->setClientInformation($this->clientInformation);
-        $tokenSet->setProviderMetadata($this->providerMetadata);
-        $tokenSet->setJwtFactory(new JwtFactory($this->providerMetadata, $this->clientInformation));
+        $tokenSet->setClientMetadata($this->config->clientMetadata());
+        $tokenSet->setProviderMetadata($this->config->providerMetadata());
+        $tokenSet->setJwtFactory(new JwtFactory($this->config->providerMetadata(), $this->config->clientMetadata()));
 
         return $tokenSet;
     }
@@ -175,9 +168,9 @@ class Client
         $parameters = $grant->prepareTokenRequestParameters(array_merge($parameters, $checks));
 
         $request = (new TokenRequestBuilder($this->httpClient, $this->httpFactory))
-            ->setProviderMetadata($this->providerMetadata)
+            ->setClientMetadata($this->config->clientMetadata())
+            ->setProviderMetadata($this->config->providerMetadata())
             ->setClientAuthentication($this->clientAuthentication)
-            ->setClientInformation($this->clientInformation)
             ->build($grant, $parameters);
 
         try {
@@ -189,7 +182,7 @@ class Client
 
         $parsed = $this->parseTokenResponse($response);
 
-        /** @var \OpenIDConnect\Contracts\TokenFactoryInterface $tokenFactory */
+        /** @var TokenFactoryInterface $tokenFactory */
         $tokenFactory = $this->container->get(TokenFactoryInterface::class);
 
         return $tokenFactory->create(array_merge($checks, $parsed));
@@ -259,7 +252,7 @@ class Client
             throw new OAuth2ClientException("Missing parameter 'redirect_uri'");
         }
 
-        $parameters['client_id'] = $this->clientInformation->id();
+        $parameters['client_id'] = $this->config->clientMetadata()->id();
 
         return $parameters;
     }

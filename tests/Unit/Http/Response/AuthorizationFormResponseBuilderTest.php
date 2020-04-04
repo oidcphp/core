@@ -18,7 +18,7 @@ class AuthorizationFormResponseBuilderTest extends TestCase
         $target = new AuthorizationFormResponseBuilder(new MockClient(), new HttpFactory());
 
         $actual = (string)$target->setProviderMetadata($this->createProviderMetadata())
-            ->setClientInformation($this->createClientInformation())
+            ->setClientMetadata($this->createClientMetadata())
             ->build([
                 'foo' => 'a',
                 'bar' => 'b',
@@ -42,7 +42,7 @@ class AuthorizationFormResponseBuilderTest extends TestCase
         $target->setProviderMetadata($this->createProviderMetadata([
             'authorization_endpoint' => null,
         ]))
-            ->setClientInformation($this->createClientInformation())
+            ->setClientMetadata($this->createClientMetadata())
             ->build([
                 'foo' => 'a',
                 'bar' => 'b',

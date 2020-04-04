@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\OAuth2\Traits;
+namespace Tests\Unit\Traits;
 
 use BadMethodCallException;
 use DomainException;
@@ -28,6 +28,23 @@ class ParameterTraitTest extends TestCase
         $this->assertSame('value', $actual->get(0));
         $this->assertSame('value', $actual->get(1));
         $this->assertSame('value', $actual->get(2));
+    }
+
+    /**
+     * @test
+     */
+    public function shouldMergeItemsWhenCallMerge(): void
+    {
+        /** @var ParameterTrait $target */
+        $target = $this->getMockForTrait(ParameterTrait::class);
+
+        $actual = $target->merge(['foo' => 1, 'bar' => 2])
+            ->merge(['foo' => 3, 'baz' => 4]);
+
+
+        $this->assertSame(3, $actual->get('foo'));
+        $this->assertSame(2, $actual->get('bar'));
+        $this->assertSame(4, $actual->get('baz'));
     }
 
     /**

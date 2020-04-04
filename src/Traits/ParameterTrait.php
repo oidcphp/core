@@ -60,8 +60,7 @@ trait ParameterTrait
     }
 
     /**
-     * @param mixed $item
-     * @return static
+     * @inheritDoc
      */
     public function append($item)
     {
@@ -71,7 +70,7 @@ trait ParameterTrait
     }
 
     /**
-     * @param string|int $key
+     * @inheritDoc
      */
     public function assertHasKey($key): void
     {
@@ -81,7 +80,7 @@ trait ParameterTrait
     }
 
     /**
-     * @param array<string> $keys
+     * @inheritDoc
      */
     public function assertHasKeys(array $keys): void
     {
@@ -91,9 +90,7 @@ trait ParameterTrait
     }
 
     /**
-     * @param string|int $key
-     * @param mixed|null $default
-     * @return mixed
+     * @inheritDoc
      */
     public function get($key, $default = null)
     {
@@ -101,8 +98,7 @@ trait ParameterTrait
     }
 
     /**
-     * @param string|int $key
-     * @return bool
+     * @inheritDoc
      */
     public function has($key): bool
     {
@@ -110,8 +106,7 @@ trait ParameterTrait
     }
 
     /**
-     * @see \JsonSerializable
-     * @return array<mixed>
+     * @inheritDoc
      */
     public function jsonSerialize()
     {
@@ -119,9 +114,17 @@ trait ParameterTrait
     }
 
     /**
-     * @param string|int $key
-     * @return mixed
-     * @throws DomainException
+     * @inheritDoc
+     */
+    public function merge(array $parameters)
+    {
+        $this->parameters = array_merge($this->parameters, $parameters);
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
      */
     public function require($key)
     {
@@ -131,7 +134,7 @@ trait ParameterTrait
     }
 
     /**
-     * @return array<mixed>
+     * @inheritDoc
      */
     public function toArray(): array
     {
@@ -139,11 +142,7 @@ trait ParameterTrait
     }
 
     /**
-     * Return a clone object with new value
-     *
-     * @param string|int $key
-     * @param mixed $value
-     * @return static
+     * @inheritDoc
      */
     public function with($key, $value)
     {

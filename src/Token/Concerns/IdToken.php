@@ -7,14 +7,14 @@ use Jose\Component\Core\Util\JsonConverter;
 use OpenIDConnect\Core\Claims;
 use OpenIDConnect\Exceptions\RelyingPartyException;
 use OpenIDConnect\Jwt\JwtFactory;
-use OpenIDConnect\Metadata\ClientInformationAwareTrait;
+use OpenIDConnect\Metadata\ClientMetadataAwareTrait;
 use OpenIDConnect\Metadata\ProviderMetadataAwareTrait;
 use RangeException;
 use UnexpectedValueException;
 
 trait IdToken
 {
-    use ClientInformationAwareTrait;
+    use ClientMetadataAwareTrait;
     use ProviderMetadataAwareTrait;
 
     /**

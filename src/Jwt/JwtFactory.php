@@ -18,16 +18,18 @@ use Jose\Component\Signature\JWSTokenSupport;
 use Jose\Component\Signature\JWSVerifier;
 use Jose\Component\Signature\Serializer\CompactSerializer;
 use Jose\Component\Signature\Serializer\JWSSerializerManager;
+use OpenIDConnect\Contracts\ClientMetadataInterface;
+use OpenIDConnect\Contracts\ProviderMetadataInterface;
 use OpenIDConnect\Jwt\Checker\NonceChecker;
-use OpenIDConnect\Metadata\ClientInformation;
-use OpenIDConnect\Metadata\ClientInformationAwareTrait;
+use OpenIDConnect\Metadata\ClientMetadata;
+use OpenIDConnect\Metadata\ClientMetadataAwareTrait;
 use OpenIDConnect\Metadata\ProviderMetadata;
 use OpenIDConnect\Metadata\ProviderMetadataAwareTrait;
 
 class JwtFactory
 {
     use AlgorithmFactoryTrait;
-    use ClientInformationAwareTrait;
+    use ClientMetadataAwareTrait;
     use ProviderMetadataAwareTrait;
 
     /**
@@ -37,10 +39,10 @@ class JwtFactory
      */
     private $algorithms = [];
 
-    public function __construct(ProviderMetadata $providerMetadata, ClientInformation $clientInformation)
+    public function __construct(ProviderMetadataInterface $providerMetadata, ClientMetadataInterface $clientMetadata)
     {
         $this->setProviderMetadata($providerMetadata);
-        $this->setClientInformation($clientInformation);
+        $this->setClientMetadata($clientMetadata);
     }
 
     /**
@@ -61,7 +63,7 @@ class JwtFactory
     public function createClaimCheckerManager($check = []): ClaimCheckerManager
     {
         return ClaimCheckerManager::create([
-            new AudienceChecker($this->clientInformation->id()),
+            new AudienceChecker($this->clientMetadata->id()),
             new ExpirationTimeChecker(),
             new IssuedAtChecker(),
             new NotBeforeChecker(),

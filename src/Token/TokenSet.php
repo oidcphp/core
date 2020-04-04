@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace OpenIDConnect\Token;
 
+use OpenIDConnect\Contracts\Parameterable;
 use OpenIDConnect\Contracts\TokenSetInterface;
 use OpenIDConnect\Token\Concerns\IdToken;
 use OpenIDConnect\Traits\ParameterTrait;
 
-class TokenSet implements TokenSetInterface
+class TokenSet implements Parameterable, TokenSetInterface
 {
     use IdToken;
     use ParameterTrait;
