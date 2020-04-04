@@ -31,7 +31,7 @@ class AuthorizationRedirectResponseBuilder extends Builder
      */
     private function createAuthorizeUri(array $parameters): UriInterface
     {
-        return $this->httpFactory->createUri($this->providerMetadata->require('authorization_endpoint'))
+        return $this->httpFactory->createUri($this->config->providerMetadata()->require('authorization_endpoint'))
             ->withQuery(Query::build($parameters));
     }
 }

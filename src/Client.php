@@ -74,9 +74,7 @@ class Client implements ConfigAwareInterface
      */
     public function createAuthorizeFormPostResponse(array $parameters = []): ResponseInterface
     {
-        return (new AuthorizationFormResponseBuilder($this->httpClient, $this->httpFactory))
-            ->setClientMetadata($this->config->clientMetadata())
-            ->setProviderMetadata($this->config->providerMetadata())
+        return (new AuthorizationFormResponseBuilder($this->config, $this->httpClient, $this->httpFactory))
             ->build($this->generateAuthorizationParameters($parameters));
     }
 
@@ -88,9 +86,7 @@ class Client implements ConfigAwareInterface
      */
     public function createAuthorizeRedirectResponse(array $parameters = []): ResponseInterface
     {
-        return (new AuthorizationRedirectResponseBuilder($this->httpClient, $this->httpFactory))
-            ->setClientMetadata($this->config->clientMetadata())
-            ->setProviderMetadata($this->config->providerMetadata())
+        return (new AuthorizationRedirectResponseBuilder($this->config, $this->httpClient, $this->httpFactory))
             ->build($this->generateAuthorizationParameters($parameters));
     }
 
@@ -167,9 +163,7 @@ class Client implements ConfigAwareInterface
     {
         $parameters = $grant->prepareTokenRequestParameters(array_merge($parameters, $checks));
 
-        $request = (new TokenRequestBuilder($this->httpClient, $this->httpFactory))
-            ->setClientMetadata($this->config->clientMetadata())
-            ->setProviderMetadata($this->config->providerMetadata())
+        $request = (new TokenRequestBuilder($this->config, $this->httpClient, $this->httpFactory))
             ->setClientAuthentication($this->clientAuthentication)
             ->build($grant, $parameters);
 

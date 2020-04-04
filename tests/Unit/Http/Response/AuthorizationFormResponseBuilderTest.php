@@ -15,14 +15,12 @@ class AuthorizationFormResponseBuilderTest extends TestCase
      */
     public function shouldReturnAuthorizationHtmlWhenCallBuild(): void
     {
-        $target = new AuthorizationFormResponseBuilder(new MockClient(), new HttpFactory());
+        $target = new AuthorizationFormResponseBuilder($this->createConfig(), new MockClient(), new HttpFactory());
 
-        $actual = (string)$target->setProviderMetadata($this->createProviderMetadata())
-            ->setClientMetadata($this->createClientMetadata())
-            ->build([
-                'foo' => 'a',
-                'bar' => 'b',
-            ])
+        $actual = (string)$target->build([
+            'foo' => 'a',
+            'bar' => 'b',
+        ])
             ->getBody();
 
         $this->assertStringContainsString('action="https://somewhere/auth"', $actual);
@@ -37,15 +35,13 @@ class AuthorizationFormResponseBuilderTest extends TestCase
     {
         $this->expectException(OAuth2ServerException::class);
 
-        $target = new \OpenIDConnect\Http\Response\AuthorizationFormResponseBuilder(new MockClient(), new HttpFactory());
-
-        $target->setProviderMetadata($this->createProviderMetadata([
+        $target = new AuthorizationFormResponseBuilder($this->createConfig([
             'authorization_endpoint' => null,
-        ]))
-            ->setClientMetadata($this->createClientMetadata())
-            ->build([
-                'foo' => 'a',
-                'bar' => 'b',
-            ]);
+        ]), new MockClient(), new HttpFactory());
+
+        $target->build([
+            'foo' => 'a',
+            'bar' => 'b',
+        ]);
     }
 }

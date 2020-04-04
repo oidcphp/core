@@ -27,13 +27,15 @@ class TokenRequestBuilder extends Builder
     public function build(GrantType $grantType, array $parameters): PendingRequest
     {
         $clientAuthentication = $this->resolveClientAuthentication(
-            $this->clientMetadata->id(),
-            $this->clientMetadata->secret()
+            $this->config->clientMetadata()->id(),
+            $this->config->clientMetadata()->secret()
         );
 
         $parameters = $grantType->prepareTokenRequestParameters($parameters);
 
-        $request = $this->httpFactory->createRequest('POST', $this->providerMetadata->require('token_endpoint'))
+        $uri = $this->config->providerMetadata()->require('token_endpoint');
+
+        $request = $this->httpFactory->createRequest('POST', $uri)
             ->withHeader('content-type', 'application/x-www-form-urlencoded')
             ->withBody($this->httpFactory->createStream(Query::build($parameters)));
 

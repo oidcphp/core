@@ -14,14 +14,12 @@ class AuthorizationRedirectResponseBuilderTest extends TestCase
      */
     public function shouldReturnRedirectResponseWhenCallBuild(): void
     {
-        $target = new AuthorizationRedirectResponseBuilder(new MockClient(), new HttpFactory());
+        $target = new AuthorizationRedirectResponseBuilder($this->createConfig(), new MockClient(), new HttpFactory());
 
-        $actual = $target->setProviderMetadata($this->createProviderMetadata())
-            ->setClientMetadata($this->createClientMetadata())
-            ->build([
-                'foo' => 'a',
-                'bar' => 'b',
-            ]);
+        $actual = $target->build([
+            'foo' => 'a',
+            'bar' => 'b',
+        ]);
 
         $this->assertSame(302, $actual->getStatusCode());
 

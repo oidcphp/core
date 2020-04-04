@@ -15,9 +15,7 @@ class TokenRequestBuilderTest extends TestCase
      */
     public function shouldReturnCorrectRequestInstance(): void
     {
-        $target = (new TokenRequestBuilder(new MockClient(), new HttpFactory()))
-            ->setProviderMetadata($this->createProviderMetadata())
-            ->setClientMetadata($this->createClientMetadata());
+        $target = new TokenRequestBuilder($this->createConfig(), new MockClient(), new HttpFactory());
 
         // base64_encode('some_id:some_secret')
         $exceptedAuthorization = 'Basic c29tZV9pZDpzb21lX3NlY3JldA==';

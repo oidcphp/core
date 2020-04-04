@@ -19,7 +19,7 @@ class UserInfoRequestBuilder extends Builder
     public function build(string $accessToken): PendingRequest
     {
         try {
-            $userInfoEndpoint = $this->providerMetadata->require('userinfo_endpoint');
+            $userInfoEndpoint = $this->config->providerMetadata()->require('userinfo_endpoint');
         } catch (DomainException $e) {
             throw new OAuth2ServerException('Provider does not support userinfo_endpoint');
         }

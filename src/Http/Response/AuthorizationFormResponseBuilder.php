@@ -28,7 +28,9 @@ class AuthorizationFormResponseBuilder extends Builder
     private function generateForm(array $parameters): string
     {
         try {
-            return $this->generateHtml($this->providerMetadata->require('authorization_endpoint'), $parameters);
+            $url = $this->config->providerMetadata()->require('authorization_endpoint');
+
+            return $this->generateHtml($url, $parameters);
         } catch (DomainException $e) {
             throw new OAuth2ServerException('Provider does not support authorization_endpoint');
         }
