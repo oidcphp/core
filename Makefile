@@ -11,6 +11,7 @@ clean:
 
 clean-all: clean
 	rm -rf ./vendor
+	rm -rf ./composer.lock
 
 check:
 	php vendor/bin/phpcs

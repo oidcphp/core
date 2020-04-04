@@ -2,8 +2,7 @@
 
 namespace Tests\Unit\Http\Response;
 
-use MilesChou\Mocker\Psr18\MockClient;
-use MilesChou\Psr\Http\Message\HttpFactory;
+use MilesChou\Psr\Http\Client\Testing\MockClient;
 use OpenIDConnect\Exceptions\OAuth2ServerException;
 use OpenIDConnect\Http\Response\AuthorizationFormResponseBuilder;
 use Tests\TestCase;
@@ -15,7 +14,7 @@ class AuthorizationFormResponseBuilderTest extends TestCase
      */
     public function shouldReturnAuthorizationHtmlWhenCallBuild(): void
     {
-        $target = new AuthorizationFormResponseBuilder($this->createConfig(), new MockClient(), new HttpFactory());
+        $target = new AuthorizationFormResponseBuilder($this->createConfig(), new MockClient());
 
         $actual = (string)$target->build([
             'foo' => 'a',
@@ -37,7 +36,7 @@ class AuthorizationFormResponseBuilderTest extends TestCase
 
         $target = new AuthorizationFormResponseBuilder($this->createConfig([
             'authorization_endpoint' => null,
-        ]), new MockClient(), new HttpFactory());
+        ]), new MockClient());
 
         $target->build([
             'foo' => 'a',

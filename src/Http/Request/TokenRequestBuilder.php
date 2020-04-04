@@ -35,9 +35,9 @@ class TokenRequestBuilder extends Builder
 
         $uri = $this->config->providerMetadata()->require('token_endpoint');
 
-        $request = $this->httpFactory->createRequest('POST', $uri)
+        $request = $this->httpClient->createRequest('POST', $uri)
             ->withHeader('content-type', 'application/x-www-form-urlencoded')
-            ->withBody($this->httpFactory->createStream(Query::build($parameters)));
+            ->withBody($this->httpClient->createStream(Query::build($parameters)));
 
         $request = $clientAuthentication->processRequest($request);
 

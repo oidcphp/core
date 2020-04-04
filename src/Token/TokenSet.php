@@ -4,21 +4,38 @@ declare(strict_types=1);
 
 namespace OpenIDConnect\Token;
 
+use Jose\Component\Core\JWKSet;
+use Jose\Component\Core\Util\JsonConverter;
+use OpenIDConnect\Claims;
+use OpenIDConnect\Contracts\ConfigAwareInterface;
+use OpenIDConnect\Contracts\ConfigInterface;
 use OpenIDConnect\Contracts\Parameterable;
 use OpenIDConnect\Contracts\TokenSetInterface;
-use OpenIDConnect\Token\Concerns\IdToken;
+use OpenIDConnect\Exceptions\RelyingPartyException;
+use OpenIDConnect\Jwt\JwtFactory;
+use OpenIDConnect\Traits\ConfigAwareTrait;
 use OpenIDConnect\Traits\ParameterTrait;
+use RangeException;
+use UnexpectedValueException;
 
-class TokenSet implements Parameterable, TokenSetInterface
+class TokenSet implements ConfigAwareInterface, Parameterable, TokenSetInterface
 {
-    use IdToken;
+    use ConfigAwareTrait;
     use ParameterTrait;
 
     /**
+     * @var Claims
+     */
+    private $claims;
+
+    /**
+     * @param ConfigInterface $config
      * @param array<mixed> $parameters An array from token endpoint response body
      */
-    public function __construct(array $parameters)
+    public function __construct(ConfigInterface $config, array $parameters)
     {
+        $this->setConfig($config);
+
         $this->parameters = $parameters;
     }
 
@@ -35,6 +52,53 @@ class TokenSet implements Parameterable, TokenSetInterface
     public function idToken(): ?string
     {
         return $this->get('id_token');
+    }
+
+    public function idTokenClaims($extraMandatoryClaims = [], $check = []): Claims
+    {
+        if (null !== $this->claims) {
+            return $this->claims;
+        }
+
+        $token = $this->idToken();
+
+        if (null === $token) {
+            throw new RangeException('No ID token');
+        }
+
+        $jwtFactory = new JwtFactory($this->config);
+
+        $loader = $jwtFactory->createJwsLoader();
+
+        $signature = null;
+
+        $jws = $loader->loadAndVerifyWithKeySet(
+            $token,
+            JWKSet::createFromKeyData($this->config->providerMetadata()->jwkSet()->toArray()),
+            $signature
+        );
+
+        $payload = $jws->getPayload();
+
+        if (null === $payload) {
+            throw new UnexpectedValueException('JWT has no payload');
+        }
+
+        if ($this->has('nonce')) {
+            $check['nonce'] = $this->get('nonce');
+        }
+
+        $claimCheckerManager = $jwtFactory->createClaimCheckerManager($check);
+
+        try {
+            $mandatoryClaims = array_unique(array_merge(static::REQUIRED_CLAIMS, $extraMandatoryClaims));
+
+            $claimCheckerManager->check(JsonConverter::decode($payload), $mandatoryClaims);
+        } catch (\Exception $e) {
+            throw new RelyingPartyException('Receive an invalid ID token: ' . $this->idToken(), 0, $e);
+        }
+
+        return $this->claims = Claims::createFromJWS($jws);
     }
 
     public function refreshToken(): ?string

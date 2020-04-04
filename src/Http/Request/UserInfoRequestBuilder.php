@@ -24,7 +24,7 @@ class UserInfoRequestBuilder extends Builder
             throw new OAuth2ServerException('Provider does not support userinfo_endpoint');
         }
 
-        $request = $this->httpFactory->createRequest('GET', $userInfoEndpoint)
+        $request = $this->httpClient->createRequest('GET', $userInfoEndpoint)
             ->withHeader('Authorization', 'Bearer ' . $accessToken);
 
         return new PendingRequest($request, $this->httpClient);

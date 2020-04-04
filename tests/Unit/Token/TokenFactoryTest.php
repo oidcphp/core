@@ -12,7 +12,7 @@ class TokenFactoryTest extends TestCase
      */
     public function shouldBeOkayWhenCreateByFactory(): void
     {
-        $target = (new TokenFactory())->create([
+        $target = (new TokenFactory($this->createConfig()))->create([
             'access_token' => 'some-access-token',
             'custom' => 'whatever',
             'expires_in' => 3600,

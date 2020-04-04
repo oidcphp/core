@@ -6,7 +6,7 @@ namespace OpenIDConnect\Contracts;
 
 use DomainException;
 use JsonSerializable;
-use OpenIDConnect\Core\Claims;
+use OpenIDConnect\Claims;
 
 /**
  * The token set interface for OpenID Connect flow
@@ -63,7 +63,8 @@ interface TokenSetInterface extends JsonSerializable
      *
      * @param array $extraMandatoryClaims
      * @param array $check
-     * @return Claims
+     *
+     * @return \OpenIDConnect\Claims
      * @link https://openid.net/specs/openid-connect-core-1_0.html#IDToken
      */
     public function idTokenClaims($extraMandatoryClaims = [], $check = []): Claims;

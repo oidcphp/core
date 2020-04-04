@@ -6,8 +6,8 @@ namespace OpenIDConnect;
 
 use InvalidArgumentException;
 use MilesChou\Psr\Http\Client\HttpClientAwareTrait;
+use MilesChou\Psr\Http\Client\HttpClientInterface;
 use MilesChou\Psr\Http\Message\HttpFactoryAwareTrait;
-use MilesChou\Psr\Http\Message\HttpFactoryInterface;
 use OpenIDConnect\Contracts\ConfigAwareInterface;
 use OpenIDConnect\Contracts\ConfigInterface;
 use OpenIDConnect\Contracts\TokenFactoryInterface;
@@ -21,11 +21,11 @@ use OpenIDConnect\Http\Response\AuthorizationRedirectResponseBuilder;
 use OpenIDConnect\Jwt\JwtFactory;
 use OpenIDConnect\OAuth2\Grant\AuthorizationCode;
 use OpenIDConnect\OAuth2\Grant\GrantType;
+use OpenIDConnect\Token\TokenFactory;
 use OpenIDConnect\Token\TokenSet;
 use OpenIDConnect\Traits\ConfigAwareTrait;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Client\ClientExceptionInterface;
-use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\ResponseInterface;
 
 /**
@@ -33,10 +33,10 @@ use Psr\Http\Message\ResponseInterface;
  */
 class Client implements ConfigAwareInterface
 {
+    use ClientAuthenticationAwareTrait;
     use ConfigAwareTrait;
     use HttpClientAwareTrait;
     use HttpFactoryAwareTrait;
-    use ClientAuthenticationAwareTrait;
 
     /**
      * @var ContainerInterface
@@ -54,27 +54,36 @@ class Client implements ConfigAwareInterface
     private $state;
 
     /**
-     * @param ConfigInterface $config
-     * @param ContainerInterface $container The container implements PSR-11
+     * @var TokenFactoryInterface
      */
-    public function __construct(ConfigInterface $config, ContainerInterface $container)
-    {
-        $this->setConfig($config);
-        $this->setContainer($container);
+    private $tokenFactory;
 
-        $this->setHttpClient($this->container->get(ClientInterface::class));
-        $this->setHttpFactory($this->container->get(HttpFactoryInterface::class));
+    /**
+     * @param ConfigInterface $config
+     * @param HttpClientInterface $httpClient
+     * @param TokenFactoryInterface|null $tokenFactory
+     */
+    public function __construct(
+        ConfigInterface $config,
+        HttpClientInterface $httpClient,
+        TokenFactoryInterface $tokenFactory = null
+    ) {
+        $this->setConfig($config);
+        $this->setHttpClient($httpClient);
+
+        $this->tokenFactory = $tokenFactory ?? new TokenFactory($config);
     }
 
     /**
      * Create PSR-7 response with form post
      *
      * @param array<mixed> $parameters
+     *
      * @return ResponseInterface
      */
     public function createAuthorizeFormPostResponse(array $parameters = []): ResponseInterface
     {
-        return (new AuthorizationFormResponseBuilder($this->config, $this->httpClient, $this->httpFactory))
+        return (new AuthorizationFormResponseBuilder($this->config, $this->httpClient))
             ->build($this->generateAuthorizationParameters($parameters));
     }
 
@@ -82,11 +91,12 @@ class Client implements ConfigAwareInterface
      * Create PSR-7 redirect response
      *
      * @param array<mixed> $parameters
+     *
      * @return ResponseInterface
      */
     public function createAuthorizeRedirectResponse(array $parameters = []): ResponseInterface
     {
-        return (new AuthorizationRedirectResponseBuilder($this->config, $this->httpClient, $this->httpFactory))
+        return (new AuthorizationRedirectResponseBuilder($this->config, $this->httpClient))
             ->build($this->generateAuthorizationParameters($parameters));
     }
 
@@ -110,7 +120,7 @@ class Client implements ConfigAwareInterface
      * @param array<mixed> $parameters
      * @param array<mixed> $checks
      *
-     * @return \OpenIDConnect\Contracts\TokenSetInterface
+     * @return TokenSetInterface
      */
     public function handleCallback(array $parameters, array $checks = []): TokenSetInterface
     {
@@ -137,33 +147,24 @@ class Client implements ConfigAwareInterface
     /**
      * @param array $parameters
      * @param array $checks
-     *
-     * @return \OpenIDConnect\Contracts\TokenSetInterface
+     * @return TokenSetInterface
      */
     public function handleOpenIDConnectCallback(array $parameters, array $checks = []): TokenSetInterface
     {
-        /** @var TokenSet $tokenSet */
-        $tokenSet = $this->handleCallback($parameters, $checks);
-
-        $tokenSet->setClientMetadata($this->config->clientMetadata());
-        $tokenSet->setProviderMetadata($this->config->providerMetadata());
-        $tokenSet->setJwtFactory(new JwtFactory($this->config->providerMetadata(), $this->config->clientMetadata()));
-
-        return $tokenSet;
+        return $this->handleCallback($parameters, $checks);
     }
 
     /**
      * @param GrantType $grant
      * @param array<mixed> $parameters
      * @param array<mixed> $checks
-     *
-     * @return \OpenIDConnect\Contracts\TokenSetInterface
+     * @return TokenSetInterface
      */
     public function sendTokenRequest(GrantType $grant, array $parameters = [], array $checks = []): TokenSetInterface
     {
         $parameters = $grant->prepareTokenRequestParameters(array_merge($parameters, $checks));
 
-        $request = (new TokenRequestBuilder($this->config, $this->httpClient, $this->httpFactory))
+        $request = (new TokenRequestBuilder($this->config, $this->httpClient))
             ->setClientAuthentication($this->clientAuthentication)
             ->build($grant, $parameters);
 
@@ -176,21 +177,7 @@ class Client implements ConfigAwareInterface
 
         $parsed = $this->parseTokenResponse($response);
 
-        /** @var TokenFactoryInterface $tokenFactory */
-        $tokenFactory = $this->container->get(TokenFactoryInterface::class);
-
-        return $tokenFactory->create(array_merge($checks, $parsed));
-    }
-
-    /**
-     * @param ContainerInterface $container
-     * @return Client
-     */
-    public function setContainer(ContainerInterface $container): Client
-    {
-        $this->container = $container;
-
-        return $this;
+        return $this->tokenFactory->create(array_merge($checks, $parsed));
     }
 
     /**
@@ -222,6 +209,7 @@ class Client implements ConfigAwareInterface
 
     /**
      * @param array<mixed> $parameters
+     *
      * @return array<mixed>
      */
     private function generateAuthorizationParameters(array $parameters): array
@@ -255,6 +243,7 @@ class Client implements ConfigAwareInterface
      * Parse response from token endpoint
      *
      * @param ResponseInterface $response
+     *
      * @return array<mixed>
      */
     private function parseTokenResponse(ResponseInterface $response): array

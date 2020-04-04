@@ -7,6 +7,7 @@ use Jose\Component\Core\JWKSet;
 use Jose\Component\Core\Util\JsonConverter;
 use Jose\Component\KeyManagement\JWKFactory;
 use Jose\Component\Signature\Serializer\CompactSerializer;
+use OpenIDConnect\Config;
 use OpenIDConnect\Jwt\JwtFactory;
 use OpenIDConnect\Metadata\ProviderMetadata;
 use OpenIDConnect\Token\TokenSet;
@@ -19,7 +20,7 @@ class TokenSetTest extends TestCase
      */
     public function shouldBeOkayWhenAllInformationIsReady(): void
     {
-        $target = new TokenSet([
+        $target = new TokenSet($this->createConfig(), [
             'access_token' => 'some-access-token',
             'custom' => 'whatever',
             'expires_in' => 3600,
@@ -49,7 +50,7 @@ class TokenSetTest extends TestCase
     {
         $this->expectException(DomainException::class);
 
-        $target = new TokenSet([]);
+        $target = new TokenSet($this->createConfig(), []);
 
         $target->accessToken();
     }
@@ -59,7 +60,7 @@ class TokenSetTest extends TestCase
      */
     public function shouldReturnNullWhenNoScope(): void
     {
-        $target = new TokenSet([]);
+        $target = new TokenSet($this->createConfig(), []);
 
         $this->assertNull($target->scope());
     }
@@ -69,7 +70,7 @@ class TokenSetTest extends TestCase
      */
     public function shouldReturnArrayDirectlyWhenScopeIsArray(): void
     {
-        $target = new TokenSet([
+        $target = new TokenSet($this->createConfig(), [
             'scope' => ['a-b', 'c d'],
         ]);
 
@@ -81,7 +82,7 @@ class TokenSetTest extends TestCase
      */
     public function shouldSerializeToJsonByParameterArray(): void
     {
-        $target = new TokenSet([
+        $target = new TokenSet($this->createConfig(), [
             'foo' => 'bar',
         ]);
 
@@ -93,7 +94,7 @@ class TokenSetTest extends TestCase
      */
     public function shouldBeOkayWhenDataIsOkay(): void
     {
-        $target = new TokenSet($this->createFakeTokenSetParameter([
+        $target = new TokenSet($this->createConfig(), $this->createFakeTokenSetParameter([
             'access_token' => 'some-access-token',
             'expires_in' => 3600,
             'id_token' => 'some-id-token',
@@ -131,7 +132,7 @@ class TokenSetTest extends TestCase
         $expectedExp = time() + 3600;
         $expectedIat = time();
 
-        $clientInformation = $this->createClientMetadata([
+        $clientMetadata = $this->createClientMetadata([
             'client_id' => 'some-aud',
         ]);
 
@@ -143,7 +144,7 @@ class TokenSetTest extends TestCase
             'sub' => 'some-sub',
         ];
 
-        $factory = new JwtFactory($providerMetadata, $clientInformation);
+        $factory = new JwtFactory(new Config($providerMetadata, $clientMetadata));
 
         $this->markTestIncomplete();
 
@@ -152,13 +153,9 @@ class TokenSetTest extends TestCase
             ->addSignature($additionJwk, ['alg' => 'HS256'])
             ->build();
 
-        $target = new TokenSet($this->createFakeTokenSetParameter([
+        $target = new TokenSet(new Config($providerMetadata, $clientMetadata), $this->createFakeTokenSetParameter([
             'id_token' => (new CompactSerializer())->serialize($jws),
         ]));
-
-        $target->setClientMetadata($clientInformation);
-        $target->setProviderMetadata($providerMetadata);
-        $target->setJwtFactory(new JwtFactory($providerMetadata, $clientInformation));
 
         $this->markTestIncomplete();
 
@@ -189,7 +186,7 @@ class TokenSetTest extends TestCase
         $expectedExp = time() + 3600;
         $expectedIat = time();
 
-        $clientInformation = $this->createClientMetadata([
+        $clientMetadata = $this->createClientMetadata([
             'client_id' => 'some-aud',
         ]);
 
@@ -201,20 +198,16 @@ class TokenSetTest extends TestCase
             'sub' => 'some-sub',
         ];
 
-        $factory = new JwtFactory($providerMetadata, $clientInformation);
+        $factory = new JwtFactory(new Config($providerMetadata, $clientMetadata));
 
         $jws = $factory->createJwsBuilder()
             ->withPayload(JsonConverter::encode($payload))
             ->addSignature($jwk, ['alg' => 'RS256'])
             ->build();
 
-        $target = new TokenSet($this->createFakeTokenSetParameter([
+        $target = new TokenSet(new Config($providerMetadata, $clientMetadata), $this->createFakeTokenSetParameter([
             'id_token' => (new CompactSerializer())->serialize($jws),
         ]));
-
-        $target->setClientMetadata($clientInformation);
-        $target->setProviderMetadata($providerMetadata);
-        $target->setJwtFactory(new JwtFactory($providerMetadata, $clientInformation));
 
         $actual = $target->idTokenClaims();
 

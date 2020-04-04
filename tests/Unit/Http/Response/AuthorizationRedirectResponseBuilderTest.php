@@ -2,8 +2,7 @@
 
 namespace Tests\Unit\Http\Response;
 
-use MilesChou\Mocker\Psr18\MockClient;
-use MilesChou\Psr\Http\Message\HttpFactory;
+use MilesChou\Psr\Http\Client\Testing\MockClient;
 use OpenIDConnect\Http\Response\AuthorizationRedirectResponseBuilder;
 use Tests\TestCase;
 
@@ -14,7 +13,7 @@ class AuthorizationRedirectResponseBuilderTest extends TestCase
      */
     public function shouldReturnRedirectResponseWhenCallBuild(): void
     {
-        $target = new AuthorizationRedirectResponseBuilder($this->createConfig(), new MockClient(), new HttpFactory());
+        $target = new AuthorizationRedirectResponseBuilder($this->createConfig(), new MockClient());
 
         $actual = $target->build([
             'foo' => 'a',

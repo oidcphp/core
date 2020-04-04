@@ -21,7 +21,7 @@ class AuthorizationRedirectResponseBuilder extends Builder
      */
     public function build(array $parameters): ResponseInterface
     {
-        return $this->httpFactory->createResponse(302)
+        return $this->httpClient->createResponse(302)
             ->withHeader('Location', (string)$this->createAuthorizeUri($parameters));
     }
 
@@ -31,7 +31,7 @@ class AuthorizationRedirectResponseBuilder extends Builder
      */
     private function createAuthorizeUri(array $parameters): UriInterface
     {
-        return $this->httpFactory->createUri($this->config->providerMetadata()->require('authorization_endpoint'))
+        return $this->httpClient->createUri($this->config->providerMetadata()->require('authorization_endpoint'))
             ->withQuery(Query::build($parameters));
     }
 }

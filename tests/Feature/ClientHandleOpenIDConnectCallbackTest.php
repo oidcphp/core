@@ -6,13 +6,12 @@ use Jose\Component\Core\JWK;
 use Jose\Component\Core\Util\JsonConverter;
 use Jose\Component\KeyManagement\JWKFactory;
 use Jose\Component\Signature\Serializer\CompactSerializer;
-use MilesChou\Mocker\Psr18\MockClient;
+use MilesChou\Psr\Http\Client\Testing\MockClient;
+use OpenIDConnect\Claims;
 use OpenIDConnect\Client;
 use OpenIDConnect\Config;
-use OpenIDConnect\Core\Claims;
 use OpenIDConnect\Exceptions\RelyingPartyException;
 use OpenIDConnect\Jwt\JwtFactory;
-use Psr\Http\Client\ClientInterface;
 use Tests\TestCase;
 
 class ClientHandleOpenIDConnectCallbackTest extends TestCase
@@ -37,7 +36,7 @@ class ClientHandleOpenIDConnectCallbackTest extends TestCase
             'sub' => 'some-sub',
         ];
 
-        $factory = new JwtFactory($providerMetadata, $clientMetadata);
+        $factory = new JwtFactory(new Config($providerMetadata, $clientMetadata));
 
         $jws = $factory->createJwsBuilder()
             ->withPayload(JsonConverter::encode($payload))
@@ -46,15 +45,11 @@ class ClientHandleOpenIDConnectCallbackTest extends TestCase
 
         $expectedIdToken = (new CompactSerializer())->serialize($jws);
 
-        /** @var Client $target */
-        $target = new Client(
-            new Config($providerMetadata, $clientMetadata),
-            $this->createContainer([
-                ClientInterface::class => (new MockClient())->appendResponseWithJson(
-                    $this->createFakeTokenSetParameter(['id_token' => $expectedIdToken])
-                ),
-            ])
+        $mockClient = (new MockClient())->appendResponseWithJson(
+            $this->createFakeTokenSetParameter(['id_token' => $expectedIdToken])
         );
+
+        $target = new Client(new Config($providerMetadata, $clientMetadata), $mockClient);
 
         $actual = $target->handleOpenIDConnectCallback([
             'code' => 'some-code',
@@ -94,22 +89,18 @@ class ClientHandleOpenIDConnectCallbackTest extends TestCase
             'sub' => 'some-sub',
         ];
 
-        $factory = new JwtFactory($providerMetadata, $clientMetadata);
+        $factory = new JwtFactory(new Config($providerMetadata, $clientMetadata));
 
         $jws = $factory->createJwsBuilder()
             ->withPayload(JsonConverter::encode($payload))
             ->addSignature(JWKFactory::createFromValues($providerMetadata->jwkSet()->get(0)), ['alg' => 'RS256'])
             ->build();
 
-        /** @var Client $target */
-        $target = new Client(
-            new Config($providerMetadata, $clientMetadata),
-            $this->createContainer([
-                ClientInterface::class => (new MockClient())->appendResponseWithJson(
-                    $this->createFakeTokenSetParameter(['id_token' => (new CompactSerializer())->serialize($jws)])
-                ),
-            ])
+        $mockClient = (new MockClient())->appendResponseWithJson(
+            $this->createFakeTokenSetParameter(['id_token' => (new CompactSerializer())->serialize($jws)])
         );
+
+        $target = new Client(new Config($providerMetadata, $clientMetadata), $mockClient);
 
         $actual = $target->handleOpenIDConnectCallback([
             'code' => 'some-code',

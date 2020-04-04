@@ -2,8 +2,7 @@
 
 namespace Tests\Unit;
 
-use MilesChou\Mocker\Psr18\MockClient;
-use MilesChou\Psr\Http\Message\HttpFactory;
+use MilesChou\Psr\Http\Client\Testing\MockClient;
 use OpenIDConnect\Issuer;
 use Tests\TestCase;
 
@@ -67,11 +66,11 @@ class IssuerTest extends TestCase
      */
     public function shouldProviderMetadataWhenDiscover(): void
     {
-        $mockHttpClient = (new MockClient())
+        $mockClient = (new MockClient())
             ->appendResponseWithJson(self::GOOGLE_OPENID_CONNECT_CONFIG)
             ->appendResponseWithJson(['keys' => []]);
 
-        $actual = (new Issuer($mockHttpClient, new HttpFactory()))
+        $actual = (new Issuer($mockClient))
             ->discover('http://somewhere');
 
         $this->assertSame('https://accounts.google.com', $actual->issuer());
@@ -89,7 +88,7 @@ class IssuerTest extends TestCase
             'none',
         ], $actual->responseTypesSupported());
 
-        $this->assertSame(['public'], $actual->subjectTypesSupported());
-        $this->assertSame(['RS256'], $actual->idTokenSigningAlgValuesSupported());
+        $this->assertSame(['public'], $actual->get('subject_types_supported'));
+        $this->assertSame(['RS256'], $actual->get('id_token_signing_alg_values_supported'));
     }
 }

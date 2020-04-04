@@ -4,12 +4,11 @@ namespace Tests\Unit;
 
 use InvalidArgumentException;
 use Laminas\Diactoros\Request;
-use MilesChou\Mocker\Psr18\MockClient;
+use MilesChou\Psr\Http\Client\Testing\MockClient;
 use OpenIDConnect\Client;
 use OpenIDConnect\Exceptions\OAuth2ClientException;
 use OpenIDConnect\Exceptions\OAuth2ServerException;
 use OpenIDConnect\OAuth2\Grant\AuthorizationCode;
-use Psr\Http\Client\ClientInterface;
 use Psr\Http\Client\NetworkExceptionInterface;
 use Psr\Http\Message\RequestInterface;
 use Tests\TestCase;
@@ -17,16 +16,13 @@ use Tests\TestCase;
 class ClientTest extends TestCase
 {
     /**
-     * @var \OpenIDConnect\Exceptions\Client
+     * @var Client
      */
     private $target;
 
     protected function setUp(): void
     {
-        $this->target = new Client(
-            $this->createConfig(),
-            $this->createContainer()
-        );
+        $this->target = new Client($this->createConfig(), new MockClient());
     }
 
     protected function tearDown(): void
@@ -39,18 +35,11 @@ class ClientTest extends TestCase
      */
     public function shouldReturnPreparedStateWhenInitParameters(): void
     {
-        $target = new Client(
-            $this->createConfig([], [
-                'redirect_uri' => 'https://someredirect',
-            ]),
-            $this->createContainer()
-        );
-
-        $target->initAuthorizationParameters([
+        $this->target->initAuthorizationParameters([
             'state' => 'expected-state',
         ]);
 
-        $this->assertSame('expected-state', $target->getState());
+        $this->assertSame('expected-state', $this->target->getState());
     }
 
     /**
@@ -58,12 +47,7 @@ class ClientTest extends TestCase
      */
     public function shouldReturnHtmlWhenCallCreateFormPost(): void
     {
-        $target = new Client(
-            $this->createConfig(),
-            $this->createContainer()
-        );
-
-        $actual = $target->createAuthorizeFormPostResponse([
+        $actual = $this->target->createAuthorizeFormPostResponse([
             'redirect_uri' => 'https://someredirect',
         ]);
 
@@ -82,14 +66,7 @@ class ClientTest extends TestCase
      */
     public function shouldReturnRedirectWhenCallCreateRedirect(): void
     {
-        $target = new Client(
-            $this->createConfig([], [
-                'redirect_uri' => 'https://someredirect',
-            ]),
-            $this->createContainer()
-        );
-
-        $actual = $target->createAuthorizeRedirectResponse([
+        $actual = $this->target->createAuthorizeRedirectResponse([
             'redirect_uri' => 'https://someredirect',
         ]);
 
@@ -107,18 +84,13 @@ class ClientTest extends TestCase
      */
     public function shouldReturnTokenSetInstanceWhenCallSendTokenRequest(): void
     {
-        $target = new Client(
-            $this->createConfig([], [
-                'redirect_uri' => 'https://someredirect',
-            ]),
-            $this->createContainer([
-                ClientInterface::class => (new MockClient())->appendResponseWithJson(
-                    $this->createFakeTokenSetParameter(['access_token' => 'some-access-token'])
-                ),
-            ])
+        $mockClient = (new MockClient())->appendResponseWithJson(
+            $this->createFakeTokenSetParameter(['access_token' => 'some-access-token'])
         );
 
-        $actual = $target->sendTokenRequest(new AuthorizationCode(), [
+        $this->target->setHttpClient($mockClient);
+
+        $actual = $this->target->sendTokenRequest(new AuthorizationCode(), [
             'code' => 'whatever',
             'redirect_uri' => 'whatever',
         ], []);
@@ -140,16 +112,11 @@ class ClientTest extends TestCase
             }
         };
 
-        $target = new Client(
-            $this->createConfig([], [
-                'redirect_uri' => 'https://someredirect',
-            ]),
-            $this->createContainer([
-                ClientInterface::class => (new MockClient())->appendThrowable($exception),
-            ])
-        );
+        $mockClient = (new MockClient())->appendThrowable($exception);
 
-        $target->sendTokenRequest(new AuthorizationCode(), [
+        $this->target->setHttpClient($mockClient);
+
+        $this->target->sendTokenRequest(new AuthorizationCode(), [
             'code' => 'whatever',
             'redirect_uri' => 'whatever',
         ], []);
@@ -162,16 +129,11 @@ class ClientTest extends TestCase
     {
         $this->expectException(OAuth2ServerException::class);
 
-        $target = new Client(
-            $this->createConfig([], [
-                'redirect_uri' => 'https://someredirect',
-            ]),
-            $this->createContainer([
-                ClientInterface::class => (new MockClient())->appendResponseWith('not json'),
-            ])
-        );
+        $mockClient = (new MockClient())->appendResponseWith('not json');
 
-        $target->sendTokenRequest(new AuthorizationCode(), [
+        $this->target->setHttpClient($mockClient);
+
+        $this->target->sendTokenRequest(new AuthorizationCode(), [
             'code' => 'whatever',
             'redirect_uri' => 'whatever',
         ], []);
@@ -184,16 +146,11 @@ class ClientTest extends TestCase
     {
         $this->expectException(OAuth2ServerException::class);
 
-        $target = new Client(
-            $this->createConfig([], [
-                'redirect_uri' => 'https://someredirect',
-            ]),
-            $this->createContainer([
-                ClientInterface::class => (new MockClient())->appendResponseWithJson(['error' => 'whatever']),
-            ])
-        );
+        $mockClient = (new MockClient())->appendResponseWithJson(['error' => 'whatever']);
 
-        $target->sendTokenRequest(new AuthorizationCode(), [
+        $this->target->setHttpClient($mockClient);
+
+        $this->target->sendTokenRequest(new AuthorizationCode(), [
             'code' => 'whatever',
             'redirect_uri' => 'whatever',
         ], []);
@@ -206,12 +163,7 @@ class ClientTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        $target = new Client(
-            $this->createConfig(),
-            $this->createContainer()
-        );
-
-        $target->handleCallback([]);
+        $this->target->handleCallback([]);
     }
 
     /**
@@ -221,16 +173,13 @@ class ClientTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        $target = new Client(
-            $this->createConfig(),
-            $this->createContainer([
-                ClientInterface::class => (new MockClient())->appendResponseWithJson(
-                    $this->createFakeTokenSetParameter(['access_token' => 'some-access-token'])
-                ),
-            ])
+        $mockClient = (new MockClient())->appendResponseWithJson(
+            $this->createFakeTokenSetParameter(['access_token' => 'some-access-token'])
         );
 
-        $target->handleCallback([
+        $this->target->setHttpClient($mockClient);
+
+        $this->target->handleCallback([
             'code' => 'whatever',
             'redirect_uri' => 'whatever',
             'state' => 'whatever',
@@ -244,16 +193,13 @@ class ClientTest extends TestCase
     {
         $this->expectException(OAuth2ClientException::class);
 
-        $target = new Client(
-            $this->createConfig(),
-            $this->createContainer([
-                ClientInterface::class => (new MockClient())->appendResponseWithJson(
-                    $this->createFakeTokenSetParameter(['access_token' => 'some-access-token'])
-                ),
-            ])
+        $mockClient = (new MockClient())->appendResponseWithJson(
+            $this->createFakeTokenSetParameter(['access_token' => 'some-access-token'])
         );
 
-        $target->handleCallback([
+        $this->target->setHttpClient($mockClient);
+
+        $this->target->handleCallback([
             'code' => 'whatever',
             'redirect_uri' => 'whatever',
         ], [
@@ -268,16 +214,13 @@ class ClientTest extends TestCase
     {
         $this->expectException(OAuth2ClientException::class);
 
-        $target = new Client(
-            $this->createConfig(),
-            $this->createContainer([
-                ClientInterface::class => (new MockClient())->appendResponseWithJson(
-                    $this->createFakeTokenSetParameter(['access_token' => 'some-access-token'])
-                ),
-            ])
+        $mockClient = (new MockClient())->appendResponseWithJson(
+            $this->createFakeTokenSetParameter(['access_token' => 'some-access-token'])
         );
 
-        $target->handleCallback([
+        $this->target->setHttpClient($mockClient);
+
+        $this->target->handleCallback([
             'code' => 'whatever',
             'redirect_uri' => 'whatever',
             'state' => 'foo',
@@ -291,16 +234,13 @@ class ClientTest extends TestCase
      */
     public function shouldReturnTokenWhenHandleCallbackWithStateIsNotGiven(): void
     {
-        $target = new Client(
-            $this->createConfig(),
-            $this->createContainer([
-                ClientInterface::class => (new MockClient())->appendResponseWithJson(
-                    $this->createFakeTokenSetParameter(['access_token' => 'some-access-token'])
-                ),
-            ])
+        $mockClient = (new MockClient())->appendResponseWithJson(
+            $this->createFakeTokenSetParameter(['access_token' => 'some-access-token'])
         );
 
-        $actual = $target->handleCallback([
+        $this->target->setHttpClient($mockClient);
+
+        $actual = $this->target->handleCallback([
             'code' => 'whatever',
             'redirect_uri' => 'whatever',
         ]);
@@ -313,16 +253,13 @@ class ClientTest extends TestCase
      */
     public function shouldReturnTokenWhenHandleCallbackWithBothGivenAndSame(): void
     {
-        $target = new Client(
-            $this->createConfig(),
-            $this->createContainer([
-                ClientInterface::class => (new MockClient())->appendResponseWithJson(
-                    $this->createFakeTokenSetParameter(['access_token' => 'some-access-token'])
-                ),
-            ])
+        $mockClient = (new MockClient())->appendResponseWithJson(
+            $this->createFakeTokenSetParameter(['access_token' => 'some-access-token'])
         );
 
-        $actual = $target->handleCallback([
+        $this->target->setHttpClient($mockClient);
+
+        $actual = $this->target->handleCallback([
             'code' => 'whatever',
             'redirect_uri' => 'whatever',
             'state' => 'foo',
@@ -363,10 +300,16 @@ class ClientTest extends TestCase
             'redirect_uri' => 'https://someredirect',
         ]);
 
-        $this->assertStringContainsStringIgnoringCase('<form method="post" action="https://somewhere/auth">', (string)$actual->getBody());
+        $this->assertStringContainsStringIgnoringCase(
+            '<form method="post" action="https://somewhere/auth">',
+            (string)$actual->getBody()
+        );
         $this->assertStringContainsStringIgnoringCase('name="state"', (string)$actual->getBody());
         $this->assertStringContainsStringIgnoringCase('name="response_type" value="code"', (string)$actual->getBody());
-        $this->assertStringContainsStringIgnoringCase('name="redirect_uri" value="https://someredirect"', (string)$actual->getBody());
+        $this->assertStringContainsStringIgnoringCase(
+            'name="redirect_uri" value="https://someredirect"',
+            (string)$actual->getBody()
+        );
         $this->assertStringContainsStringIgnoringCase('name="client_id" value="some_id"', (string)$actual->getBody());
     }
 

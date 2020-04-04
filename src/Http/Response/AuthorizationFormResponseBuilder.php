@@ -17,8 +17,8 @@ class AuthorizationFormResponseBuilder extends Builder
      */
     public function build(array $parameters): ResponseInterface
     {
-        return $this->httpFactory->createResponse()
-            ->withBody($this->httpFactory->createStream($this->generateForm($parameters)));
+        return $this->httpClient->createResponse()
+            ->withBody($this->httpClient->createStream($this->generateForm($parameters)));
     }
 
     /**

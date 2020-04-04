@@ -2,8 +2,7 @@
 
 namespace Tests\Unit\Http\Request;
 
-use MilesChou\Mocker\Psr18\MockClient;
-use MilesChou\Psr\Http\Message\HttpFactory;
+use MilesChou\Psr\Http\Client\Testing\MockClient;
 use OpenIDConnect\Http\Request\TokenRequestBuilder;
 use OpenIDConnect\OAuth2\Grant\AuthorizationCode;
 use Tests\TestCase;
@@ -15,7 +14,7 @@ class TokenRequestBuilderTest extends TestCase
      */
     public function shouldReturnCorrectRequestInstance(): void
     {
-        $target = new TokenRequestBuilder($this->createConfig(), new MockClient(), new HttpFactory());
+        $target = new TokenRequestBuilder($this->createConfig(), new MockClient());
 
         // base64_encode('some_id:some_secret')
         $exceptedAuthorization = 'Basic c29tZV9pZDpzb21lX3NlY3JldA==';

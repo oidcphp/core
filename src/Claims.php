@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OpenIDConnect\Core;
+namespace OpenIDConnect;
 
 use Jose\Component\Core\Util\JsonConverter;
 use Jose\Component\Signature\JWS;
@@ -21,17 +21,17 @@ class Claims
 
     /**
      * @param JWS $jws
-     * @return static
+     * @return Claims
      */
-    public static function createFromJWS(JWS $jws)
+    public static function createFromJWS(JWS $jws): Claims
     {
         $payload = $jws->getPayload();
 
         if (null === $payload) {
-            return new static();
+            return new self();
         }
 
-        return new static(JsonConverter::decode($payload));
+        return new self(JsonConverter::decode($payload));
     }
 
     /**

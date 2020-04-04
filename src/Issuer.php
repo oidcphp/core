@@ -2,7 +2,8 @@
 
 namespace OpenIDConnect;
 
-use MilesChou\Psr\Http\Message\HttpFactoryInterface;
+use MilesChou\Psr\Http\Client\HttpClientAwareTrait;
+use MilesChou\Psr\Http\Client\HttpClientInterface;
 use OpenIDConnect\Contracts\ClientMetadataInterface;
 use OpenIDConnect\Contracts\ProviderMetadataInterface;
 use OpenIDConnect\Exceptions\OpenIDProviderException;
@@ -10,7 +11,6 @@ use OpenIDConnect\Exceptions\RelyingPartyException;
 use OpenIDConnect\Jwt\JwkSet;
 use OpenIDConnect\Metadata\ProviderMetadata;
 use Psr\Http\Client\ClientExceptionInterface;
-use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\ResponseInterface;
 
 /**
@@ -18,24 +18,14 @@ use Psr\Http\Message\ResponseInterface;
  */
 class Issuer
 {
-    /**
-     * @var ClientInterface
-     */
-    private $client;
+    use HttpClientAwareTrait;
 
     /**
-     * @var HttpFactoryInterface
+     * @param HttpClientInterface $httpClient
      */
-    private $httpFactory;
-
-    /**
-     * @param ClientInterface $client
-     * @param HttpFactoryInterface $httpFactory
-     */
-    public function __construct(ClientInterface $client, HttpFactoryInterface $httpFactory)
+    public function __construct(HttpClientInterface $httpClient)
     {
-        $this->client = $client;
-        $this->httpFactory = $httpFactory;
+        $this->setHttpClient($httpClient);
     }
 
     /**
@@ -73,11 +63,11 @@ class Issuer
 
         $registrationEndpoint = $providerMetadata->get('registration_endpoint');
 
-        $request = $this->httpFactory->createRequest('POST', $registrationEndpoint)
+        $request = $this->httpClient->createRequest('POST', $registrationEndpoint)
             ->withHeader('content-type', 'application/json')
-            ->withBody($this->httpFactory->createStream((string)json_encode($clientMetadata)));
+            ->withBody($this->httpClient->createStream((string)json_encode($clientMetadata)));
 
-        $response = $this->processResponse($this->client->sendRequest($request));
+        $response = $this->processResponse($this->httpClient->sendRequest($request));
 
         return $clientMetadata->merge($response);
     }
@@ -91,7 +81,7 @@ class Issuer
      */
     private function sendRequestDiscovery(string $uri): array
     {
-        $response = $this->client->sendRequest($this->httpFactory->createRequest('GET', $uri));
+        $response = $this->httpClient->sendRequest($this->httpClient->createRequest('GET', $uri));
 
         return $this->processResponse($response);
     }
