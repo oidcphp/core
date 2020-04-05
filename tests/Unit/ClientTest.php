@@ -90,7 +90,7 @@ class ClientTest extends TestCase
 
         $this->target->setHttpClient($mockClient);
 
-        $actual = $this->target->sendTokenRequest(new AuthorizationCode(), [
+        $actual = $this->target->sendTokenRequest([
             'code' => 'whatever',
             'redirect_uri' => 'whatever',
         ], []);
@@ -116,7 +116,7 @@ class ClientTest extends TestCase
 
         $this->target->setHttpClient($mockClient);
 
-        $this->target->sendTokenRequest(new AuthorizationCode(), [
+        $this->target->sendTokenRequest([
             'code' => 'whatever',
             'redirect_uri' => 'whatever',
         ], []);
@@ -133,7 +133,7 @@ class ClientTest extends TestCase
 
         $this->target->setHttpClient($mockClient);
 
-        $this->target->sendTokenRequest(new AuthorizationCode(), [
+        $this->target->sendTokenRequest([
             'code' => 'whatever',
             'redirect_uri' => 'whatever',
         ], []);
@@ -150,7 +150,7 @@ class ClientTest extends TestCase
 
         $this->target->setHttpClient($mockClient);
 
-        $this->target->sendTokenRequest(new AuthorizationCode(), [
+        $this->target->sendTokenRequest([
             'code' => 'whatever',
             'redirect_uri' => 'whatever',
         ], []);

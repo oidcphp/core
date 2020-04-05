@@ -139,20 +139,25 @@ class Client implements ConfigAwareInterface
             throw new OAuth2ClientException($msg);
         }
 
-        return $this->sendTokenRequest(new AuthorizationCode(), $parameters, $checks);
+        return $this->sendTokenRequest($parameters, $checks);
     }
 
     /**
-     * @param GrantType $grant
      * @param array<mixed> $parameters
      * @param array<mixed> $checks
+     * @param GrantType|null $grant Default is AuthorizationCode.
      * @return TokenSetInterface
      */
-    public function sendTokenRequest(GrantType $grant, array $parameters = [], array $checks = []): TokenSetInterface
-    {
+    public function sendTokenRequest(
+        array $parameters = [],
+        array $checks = [],
+        GrantType $grant = null
+    ): TokenSetInterface {
+        $grant = $grant ?? new AuthorizationCode();
+
         $request = (new TokenRequestBuilder($this->config, $this->httpClient))
             ->setClientAuthentication($this->clientAuthentication)
-            ->build($grant, array_merge($parameters, $checks));
+            ->build(array_merge($parameters, $checks), $grant);
 
         try {
             $response = $request->send();

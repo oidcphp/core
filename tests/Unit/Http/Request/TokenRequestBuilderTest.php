@@ -19,10 +19,10 @@ class TokenRequestBuilderTest extends TestCase
         // base64_encode('some_id:some_secret')
         $exceptedAuthorization = 'Basic c29tZV9pZDpzb21lX3NlY3JldA==';
 
-        $actual = $target->build(new AuthorizationCode(), [
+        $actual = $target->build([
             'code' => 'some-code',
             'redirect_uri' => 'some-redirect-uri',
-        ]);
+        ], new AuthorizationCode());
 
         $this->assertSame('https://somewhere/token', (string)$actual->getUri());
         $this->assertStringContainsString('grant_type=authorization_code', (string)$actual->getBody());
