@@ -3,6 +3,7 @@
 namespace Tests\Unit\Http\Response;
 
 use MilesChou\Psr\Http\Client\Testing\MockClient;
+use MilesChou\Psr\Http\Message\Testing\TestResponse;
 use OpenIDConnect\Exceptions\OAuth2ServerException;
 use OpenIDConnect\Http\Response\AuthorizationFormResponseBuilder;
 use Tests\TestCase;
@@ -16,15 +17,15 @@ class AuthorizationFormResponseBuilderTest extends TestCase
     {
         $target = new AuthorizationFormResponseBuilder($this->createConfig(), new MockClient());
 
-        $actual = (string)$target->build([
+        $actual = $target->build([
             'foo' => 'a',
             'bar' => 'b',
-        ])
-            ->getBody();
+        ]);
 
-        $this->assertStringContainsString('action="https://somewhere/auth"', $actual);
-        $this->assertStringContainsString('name="foo" value="a"', $actual);
-        $this->assertStringContainsString('name="bar" value="b"', $actual);
+        TestResponse::fromBaseResponse($actual)
+            ->assertSee('action="https://somewhere/auth"')
+            ->assertSee('name="foo" value="a"')
+            ->assertSee('name="bar" value="b"');
     }
 
     /**

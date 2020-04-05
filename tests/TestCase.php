@@ -20,6 +20,11 @@ class TestCase extends BaseTestCase
         );
     }
 
+    protected function createConfigWithClientMetadata($clientMetadata = []): Config
+    {
+        return $this->createConfig([], $clientMetadata);
+    }
+
     protected function createClientMetadata($overwrite = []): ClientMetadata
     {
         return new ClientMetadata($this->createClientMetadataConfig($overwrite));
