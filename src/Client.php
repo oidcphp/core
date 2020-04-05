@@ -18,11 +18,9 @@ use OpenIDConnect\Http\Authentication\ClientAuthenticationAwareTrait;
 use OpenIDConnect\Http\Request\TokenRequestBuilder;
 use OpenIDConnect\Http\Response\AuthorizationFormResponseBuilder;
 use OpenIDConnect\Http\Response\AuthorizationRedirectResponseBuilder;
-use OpenIDConnect\Jwt\JwtFactory;
 use OpenIDConnect\OAuth2\Grant\AuthorizationCode;
 use OpenIDConnect\OAuth2\Grant\GrantType;
 use OpenIDConnect\Token\TokenFactory;
-use OpenIDConnect\Token\TokenSet;
 use OpenIDConnect\Traits\ConfigAwareTrait;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Client\ClientExceptionInterface;
@@ -142,16 +140,6 @@ class Client implements ConfigAwareInterface
         }
 
         return $this->sendTokenRequest(new AuthorizationCode(), $parameters, $checks);
-    }
-
-    /**
-     * @param array $parameters
-     * @param array $checks
-     * @return TokenSetInterface
-     */
-    public function handleOpenIDConnectCallback(array $parameters, array $checks = []): TokenSetInterface
-    {
-        return $this->handleCallback($parameters, $checks);
     }
 
     /**

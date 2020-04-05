@@ -51,7 +51,7 @@ class ClientHandleOpenIDConnectCallbackTest extends TestCase
 
         $target = new Client(new Config($providerMetadata, $clientMetadata), $mockClient);
 
-        $actual = $target->handleOpenIDConnectCallback([
+        $actual = $target->handleCallback([
             'code' => 'some-code',
         ], [
             'redirect_uri' => 'https://someredirect',
@@ -102,7 +102,7 @@ class ClientHandleOpenIDConnectCallbackTest extends TestCase
 
         $target = new Client(new Config($providerMetadata, $clientMetadata), $mockClient);
 
-        $actual = $target->handleOpenIDConnectCallback([
+        $actual = $target->handleCallback([
             'code' => 'some-code',
         ], [
             'redirect_uri' => 'https://someredirect',
