@@ -162,11 +162,9 @@ class Client implements ConfigAwareInterface
      */
     public function sendTokenRequest(GrantType $grant, array $parameters = [], array $checks = []): TokenSetInterface
     {
-        $parameters = $grant->prepareTokenRequestParameters(array_merge($parameters, $checks));
-
         $request = (new TokenRequestBuilder($this->config, $this->httpClient))
             ->setClientAuthentication($this->clientAuthentication)
-            ->build($grant, $parameters);
+            ->build($grant, array_merge($parameters, $checks));
 
         try {
             $response = $request->send();
