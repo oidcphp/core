@@ -67,7 +67,7 @@ class JwtFactory
     public function createClaimCheckerManager($check = []): ClaimCheckerManager
     {
         return ClaimCheckerManager::create([
-            new AudienceChecker($this->config->clientMetadata()->id()),
+            new AudienceChecker($this->config->requireClientMetadata('client_id')),
             new ExpirationTimeChecker(),
             new IssuedAtChecker(),
             new NotBeforeChecker(),
@@ -82,13 +82,13 @@ class JwtFactory
     {
         $tokenTypesSupport = [new JWSTokenSupport()];
 
-        if (null !== $this->config->providerMetadata()->get('id_token_encryption_alg_values_supported')) {
+        if (null !== $this->config->getProviderMetadata('id_token_encryption_alg_values_supported')) {
             $tokenTypesSupport[] = new JWETokenSupport();
         }
 
         return HeaderCheckerManager::create([
             new AlgorithmChecker($this->resolveAlgorithms()),
-            new IssuerChecker($this->config->providerMetadata()->require('issuer')),
+            new IssuerChecker($this->config->requireProviderMetadata('issuer')),
         ], $tokenTypesSupport);
     }
 

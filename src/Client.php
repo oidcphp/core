@@ -225,7 +225,7 @@ class Client implements ConfigAwareInterface
             throw new OAuth2ClientException("Missing parameter 'redirect_uri'");
         }
 
-        $parameters['client_id'] = $this->config->clientMetadata()->id();
+        $parameters['client_id'] = $this->config->requireClientMetadata('client_id');
 
         return $parameters;
     }

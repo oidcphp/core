@@ -27,8 +27,8 @@ class TokenRequestBuilder extends Builder
     public function build(array $parameters, GrantType $grantType): PendingRequest
     {
         $clientAuthentication = $this->resolveClientAuthentication(
-            $this->config->clientMetadata()->id(),
-            $this->config->clientMetadata()->secret()
+            $this->config->requireClientMetadata('client_id'),
+            $this->config->requireClientMetadata('client_secret')
         );
 
         $parameters = $grantType->prepareTokenRequestParameters($parameters);

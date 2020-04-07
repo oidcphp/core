@@ -28,7 +28,7 @@ class AuthorizationFormResponseBuilder extends Builder
     private function generateForm(array $parameters): string
     {
         try {
-            $url = $this->config->providerMetadata()->require('authorization_endpoint');
+            $url = $this->config->requireProviderMetadata('authorization_endpoint');
 
             return $this->generateHtml($url, $parameters);
         } catch (DomainException $e) {

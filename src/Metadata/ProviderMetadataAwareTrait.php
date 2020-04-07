@@ -6,6 +6,9 @@ namespace OpenIDConnect\Metadata;
 
 use OpenIDConnect\Contracts\ProviderMetadataInterface;
 
+/**
+ * @see \OpenIDConnect\Contracts\ProviderMetadataAwareInterface
+ */
 trait ProviderMetadataAwareTrait
 {
     /**
@@ -13,18 +16,21 @@ trait ProviderMetadataAwareTrait
      */
     protected $providerMetadata;
 
-    /**
-     * @return ProviderMetadataInterface
-     */
     public function providerMetadata(): ProviderMetadataInterface
     {
         return $this->providerMetadata;
     }
 
-    /**
-     * @param ProviderMetadataInterface $providerMetadata
-     * @return $this
-     */
+    public function getProviderMetadata(string $name, $default = null)
+    {
+        return $this->providerMetadata->get($name, $default);
+    }
+
+    public function requireProviderMetadata(string $name)
+    {
+        return $this->providerMetadata->require($name);
+    }
+
     public function setProviderMetadata(ProviderMetadataInterface $providerMetadata)
     {
         $this->providerMetadata = $providerMetadata;
