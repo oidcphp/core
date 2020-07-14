@@ -59,7 +59,7 @@ class JwtFactory
         return ClaimCheckerManager::create([
             new AudienceChecker($this->clientMetadata->id()),
             new ExpirationTimeChecker(),
-            new IssuedAtChecker(),
+            new IssuedAtChecker(10),
             new NotBeforeChecker(),
         ]);
     }
