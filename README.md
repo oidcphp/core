@@ -45,3 +45,4 @@ OpenID Connect Core Library implementation for PHP.
 | [Apple ID](https://developer.apple.com/sign-in-with-apple/) | [Discovery](https://appleid.apple.com/.well-known/openid-configuration) |
 | [Google](https://developers.google.com/identity/protocols/OpenIDConnect) | [Discovery](https://accounts.google.com/.well-known/openid-configuration) |
 | [Line](https://developers.line.biz/en/docs/line-login/web/integrate-line-login/) | [Discovery](https://access.line.me/.well-known/openid-configuration) |
+| [Office 365](https://www.office.com/) | [Discovery](https://login.microsoftonline.com/common/.well-known/openid-configuration) |
