@@ -9,7 +9,6 @@ use Jose\Component\Checker\ExpirationTimeChecker;
 use Jose\Component\Checker\HeaderCheckerManager;
 use Jose\Component\Checker\IssuedAtChecker;
 use Jose\Component\Checker\NotBeforeChecker;
-use Jose\Component\Checker\Tests\Stub\IssuerChecker;
 use Jose\Component\Core\AlgorithmManager;
 use Jose\Component\Encryption\JWETokenSupport;
 use Jose\Component\Signature\JWSBuilder;
@@ -18,15 +17,8 @@ use Jose\Component\Signature\JWSTokenSupport;
 use Jose\Component\Signature\JWSVerifier;
 use Jose\Component\Signature\Serializer\CompactSerializer;
 use Jose\Component\Signature\Serializer\JWSSerializerManager;
-use OpenIDConnect\Config;
-use OpenIDConnect\Contracts\ClientMetadataInterface;
 use OpenIDConnect\Contracts\ConfigInterface;
-use OpenIDConnect\Contracts\ProviderMetadataInterface;
 use OpenIDConnect\Jwt\Checker\NonceChecker;
-use OpenIDConnect\Metadata\ClientMetadata;
-use OpenIDConnect\Metadata\ClientMetadataAwareTrait;
-use OpenIDConnect\Metadata\ProviderMetadata;
-use OpenIDConnect\Metadata\ProviderMetadataAwareTrait;
 use OpenIDConnect\Traits\ConfigAwareTrait;
 
 class JwtFactory
@@ -54,7 +46,7 @@ class JwtFactory
      */
     public function createAlgorithmManager(): AlgorithmManager
     {
-        return AlgorithmManager::create(
+        return new AlgorithmManager(
             $this->createAlgorithms($this->resolveAlgorithms())
         );
     }
@@ -66,7 +58,7 @@ class JwtFactory
      */
     public function createClaimCheckerManager($check = []): ClaimCheckerManager
     {
-        return ClaimCheckerManager::create([
+        return new ClaimCheckerManager([
             new AudienceChecker($this->config->requireClientMetadata('client_id')),
             new ExpirationTimeChecker(),
             new IssuedAtChecker(),
@@ -86,9 +78,8 @@ class JwtFactory
             $tokenTypesSupport[] = new JWETokenSupport();
         }
 
-        return HeaderCheckerManager::create([
+        return new HeaderCheckerManager([
             new AlgorithmChecker($this->resolveAlgorithms()),
-            new IssuerChecker($this->config->requireProviderMetadata('issuer')),
         ], $tokenTypesSupport);
     }
 
@@ -121,7 +112,7 @@ class JwtFactory
      */
     public function createJwsSerializerManager(): JWSSerializerManager
     {
-        return JWSSerializerManager::create([
+        return new JWSSerializerManager([
             new CompactSerializer(),
         ]);
     }
