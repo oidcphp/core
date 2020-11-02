@@ -8,6 +8,7 @@ use Jose\Component\Checker\ClaimCheckerManager;
 use Jose\Component\Checker\ExpirationTimeChecker;
 use Jose\Component\Checker\HeaderCheckerManager;
 use Jose\Component\Checker\IssuedAtChecker;
+use Jose\Component\Checker\IssuerChecker;
 use Jose\Component\Checker\NotBeforeChecker;
 use Jose\Component\Core\AlgorithmManager;
 use Jose\Component\Encryption\JWETokenSupport;
@@ -60,6 +61,7 @@ class JwtFactory
     {
         return new ClaimCheckerManager([
             new AudienceChecker($this->config->requireClientMetadata('client_id')),
+            new IssuerChecker([$this->config->requireProviderMetadata('issuer')]),
             new ExpirationTimeChecker(),
             new IssuedAtChecker(),
             new NotBeforeChecker(),
@@ -88,10 +90,7 @@ class JwtFactory
      */
     public function createJwsBuilder(): JWSBuilder
     {
-        return new JWSBuilder(
-            null,
-            $this->createAlgorithmManager()
-        );
+        return new JWSBuilder($this->createAlgorithmManager());
     }
 
     /**

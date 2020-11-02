@@ -7,7 +7,7 @@ namespace OpenIDConnect\Jwt\Checker;
 use Jose\Component\Checker\ClaimChecker;
 use Jose\Component\Checker\InvalidClaimException;
 
-final class NonceChecker implements ClaimChecker
+class NonceChecker implements ClaimChecker
 {
     private const CLAIM_NAME = 'nonce';
 
@@ -24,7 +24,7 @@ final class NonceChecker implements ClaimChecker
         $this->nonce = $nonce;
     }
 
-    public function checkClaim($value)
+    public function checkClaim($value): void
     {
         if ($this->nonce !== null && $value !== $this->nonce) {
             throw new InvalidClaimException('Nonce check error', self::CLAIM_NAME, $value);

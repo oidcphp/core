@@ -21,7 +21,9 @@ class ClientHandleOpenIDConnectCallbackTest extends TestCase
      */
     public function shouldReturnTokenSetWhenEverythingOkay(): void
     {
-        $providerMetadata = $this->createProviderMetadata();
+        $providerMetadata = $this->createProviderMetadata([
+            'issuer' => 'some-iss',
+        ]);
 
         $clientMetadata = $this->createClientMetadata([
             'client_id' => 'some-aud',
@@ -64,7 +66,12 @@ class ClientHandleOpenIDConnectCallbackTest extends TestCase
         $this->assertSame(['some-scope'], $actual->scope());
         $this->assertSame($expectedIdToken, $actual->idToken());
 
-        $this->assertInstanceOf(Claims::class, $actual->idTokenClaims());
+        $claims = $actual->idTokenClaims();
+
+        $this->assertSame('some-aud', $claims->aud());
+        $this->assertSame('some-iss', $claims->iss());
+        $this->assertSame('0123456789', $claims->nonce());
+        $this->assertSame('some-sub', $claims->sub());
     }
 
     /**

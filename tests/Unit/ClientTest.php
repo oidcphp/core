@@ -318,8 +318,6 @@ class ClientTest extends TestCase
      */
     public function shouldReturnStringStateAndNonceWhenInitAuthorizationParameters(): void
     {
-        $this->markTestIncomplete();
-
         $this->assertNull($this->target->getNonce());
         $this->assertNull($this->target->getState());
 
@@ -350,8 +348,6 @@ class ClientTest extends TestCase
      */
     public function shouldReturnPrepareStateAndNonceWhenInitAuthorizationParametersWithOptions(): void
     {
-        $this->markTestIncomplete();
-
         $expectedNonce = 'some-nonce';
         $expectedState = 'some-state';
 

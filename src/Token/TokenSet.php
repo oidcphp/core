@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OpenIDConnect\Token;
 
+use Exception;
 use Jose\Component\Core\JWKSet;
 use Jose\Component\Core\Util\JsonConverter;
 use OpenIDConnect\Claims;
@@ -94,7 +95,7 @@ class TokenSet implements ConfigAwareInterface, Parameterable, TokenSetInterface
             $mandatoryClaims = array_unique(array_merge(static::REQUIRED_CLAIMS, $extraMandatoryClaims));
 
             $claimCheckerManager->check(JsonConverter::decode($payload), $mandatoryClaims);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw new RelyingPartyException('Receive an invalid ID token: ' . $this->idToken(), 0, $e);
         }
 

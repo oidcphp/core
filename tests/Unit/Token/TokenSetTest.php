@@ -157,8 +157,6 @@ class TokenSetTest extends TestCase
             'id_token' => (new CompactSerializer())->serialize($jws),
         ]));
 
-        $this->markTestIncomplete();
-
         $actual = $target->idTokenClaims();
 
         $this->assertSame('some-aud', $actual->aud());
@@ -194,7 +192,7 @@ class TokenSetTest extends TestCase
             'aud' => 'some-aud',
             'exp' => $expectedExp,
             'iat' => $expectedIat,
-            'iss' => 'some-iss',
+            'iss' => 'https://somewhere',
             'sub' => 'some-sub',
         ];
 
@@ -212,7 +210,7 @@ class TokenSetTest extends TestCase
         $actual = $target->idTokenClaims();
 
         $this->assertSame('some-aud', $actual->aud());
-        $this->assertSame('some-iss', $actual->iss());
+        $this->assertSame('https://somewhere', $actual->iss());
         $this->assertSame($expectedExp, $actual->exp());
         $this->assertSame($expectedIat, $actual->iat());
         $this->assertSame('some-sub', $actual->sub());

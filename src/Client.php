@@ -185,6 +185,14 @@ class Client implements ConfigAwareInterface
         if (null === $this->state) {
             $this->state = $this->generateRandomString();
         }
+
+        if (!empty($options['nonce'])) {
+            $this->nonce = $options['nonce'];
+        }
+
+        if (null === $this->nonce) {
+            $this->nonce = $this->generateRandomString();
+        }
     }
 
     /**
