@@ -1,18 +1,16 @@
 # OpenID Connect Core Library for PHP
 
-[![License][license-svg]][license-link]
-[![Build Status][travis-svg]][travis-link]
+![tests](https://github.com/oidcphp/core/workflows/tests/badge.svg)
 [![Coverage Status][coverage-svg]][coverage-link]
 [![Codacy Badge][codacy-svg]][codacy-link]
 [![Latest Stable Version][latest-stable-svg]][packagist-link]
 [![Total Downloads][total-download-svg]][packagist-link]
+[![License][license-svg]][license-link]
 
 OpenID Connect Core Library implementation for PHP.
 
 [license-svg]: https://img.shields.io/badge/license-MIT-brightgreen.svg
 [license-link]: https://github.com/oidcphp/core/blob/master/LICENSE
-[travis-svg]: https://travis-ci.com/oidcphp/core.svg?branch=master
-[travis-link]: https://travis-ci.com/oidcphp/core
 [coverage-svg]: https://codecov.io/gh/oidcphp/core/branch/master/graph/badge.svg
 [coverage-link]: https://codecov.io/gh/oidcphp/core
 [codacy-svg]: https://api.codacy.com/project/badge/Grade/d1d31fd3aa3644839e18bb929a20d993
