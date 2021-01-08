@@ -31,18 +31,29 @@ class Issuer
     /**
      * Discover the OpenID Connect provider
      *
-     * @param string $discoverUri
+     * @param string $uri
      * @return ProviderMetadata
      * @throws ClientExceptionInterface
      * @see https://tools.ietf.org/html/rfc8414#section-3
      * @see https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfig
      */
-    public function discover(string $discoverUri): ProviderMetadata
+    public function discover(string $uri): ProviderMetadata
     {
-        $discoverResponse = $this->sendRequestDiscovery($discoverUri);
-        $jwksResponse = $this->sendRequestDiscovery($discoverResponse['jwks_uri']);
+        $discover = $this->sendRequest($uri);
 
-        return new ProviderMetadata($discoverResponse, new JwkSet($jwksResponse));
+        return new ProviderMetadata($discover, $this->jwkSet($discover['jwks_uri']));
+    }
+
+    /**
+     * Download JWKs
+     *
+     * @param string $jwksUri
+     * @return JwkSet
+     * @throws ClientExceptionInterface
+     */
+    public function jwkSet(string $jwksUri): JwkSet
+    {
+        return new JwkSet($this->sendRequest($jwksUri));
     }
 
     /**
@@ -79,9 +90,11 @@ class Issuer
      * @return array
      * @throws ClientExceptionInterface
      */
-    private function sendRequestDiscovery(string $uri): array
+    private function sendRequest(string $uri): array
     {
-        $response = $this->httpClient->sendRequest($this->httpClient->createRequest('GET', $uri));
+        $response = $this->httpClient->sendRequest(
+            $this->httpClient->createRequest('GET', $uri)
+        );
 
         return $this->processResponse($response);
     }
@@ -93,6 +106,7 @@ class Issuer
     private function processResponse(ResponseInterface $response): array
     {
         $statusCode = $response->getStatusCode();
+
         if (200 > $statusCode || $statusCode >= 300) {
             throw new OpenIDProviderException('Response status code is not 2xx, Given is ' . $statusCode);
         }

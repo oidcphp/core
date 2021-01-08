@@ -10,7 +10,6 @@ use Jose\Component\Core\Util\JsonConverter;
 use OpenIDConnect\Claims;
 use OpenIDConnect\Contracts\ConfigAwareInterface;
 use OpenIDConnect\Contracts\ConfigInterface;
-use OpenIDConnect\Contracts\Parameterable;
 use OpenIDConnect\Contracts\TokenSetInterface;
 use OpenIDConnect\Exceptions\RelyingPartyException;
 use OpenIDConnect\Jwt\JwtFactory;
@@ -19,7 +18,7 @@ use OpenIDConnect\Traits\ParameterTrait;
 use RangeException;
 use UnexpectedValueException;
 
-class TokenSet implements ConfigAwareInterface, Parameterable, TokenSetInterface
+class TokenSet implements ConfigAwareInterface, TokenSetInterface
 {
     use ConfigAwareTrait;
     use ParameterTrait;
