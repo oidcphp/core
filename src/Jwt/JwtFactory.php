@@ -20,11 +20,13 @@ use Jose\Component\Signature\Serializer\CompactSerializer;
 use Jose\Component\Signature\Serializer\JWSSerializerManager;
 use OpenIDConnect\Contracts\ConfigInterface;
 use OpenIDConnect\Jwt\Checker\NonceChecker;
+use OpenIDConnect\Traits\ClockTolerance;
 use OpenIDConnect\Traits\ConfigAwareTrait;
 
 class JwtFactory
 {
     use AlgorithmFactoryTrait;
+    use ClockTolerance;
     use ConfigAwareTrait;
 
     /**
@@ -36,9 +38,11 @@ class JwtFactory
 
     /**
      * @param ConfigInterface $config
+     * @param int $clockTolerance
      */
-    public function __construct(ConfigInterface $config)
+    public function __construct(ConfigInterface $config, $clockTolerance = 10)
     {
+        $this->clockTolerance = $clockTolerance;
         $this->config = $config;
     }
 
@@ -62,9 +66,9 @@ class JwtFactory
         return new ClaimCheckerManager([
             new AudienceChecker($this->config->requireClientMetadata('client_id')),
             new IssuerChecker([$this->config->requireProviderMetadata('issuer')]),
-            new ExpirationTimeChecker(),
-            new IssuedAtChecker(),
-            new NotBeforeChecker(),
+            new ExpirationTimeChecker($this->clockTolerance()),
+            new IssuedAtChecker($this->clockTolerance()),
+            new NotBeforeChecker($this->clockTolerance()),
             new NonceChecker($check['nonce'] ?? null),
         ]);
     }

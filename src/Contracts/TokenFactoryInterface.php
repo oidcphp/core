@@ -9,8 +9,9 @@ interface TokenFactoryInterface
     /**
      * Create TokenSet by response from token endpoint
      *
-     * @param array<mixed> $parameters
+     * @param array $parameters
+     * @param int $clockTolerance
      * @return TokenSetInterface
      */
-    public function create(array $parameters): TokenSetInterface;
+    public function create(array $parameters, $clockTolerance = 10): TokenSetInterface;
 }

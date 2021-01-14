@@ -7,6 +7,7 @@ namespace OpenIDConnect\Token;
 use OpenIDConnect\Contracts\ConfigInterface;
 use OpenIDConnect\Contracts\TokenFactoryInterface;
 use OpenIDConnect\Contracts\TokenSetInterface;
+use OpenIDConnect\Traits\ClockTolerance;
 use OpenIDConnect\Traits\ConfigAwareTrait;
 
 class TokenFactory implements TokenFactoryInterface
@@ -21,8 +22,8 @@ class TokenFactory implements TokenFactoryInterface
         $this->setConfig($config);
     }
 
-    public function create(array $parameters): TokenSetInterface
+    public function create(array $parameters, $clockTolerance = 10): TokenSetInterface
     {
-        return new TokenSet($this->config, $parameters);
+        return new TokenSet($this->config, $parameters, $clockTolerance);
     }
 }

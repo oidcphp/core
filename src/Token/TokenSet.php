@@ -13,6 +13,7 @@ use OpenIDConnect\Contracts\ConfigInterface;
 use OpenIDConnect\Contracts\TokenSetInterface;
 use OpenIDConnect\Exceptions\RelyingPartyException;
 use OpenIDConnect\Jwt\JwtFactory;
+use OpenIDConnect\Traits\ClockTolerance;
 use OpenIDConnect\Traits\ConfigAwareTrait;
 use OpenIDConnect\Traits\ParameterTrait;
 use RangeException;
@@ -21,6 +22,7 @@ use UnexpectedValueException;
 class TokenSet implements ConfigAwareInterface, TokenSetInterface
 {
     use ConfigAwareTrait;
+    use ClockTolerance;
     use ParameterTrait;
 
     /**
@@ -30,12 +32,13 @@ class TokenSet implements ConfigAwareInterface, TokenSetInterface
 
     /**
      * @param ConfigInterface $config
-     * @param array<mixed> $parameters An array from token endpoint response body
+     * @param array $parameters An array from token endpoint response body
+     * @param int $clockTolerance
      */
-    public function __construct(ConfigInterface $config, array $parameters)
+    public function __construct(ConfigInterface $config, array $parameters, $clockTolerance = 10)
     {
         $this->setConfig($config);
-
+        $this->clockTolerance = $clockTolerance;
         $this->parameters = $parameters;
     }
 
@@ -66,7 +69,7 @@ class TokenSet implements ConfigAwareInterface, TokenSetInterface
             throw new RangeException('No ID token');
         }
 
-        $jwtFactory = new JwtFactory($this->config);
+        $jwtFactory = new JwtFactory($this->config, $this->clockTolerance());
 
         $loader = $jwtFactory->createJwsLoader();
 

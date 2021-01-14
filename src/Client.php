@@ -21,6 +21,7 @@ use OpenIDConnect\Http\Response\AuthorizationRedirectResponseBuilder;
 use OpenIDConnect\OAuth2\Grant\AuthorizationCode;
 use OpenIDConnect\OAuth2\Grant\GrantType;
 use OpenIDConnect\Token\TokenFactory;
+use OpenIDConnect\Traits\ClockTolerance;
 use OpenIDConnect\Traits\ConfigAwareTrait;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Client\ClientExceptionInterface;
@@ -32,6 +33,7 @@ use Psr\Http\Message\ResponseInterface;
 class Client implements ConfigAwareInterface
 {
     use ClientAuthenticationAwareTrait;
+    use ClockTolerance;
     use ConfigAwareTrait;
     use HttpClientAwareTrait;
     use HttpFactoryAwareTrait;
@@ -75,8 +77,7 @@ class Client implements ConfigAwareInterface
     /**
      * Create PSR-7 response with form post
      *
-     * @param array<mixed> $parameters
-     *
+     * @param array $parameters
      * @return ResponseInterface
      */
     public function createAuthorizeFormPostResponse(array $parameters = []): ResponseInterface
@@ -88,8 +89,7 @@ class Client implements ConfigAwareInterface
     /**
      * Create PSR-7 redirect response
      *
-     * @param array<mixed> $parameters
-     *
+     * @param array $parameters
      * @return ResponseInterface
      */
     public function createAuthorizeRedirectResponse(array $parameters = []): ResponseInterface
@@ -115,9 +115,8 @@ class Client implements ConfigAwareInterface
     }
 
     /**
-     * @param array<mixed> $parameters
-     * @param array<mixed> $checks
-     *
+     * @param array $parameters
+     * @param array $checks
      * @return TokenSetInterface
      */
     public function handleCallback(array $parameters, array $checks = []): TokenSetInterface
@@ -140,6 +139,30 @@ class Client implements ConfigAwareInterface
         }
 
         return $this->sendTokenRequest($parameters, $checks);
+    }
+
+    /**
+     * Initial the authorization parameters
+     *
+     * @param array<mixed> $options
+     */
+    public function initAuthorizationParameters(array $options = []): void
+    {
+        if (!empty($options['state'])) {
+            $this->state = $options['state'];
+        }
+
+        if (null === $this->state) {
+            $this->state = $this->generateRandomString();
+        }
+
+        if (!empty($options['nonce'])) {
+            $this->nonce = $options['nonce'];
+        }
+
+        if (null === $this->nonce) {
+            $this->nonce = $this->generateRandomString();
+        }
     }
 
     /**
@@ -168,31 +191,7 @@ class Client implements ConfigAwareInterface
 
         $parsed = $this->parseTokenResponse($response);
 
-        return $this->tokenFactory->create(array_merge($checks, $parsed));
-    }
-
-    /**
-     * Initial the authorization parameters
-     *
-     * @param array<mixed> $options
-     */
-    public function initAuthorizationParameters(array $options = []): void
-    {
-        if (!empty($options['state'])) {
-            $this->state = $options['state'];
-        }
-
-        if (null === $this->state) {
-            $this->state = $this->generateRandomString();
-        }
-
-        if (!empty($options['nonce'])) {
-            $this->nonce = $options['nonce'];
-        }
-
-        if (null === $this->nonce) {
-            $this->nonce = $this->generateRandomString();
-        }
+        return $this->tokenFactory->create(array_merge($checks, $parsed), $this->clockTolerance());
     }
 
     /**
@@ -242,8 +241,7 @@ class Client implements ConfigAwareInterface
      * Parse response from token endpoint
      *
      * @param ResponseInterface $response
-     *
-     * @return array<mixed>
+     * @return array
      */
     private function parseTokenResponse(ResponseInterface $response): array
     {
@@ -256,10 +254,8 @@ class Client implements ConfigAwareInterface
             throw new OAuth2ServerException('Invalid response received from token endpoint. Expected JSON.');
         }
 
-        if (is_array($parsed) && !empty($parsed['error'])) {
-            $error = $parsed['error'];
-
-            throw new OAuth2ServerException($error);
+        if (isset($parsed['error'])) {
+            throw new OAuth2ServerException($parsed['error']);
         }
 
         return $parsed;
