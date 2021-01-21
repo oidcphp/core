@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace OpenIDConnect\Metadata;
 
-use OpenIDConnect\Contracts\ClientMetadataInterface;
+use JsonSerializable;
 use OpenIDConnect\Traits\ParameterTrait;
 
 /**
@@ -13,7 +13,7 @@ use OpenIDConnect\Traits\ParameterTrait;
  * @see https://tools.ietf.org/html/rfc7591#section-2
  * @see https://tools.ietf.org/html/rfc7591#section-3.2.1
  */
-class ClientMetadata implements ClientMetadataInterface
+class ClientMetadata implements JsonSerializable
 {
     use ParameterTrait;
 

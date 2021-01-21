@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace OpenIDConnect\Token;
 
-use OpenIDConnect\Contracts\ConfigInterface;
+use OpenIDConnect\Config;
 use OpenIDConnect\Contracts\TokenFactoryInterface;
 use OpenIDConnect\Contracts\TokenSetInterface;
-use OpenIDConnect\Traits\ClockTolerance;
 use OpenIDConnect\Traits\ConfigAwareTrait;
 
 class TokenFactory implements TokenFactoryInterface
@@ -15,9 +14,9 @@ class TokenFactory implements TokenFactoryInterface
     use ConfigAwareTrait;
 
     /**
-     * @param ConfigInterface $config
+     * @param Config $config
      */
-    public function __construct(ConfigInterface $config)
+    public function __construct(Config $config)
     {
         $this->setConfig($config);
     }

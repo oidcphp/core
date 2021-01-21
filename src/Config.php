@@ -2,18 +2,17 @@
 
 namespace OpenIDConnect;
 
-use OpenIDConnect\Contracts\ClientMetadataInterface;
-use OpenIDConnect\Contracts\ConfigInterface;
-use OpenIDConnect\Contracts\ProviderMetadataInterface;
+use OpenIDConnect\Metadata\ClientMetadata;
 use OpenIDConnect\Metadata\ClientMetadataAwareTrait;
+use OpenIDConnect\Metadata\ProviderMetadata;
 use OpenIDConnect\Metadata\ProviderMetadataAwareTrait;
 
-class Config implements ConfigInterface
+class Config
 {
     use ClientMetadataAwareTrait;
     use ProviderMetadataAwareTrait;
 
-    public function __construct(ProviderMetadataInterface $providerMetadata, ClientMetadataInterface $clientMetadata)
+    public function __construct(ProviderMetadata $providerMetadata, ClientMetadata $clientMetadata)
     {
         $this->setClientMetadata($clientMetadata);
         $this->setProviderMetadata($providerMetadata);

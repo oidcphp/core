@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace OpenIDConnect\Metadata;
 
+use JsonSerializable;
 use OpenIDConnect\Contracts\JwkSetInterface;
-use OpenIDConnect\Contracts\ProviderMetadataInterface;
 use OpenIDConnect\Jwt\JwkSet;
 use OpenIDConnect\Traits\ParameterTrait;
 
@@ -37,7 +37,7 @@ use OpenIDConnect\Traits\ParameterTrait;
  *
  * @see https://tools.ietf.org/html/rfc8414#section-2
  */
-class ProviderMetadata implements ProviderMetadataInterface
+class ProviderMetadata implements JsonSerializable
 {
     use ParameterTrait;
 

@@ -4,11 +4,10 @@ namespace OpenIDConnect;
 
 use MilesChou\Psr\Http\Client\HttpClientAwareTrait;
 use MilesChou\Psr\Http\Client\HttpClientInterface;
-use OpenIDConnect\Contracts\ClientMetadataInterface;
-use OpenIDConnect\Contracts\ProviderMetadataInterface;
 use OpenIDConnect\Exceptions\OpenIDProviderException;
 use OpenIDConnect\Exceptions\RelyingPartyException;
 use OpenIDConnect\Jwt\JwkSet;
+use OpenIDConnect\Metadata\ClientMetadata;
 use OpenIDConnect\Metadata\ProviderMetadata;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -57,15 +56,13 @@ class Issuer
     }
 
     /**
-     * @param ProviderMetadataInterface $providerMetadata
-     * @param ClientMetadataInterface $clientMetadata
-     * @return ClientMetadataInterface
+     * @param ProviderMetadata $providerMetadata
+     * @param ClientMetadata $clientMetadata
+     * @return ClientMetadata
      * @throws ClientExceptionInterface
      */
-    public function register(
-        ProviderMetadataInterface $providerMetadata,
-        ClientMetadataInterface $clientMetadata
-    ): ClientMetadataInterface {
+    public function register(ProviderMetadata $providerMetadata, ClientMetadata $clientMetadata): ClientMetadata
+    {
         if (!$providerMetadata->has('registration_endpoint')) {
             $msg = 'Cannot use dynamic client registration on issuer: ' . $providerMetadata->get('issuer');
 

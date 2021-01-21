@@ -8,8 +8,6 @@ use InvalidArgumentException;
 use MilesChou\Psr\Http\Client\HttpClientAwareTrait;
 use MilesChou\Psr\Http\Client\HttpClientInterface;
 use MilesChou\Psr\Http\Message\HttpFactoryAwareTrait;
-use OpenIDConnect\Contracts\ConfigAwareInterface;
-use OpenIDConnect\Contracts\ConfigInterface;
 use OpenIDConnect\Contracts\TokenFactoryInterface;
 use OpenIDConnect\Contracts\TokenSetInterface;
 use OpenIDConnect\Exceptions\OAuth2ClientException;
@@ -30,7 +28,7 @@ use Psr\Http\Message\ResponseInterface;
 /**
  * OAuth 2.0 / OpenID Connect Client
  */
-class Client implements ConfigAwareInterface
+class Client
 {
     use ClientAuthenticationAwareTrait;
     use ClockTolerance;
@@ -59,12 +57,12 @@ class Client implements ConfigAwareInterface
     private $tokenFactory;
 
     /**
-     * @param ConfigInterface $config
+     * @param Config $config
      * @param HttpClientInterface $httpClient
      * @param TokenFactoryInterface|null $tokenFactory
      */
     public function __construct(
-        ConfigInterface $config,
+        Config $config,
         HttpClientInterface $httpClient,
         TokenFactoryInterface $tokenFactory = null
     ) {

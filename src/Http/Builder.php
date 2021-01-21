@@ -6,7 +6,7 @@ namespace OpenIDConnect\Http;
 
 use MilesChou\Psr\Http\Client\HttpClientAwareTrait;
 use MilesChou\Psr\Http\Client\HttpClientInterface;
-use OpenIDConnect\Contracts\ConfigInterface;
+use OpenIDConnect\Config;
 use OpenIDConnect\Traits\ConfigAwareTrait;
 
 abstract class Builder
@@ -15,10 +15,10 @@ abstract class Builder
     use HttpClientAwareTrait;
 
     /**
-     * @param ConfigInterface $config
+     * @param Config $config
      * @param HttpClientInterface $httpClient
      */
-    public function __construct(ConfigInterface $config, HttpClientInterface $httpClient)
+    public function __construct(Config $config, HttpClientInterface $httpClient)
     {
         $this->setConfig($config);
         $this->setHttpClient($httpClient);

@@ -8,8 +8,7 @@ use Exception;
 use Jose\Component\Core\JWKSet;
 use Jose\Component\Core\Util\JsonConverter;
 use OpenIDConnect\Claims;
-use OpenIDConnect\Contracts\ConfigAwareInterface;
-use OpenIDConnect\Contracts\ConfigInterface;
+use OpenIDConnect\Config;
 use OpenIDConnect\Contracts\TokenSetInterface;
 use OpenIDConnect\Exceptions\RelyingPartyException;
 use OpenIDConnect\Jwt\JwtFactory;
@@ -19,7 +18,7 @@ use OpenIDConnect\Traits\ParameterTrait;
 use RangeException;
 use UnexpectedValueException;
 
-class TokenSet implements ConfigAwareInterface, TokenSetInterface
+class TokenSet implements TokenSetInterface
 {
     use ConfigAwareTrait;
     use ClockTolerance;
@@ -31,11 +30,11 @@ class TokenSet implements ConfigAwareInterface, TokenSetInterface
     private $claims;
 
     /**
-     * @param ConfigInterface $config
+     * @param Config $config
      * @param array $parameters An array from token endpoint response body
      * @param int $clockTolerance
      */
-    public function __construct(ConfigInterface $config, array $parameters, $clockTolerance = 10)
+    public function __construct(Config $config, array $parameters, $clockTolerance = 10)
     {
         $this->setConfig($config);
         $this->clockTolerance = $clockTolerance;

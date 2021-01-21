@@ -18,7 +18,7 @@ use Jose\Component\Signature\JWSTokenSupport;
 use Jose\Component\Signature\JWSVerifier;
 use Jose\Component\Signature\Serializer\CompactSerializer;
 use Jose\Component\Signature\Serializer\JWSSerializerManager;
-use OpenIDConnect\Contracts\ConfigInterface;
+use OpenIDConnect\Config;
 use OpenIDConnect\Jwt\Checker\NonceChecker;
 use OpenIDConnect\Traits\ClockTolerance;
 use OpenIDConnect\Traits\ConfigAwareTrait;
@@ -37,10 +37,10 @@ class JwtFactory
     private $algorithms = [];
 
     /**
-     * @param ConfigInterface $config
+     * @param Config $config
      * @param int $clockTolerance
      */
-    public function __construct(ConfigInterface $config, $clockTolerance = 10)
+    public function __construct(Config $config, $clockTolerance = 10)
     {
         $this->clockTolerance = $clockTolerance;
         $this->config = $config;

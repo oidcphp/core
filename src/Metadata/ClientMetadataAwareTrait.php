@@ -4,19 +4,14 @@ declare(strict_types=1);
 
 namespace OpenIDConnect\Metadata;
 
-use OpenIDConnect\Contracts\ClientMetadataInterface;
-
-/**
- * @see \OpenIDConnect\Contracts\ClientMetadataAwareInterface
- */
 trait ClientMetadataAwareTrait
 {
     /**
-     * @var ClientMetadataInterface
+     * @var ClientMetadata
      */
     protected $clientMetadata;
 
-    public function clientMetadata(): ClientMetadataInterface
+    public function clientMetadata(): ClientMetadata
     {
         return $this->clientMetadata;
     }
@@ -31,7 +26,7 @@ trait ClientMetadataAwareTrait
         return $this->clientMetadata->require($name);
     }
 
-    public function setClientMetadata(ClientMetadataInterface $clientMetadata)
+    public function setClientMetadata(ClientMetadata $clientMetadata)
     {
         $this->clientMetadata = $clientMetadata;
 
