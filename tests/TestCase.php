@@ -52,7 +52,7 @@ class TestCase extends BaseTestCase
     {
         return new ProviderMetadata(
             $this->createProviderMetadataConfig($overwrite),
-            new \OpenIDConnect\Jwt\JwkSet(JsonConverter::decode(JsonConverter::encode($this->createJwkSet($jwks))))
+            JsonConverter::decode(JsonConverter::encode($this->createJwkSet($jwks)))
         );
     }
 

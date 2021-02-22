@@ -6,7 +6,6 @@ use MilesChou\Psr\Http\Client\HttpClientAwareTrait;
 use MilesChou\Psr\Http\Client\HttpClientInterface;
 use OpenIDConnect\Exceptions\OpenIDProviderException;
 use OpenIDConnect\Exceptions\RelyingPartyException;
-use OpenIDConnect\Jwt\JwkSet;
 use OpenIDConnect\Metadata\ClientMetadata;
 use OpenIDConnect\Metadata\ProviderMetadata;
 use Psr\Http\Client\ClientExceptionInterface;
@@ -40,19 +39,7 @@ class Issuer
     {
         $discover = $this->sendRequest($uri);
 
-        return new ProviderMetadata($discover, $this->jwkSet($discover['jwks_uri']));
-    }
-
-    /**
-     * Download JWKs
-     *
-     * @param string $jwksUri
-     * @return JwkSet
-     * @throws ClientExceptionInterface
-     */
-    public function jwkSet(string $jwksUri): JwkSet
-    {
-        return new JwkSet($this->sendRequest($jwksUri));
+        return new ProviderMetadata($discover, $this->sendRequest($discover['jwks_uri']));
     }
 
     /**

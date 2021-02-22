@@ -5,18 +5,17 @@ declare(strict_types=1);
 namespace OpenIDConnect\Contracts;
 
 use JsonSerializable;
-use OpenIDConnect\Jwt\JwkSet;
 
 interface JwkSetInterface extends JsonSerializable
 {
     /**
-     * @param array<mixed> $jwkSet
+     * @param array $jwkSet
      * @return JwkSetInterface
      */
     public function init(array $jwkSet): JwkSetInterface;
 
     /**
-     * @param array<mixed> $jwk
+     * @param array $jwk
      * @return JwkSetInterface
      */
     public function add(array $jwk): JwkSetInterface;

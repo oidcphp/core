@@ -7,7 +7,7 @@
 all: test
 
 clean:
-	rm -rf ./build
+	git clean -Xfq build
 
 clean-all: clean
 	rm -rf ./vendor
@@ -16,7 +16,7 @@ clean-all: clean
 check:
 	php vendor/bin/phpcs
 
-test: check
+test: clean check
 	phpdbg -qrr vendor/bin/phpunit
 
 coverage: test

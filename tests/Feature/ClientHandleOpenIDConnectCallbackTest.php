@@ -7,7 +7,6 @@ use Jose\Component\Core\Util\JsonConverter;
 use Jose\Component\KeyManagement\JWKFactory;
 use Jose\Component\Signature\Serializer\CompactSerializer;
 use MilesChou\Psr\Http\Client\Testing\MockClient;
-use OpenIDConnect\Claims;
 use OpenIDConnect\Client;
 use OpenIDConnect\Config;
 use OpenIDConnect\Exceptions\RelyingPartyException;

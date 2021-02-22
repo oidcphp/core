@@ -8,7 +8,6 @@ use MilesChou\Psr\Http\Client\Testing\MockClient;
 use OpenIDConnect\Client;
 use OpenIDConnect\Exceptions\OAuth2ClientException;
 use OpenIDConnect\Exceptions\OAuth2ServerException;
-use OpenIDConnect\OAuth2\Grant\AuthorizationCode;
 use Psr\Http\Client\NetworkExceptionInterface;
 use Psr\Http\Message\RequestInterface;
 use Tests\TestCase;

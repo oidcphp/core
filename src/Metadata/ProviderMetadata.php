@@ -47,36 +47,33 @@ class ProviderMetadata implements JsonSerializable
     private $jwkSet;
 
     /**
-     * @param array<mixed> $metadata
-     * @param JwkSetInterface|null $jwkSet
+     * @param array $metadata
+     * @param array $jwkSet
      */
-    public function __construct(array $metadata, ?JwkSetInterface $jwkSet = null)
+    public function __construct(array $metadata, array $jwkSet = [])
     {
         $this->parameters = $metadata;
-
-        if (null === $jwkSet) {
-            $jwkSet = new JwkSet();
-        }
-
-        $this->jwkSet = $jwkSet;
+        $this->jwkSet = new JwkSet($jwkSet);
     }
 
     /**
-     * @param array<mixed> $jwk JWK array
+     * @param array $jwk JWK array
      * @return ProviderMetadata
      */
-    public function addJwk($jwk): ProviderMetadata
+    public function addJwk(array $jwk): ProviderMetadata
     {
         $this->jwkSet->add($jwk);
 
         return $this;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function jwkSet(): JwkSetInterface
     {
         return $this->jwkSet;
+    }
+
+    public function jwkSetRaw(): JwkSetInterface
+    {
+        return $this->jwkSet->jsonSerialize();
     }
 }
