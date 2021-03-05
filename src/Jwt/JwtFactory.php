@@ -63,14 +63,14 @@ class JwtFactory
      */
     public function createClaimCheckerManager($check = []): ClaimCheckerManager
     {
-        return new ClaimCheckerManager([
-            new AudienceChecker($this->config->requireClientMetadata('client_id')),
-            new IssuerChecker([$this->config->requireProviderMetadata('issuer')]),
-            new ExpirationTimeChecker($this->clockTolerance()),
-            new IssuedAtChecker($this->clockTolerance()),
-            new NotBeforeChecker($this->clockTolerance()),
-            new NonceChecker($check['nonce'] ?? null),
-        ]);
+        return (new ClaimCheckerManagerBuilder())
+            ->add(AudienceChecker::class, $this->config->requireClientMetadata('client_id'))
+            ->add(IssuerChecker::class, [$this->config->requireProviderMetadata('issuer')])
+            ->add(ExpirationTimeChecker::class, $this->clockTolerance())
+            ->add(IssuedAtChecker::class, $this->clockTolerance())
+            ->add(NotBeforeChecker::class, $this->clockTolerance())
+            ->add(NonceChecker::class, $check['nonce'] ?? null)
+            ->build();
     }
 
     /**
