@@ -4,13 +4,17 @@ declare(strict_types=1);
 
 namespace OpenIDConnect;
 
+use Base64Url\Base64Url;
+use InvalidArgumentException;
+use Jose\Component\Core\JWT;
 use Jose\Component\Core\Util\JsonConverter;
 use Jose\Component\Signature\JWS;
 
 /**
- * Verified JWT Claims
+ * JWT Claims
  *
  * @see https://openid.net/specs/openid-connect-core-1_0.html#IDToken
+ * @see https://openid.net/specs/openid-connect-backchannel-1_0.html#LogoutToken
  */
 class Claims
 {
@@ -20,18 +24,50 @@ class Claims
     private $claims;
 
     /**
-     * @param JWS $jws
+     * @param string $token
+     * @return mixed
+     */
+    public static function createFromJwsString(string $token): Claims
+    {
+        $parts = explode('.', $token);
+
+        if (3 !== count($parts)) {
+            throw new InvalidArgumentException('Unsupported input');
+        }
+
+        $claims = json_decode(
+            Base64Url::decode($parts[1]),
+            true,
+            512,
+            JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+        );
+
+        return new self($claims);
+    }
+
+    /**
+     * @param JWT $jwt
      * @return Claims
      */
-    public static function createFromJWS(JWS $jws): Claims
+    public static function createFromJwt(JWT $jwt): Claims
     {
-        $payload = $jws->getPayload();
+        $payload = $jwt->getPayload();
 
         if (null === $payload) {
             return new self();
         }
 
         return new self(JsonConverter::decode($payload));
+    }
+
+    /**
+     * @param JWS $jws
+     * @return Claims
+     * @deprecated use createFromJwt()
+     */
+    public static function createFromJWS(JWS $jws): Claims
+    {
+        return self::createFromJwt($jws);
     }
 
     /**

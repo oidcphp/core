@@ -82,7 +82,6 @@ class TestCase extends BaseTestCase
         return array_merge([
             'access_token' => 'some-access-token',
             'expires_in' => 3600,
-            'id_token' => null,
             'refresh_token' => 'some-refresh-token',
             'scope' => 'some-scope',
         ], $overwrite);

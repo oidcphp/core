@@ -4,7 +4,6 @@ namespace Tests\Unit\Http\Response;
 
 use MilesChou\Psr\Http\Client\Testing\MockClient;
 use MilesChou\Psr\Http\Message\Testing\TestResponse;
-use OpenIDConnect\Exceptions\OAuth2ServerException;
 use OpenIDConnect\Http\Response\AuthorizationFormPostResponseBuilder;
 use Tests\TestCase;
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Token;
+namespace Tests\Unit;
 
 use DomainException;
 use Jose\Component\Core\JWKSet;
@@ -10,7 +10,7 @@ use Jose\Component\Signature\Serializer\CompactSerializer;
 use OpenIDConnect\Config;
 use OpenIDConnect\Jwt\JwtFactory;
 use OpenIDConnect\Metadata\ProviderMetadata;
-use OpenIDConnect\Token\TokenSet;
+use OpenIDConnect\TokenSet;
 use Tests\TestCase;
 
 class TokenSetTest extends TestCase

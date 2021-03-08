@@ -94,7 +94,7 @@ class ClientTest extends TestCase
             'redirect_uri' => 'whatever',
         ], []);
 
-        $this->assertSame('some-access-token', $actual->accessToken());
+        $this->assertSame('some-access-token', $actual['access_token']);
     }
 
     /**

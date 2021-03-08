@@ -8,8 +8,6 @@ use InvalidArgumentException;
 use MilesChou\Psr\Http\Client\HttpClientAwareTrait;
 use MilesChou\Psr\Http\Client\HttpClientInterface;
 use MilesChou\Psr\Http\Message\HttpFactoryAwareTrait;
-use OpenIDConnect\Contracts\TokenFactoryInterface;
-use OpenIDConnect\Contracts\TokenSetInterface;
 use OpenIDConnect\Exceptions\OAuth2ClientException;
 use OpenIDConnect\Exceptions\OAuth2ServerException;
 use OpenIDConnect\Http\Authentication\ClientAuthenticationAwareTrait;
@@ -18,9 +16,10 @@ use OpenIDConnect\Http\Response\AuthorizationFormPostResponseBuilder;
 use OpenIDConnect\Http\Response\AuthorizationRedirectResponseBuilder;
 use OpenIDConnect\Http\Response\InitiateLogoutFormPostResponseBuilder;
 use OpenIDConnect\Http\Response\InitiateLogoutRedirectResponseBuilder;
+use OpenIDConnect\Jwt\JwtFactory;
+use OpenIDConnect\Jwt\Verifiers\IdTokenVerifier;
 use OpenIDConnect\OAuth2\Grant\AuthorizationCode;
 use OpenIDConnect\OAuth2\Grant\GrantType;
-use OpenIDConnect\Token\TokenFactory;
 use OpenIDConnect\Traits\ClockTolerance;
 use OpenIDConnect\Traits\ConfigAwareTrait;
 use Psr\Container\ContainerInterface;
@@ -54,24 +53,13 @@ class Client
     private $state;
 
     /**
-     * @var TokenFactoryInterface
-     */
-    private $tokenFactory;
-
-    /**
      * @param Config $config
      * @param HttpClientInterface $httpClient
-     * @param TokenFactoryInterface|null $tokenFactory
      */
-    public function __construct(
-        Config $config,
-        HttpClientInterface $httpClient,
-        TokenFactoryInterface $tokenFactory = null
-    ) {
+    public function __construct(Config $config, HttpClientInterface $httpClient)
+    {
         $this->setConfig($config);
         $this->setHttpClient($httpClient);
-
-        $this->tokenFactory = $tokenFactory ?? new TokenFactory($config);
     }
 
     /**
@@ -141,9 +129,9 @@ class Client
     /**
      * @param array $parameters
      * @param array $checks
-     * @return TokenSetInterface
+     * @return TokenSet
      */
-    public function handleCallback(array $parameters, array $checks = []): TokenSetInterface
+    public function handleCallback(array $parameters, array $checks = []): TokenSet
     {
         if (!isset($parameters['code'])) {
             throw new InvalidArgumentException("'code' missing from the response");
@@ -162,7 +150,22 @@ class Client
             throw new OAuth2ClientException($msg);
         }
 
-        return $this->sendTokenRequest($parameters, $checks);
+        $parsed = $this->sendTokenRequest($parameters, $checks);
+
+        $tokenSet = new TokenSet($this->config, array_merge($checks, $parsed), $this->clockTolerance());
+
+        // Verify ID Token when exist
+        if ($tokenSet->idToken()) {
+            $idTokenVerifier = new IdTokenVerifier(
+                $this->config,
+                new JwtFactory($this->config),
+                $this->clockTolerance()
+            );
+
+            $idTokenVerifier->verify($tokenSet->idToken());
+        }
+
+        return $tokenSet;
     }
 
     /**
@@ -193,13 +196,13 @@ class Client
      * @param array<mixed> $parameters
      * @param array<mixed> $checks
      * @param GrantType|null $grant Default is AuthorizationCode.
-     * @return TokenSetInterface
+     * @return array
      */
     public function sendTokenRequest(
         array $parameters = [],
         array $checks = [],
         GrantType $grant = null
-    ): TokenSetInterface {
+    ): array {
         $grant = $grant ?? new AuthorizationCode();
 
         $request = (new TokenRequestBuilder($this->config, $this->httpClient))
@@ -213,9 +216,7 @@ class Client
             throw new OAuth2ServerException($msg, 0, $e);
         }
 
-        $parsed = $this->parseTokenResponse($response);
-
-        return $this->tokenFactory->create(array_merge($checks, $parsed), $this->clockTolerance());
+        return $this->parseTokenResponse($response);
     }
 
     /**

@@ -3,13 +3,7 @@
 namespace OpenIDConnect\Jwt;
 
 use Jose\Component\Checker\AlgorithmChecker;
-use Jose\Component\Checker\AudienceChecker;
-use Jose\Component\Checker\ClaimCheckerManager;
-use Jose\Component\Checker\ExpirationTimeChecker;
 use Jose\Component\Checker\HeaderCheckerManager;
-use Jose\Component\Checker\IssuedAtChecker;
-use Jose\Component\Checker\IssuerChecker;
-use Jose\Component\Checker\NotBeforeChecker;
 use Jose\Component\Core\AlgorithmManager;
 use Jose\Component\Encryption\JWETokenSupport;
 use Jose\Component\Signature\JWSBuilder;
@@ -19,14 +13,11 @@ use Jose\Component\Signature\JWSVerifier;
 use Jose\Component\Signature\Serializer\CompactSerializer;
 use Jose\Component\Signature\Serializer\JWSSerializerManager;
 use OpenIDConnect\Config;
-use OpenIDConnect\Jwt\Checker\NonceChecker;
-use OpenIDConnect\Traits\ClockTolerance;
 use OpenIDConnect\Traits\ConfigAwareTrait;
 
 class JwtFactory
 {
     use AlgorithmFactoryTrait;
-    use ClockTolerance;
     use ConfigAwareTrait;
 
     /**
@@ -38,11 +29,9 @@ class JwtFactory
 
     /**
      * @param Config $config
-     * @param int $clockTolerance
      */
-    public function __construct(Config $config, $clockTolerance = 10)
+    public function __construct(Config $config)
     {
-        $this->clockTolerance = $clockTolerance;
         $this->config = $config;
     }
 
@@ -54,23 +43,6 @@ class JwtFactory
         return new AlgorithmManager(
             $this->createAlgorithms($this->resolveAlgorithms())
         );
-    }
-
-    /**
-     * @param array $check
-     * @return ClaimCheckerManager
-     * @link https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation
-     */
-    public function createClaimCheckerManager($check = []): ClaimCheckerManager
-    {
-        return (new ClaimCheckerManagerBuilder())
-            ->add(AudienceChecker::class, $this->config->requireClientMetadata('client_id'))
-            ->add(IssuerChecker::class, [$this->config->requireProviderMetadata('issuer')])
-            ->add(ExpirationTimeChecker::class, $this->clockTolerance())
-            ->add(IssuedAtChecker::class, $this->clockTolerance())
-            ->add(NotBeforeChecker::class, $this->clockTolerance())
-            ->add(NonceChecker::class, $check['nonce'] ?? null)
-            ->build();
     }
 
     /**
