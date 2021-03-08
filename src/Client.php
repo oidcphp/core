@@ -107,7 +107,7 @@ class Client
     public function initiateLogoutFormPostResponse(array $parameters = []): ResponseInterface
     {
         return (new InitiateLogoutFormPostResponseBuilder($this->config, $this->httpClient))
-            ->build($this->generateAuthorizationParameters($parameters));
+            ->build($parameters);
     }
 
     /**
@@ -119,7 +119,7 @@ class Client
     public function initiateLogoutRedirectResponse(array $parameters = []): ResponseInterface
     {
         return (new InitiateLogoutRedirectResponseBuilder($this->config, $this->httpClient))
-            ->build($this->generateAuthorizationParameters($parameters));
+            ->build($parameters);
     }
 
     /**
