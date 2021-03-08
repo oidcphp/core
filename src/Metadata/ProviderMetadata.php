@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace OpenIDConnect\Metadata;
 
 use JsonSerializable;
-use OpenIDConnect\Contracts\JwkSetInterface;
 use OpenIDConnect\Jwt\JwkSet;
 use OpenIDConnect\Traits\ParameterTrait;
 
@@ -42,7 +41,7 @@ class ProviderMetadata implements JsonSerializable
     use ParameterTrait;
 
     /**
-     * @var JwkSetInterface
+     * @var JwkSet
      */
     private $jwkSet;
 
@@ -67,13 +66,8 @@ class ProviderMetadata implements JsonSerializable
         return $this;
     }
 
-    public function jwkSet(): JwkSetInterface
+    public function jwkSet(): JwkSet
     {
         return $this->jwkSet;
-    }
-
-    public function jwkSetRaw(): JwkSetInterface
-    {
-        return $this->jwkSet->jsonSerialize();
     }
 }

@@ -5,20 +5,19 @@ declare(strict_types=1);
 namespace OpenIDConnect\Jwt;
 
 use InvalidArgumentException;
-use OpenIDConnect\Contracts\JwkSetInterface;
 
 /**
  * @see https://tools.ietf.org/html/rfc7517#section-5
  */
-class JwkSet implements JwkSetInterface
+class JwkSet
 {
     /**
-     * @var array<mixed>
+     * @var array
      */
     private $keys = [];
 
     /**
-     * @param array<mixed> $jwkSet
+     * @param array $jwkSet
      */
     public function __construct(array $jwkSet = [])
     {
@@ -26,10 +25,10 @@ class JwkSet implements JwkSetInterface
     }
 
     /**
-     * @param array<mixed> $jwkSet
-     * @return JwkSetInterface
+     * @param array $jwkSet
+     * @return JwkSet
      */
-    public function init(array $jwkSet): JwkSetInterface
+    public function init(array $jwkSet): JwkSet
     {
         if (isset($jwkSet['keys'])) {
             foreach ($jwkSet['keys'] as $key) {
@@ -41,10 +40,10 @@ class JwkSet implements JwkSetInterface
     }
 
     /**
-     * @param array<mixed> $jwk
-     * @return JwkSetInterface
+     * @param array $jwk
+     * @return JwkSet
      */
-    public function add(array $jwk): JwkSetInterface
+    public function add(array $jwk): JwkSet
     {
         if (isset($jwk['kid'])) {
             $this->keys[$jwk['kid']] = $jwk;
@@ -78,7 +77,7 @@ class JwkSet implements JwkSetInterface
     }
 
     /**
-     * @return array<mixed>
+     * @return array
      */
     public function jsonSerialize(): array
     {
@@ -88,7 +87,7 @@ class JwkSet implements JwkSetInterface
     /**
      * Transfer to array
      *
-     * @return array<mixed>
+     * @return array
      */
     public function toArray(): array
     {
