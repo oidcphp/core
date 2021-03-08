@@ -1,29 +1,15 @@
 <?php
 
-declare(strict_types=1);
-
-namespace OpenIDConnect\Http;
+namespace OpenIDConnect\Traits;
 
 use MilesChou\Psr\Http\Client\HttpClientAwareTrait;
-use MilesChou\Psr\Http\Client\HttpClientInterface;
-use OpenIDConnect\Config;
-use OpenIDConnect\Traits\ConfigAwareTrait;
+use OpenIDConnect\Http\Query;
 use Psr\Http\Message\UriInterface;
 
-abstract class Builder
+trait Psr7ResponseBuilder
 {
     use ConfigAwareTrait;
     use HttpClientAwareTrait;
-
-    /**
-     * @param Config $config
-     * @param HttpClientInterface $httpClient
-     */
-    public function __construct(Config $config, HttpClientInterface $httpClient)
-    {
-        $this->setConfig($config);
-        $this->setHttpClient($httpClient);
-    }
 
     /**
      * Using form post

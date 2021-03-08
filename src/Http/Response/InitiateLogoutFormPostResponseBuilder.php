@@ -4,25 +4,18 @@ declare(strict_types=1);
 
 namespace OpenIDConnect\Http\Response;
 
-use OpenIDConnect\Http\Builder;
-use Psr\Http\Message\ResponseInterface;
-
 /**
  * @see https://openid.net/specs/openid-connect-rpinitiated-1_0.html#RPLogout
  */
-class InitiateLogoutFormPostResponseBuilder extends Builder
+class InitiateLogoutFormPostResponseBuilder extends ConfigurableResponseBuilder
 {
     /**
-     * @param array $parameters
-     * @return ResponseInterface
+     * @var string
      */
-    public function build(array $parameters): ResponseInterface
-    {
-        $body = $this->httpClient->createStream(
-            $this->generateFormPostHtmlWithProviderConfig('end_session_endpoint', $parameters)
-        );
+    protected $method = self::METHOD_FORM;
 
-        return $this->httpClient->createResponse()
-            ->withBody($body);
-    }
+    /**
+     * @var string
+     */
+    protected $key = 'end_session_endpoint';
 }

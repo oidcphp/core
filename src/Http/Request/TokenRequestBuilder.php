@@ -4,20 +4,35 @@ declare(strict_types=1);
 
 namespace OpenIDConnect\Http\Request;
 
+use MilesChou\Psr\Http\Client\HttpClientAwareTrait;
+use MilesChou\Psr\Http\Client\HttpClientInterface;
 use MilesChou\Psr\Http\Message\PendingRequest;
+use OpenIDConnect\Config;
 use OpenIDConnect\Http\Authentication\ClientAuthenticationAwareTrait;
-use OpenIDConnect\Http\Builder;
 use OpenIDConnect\Http\Query;
 use OpenIDConnect\OAuth2\Grant\GrantType;
+use OpenIDConnect\Traits\ConfigAwareTrait;
 
 /**
  * Generate Request for token endpoint
  *
  * @see https://tools.ietf.org/html/rfc6749#section-3.2
  */
-class TokenRequestBuilder extends Builder
+class TokenRequestBuilder
 {
     use ClientAuthenticationAwareTrait;
+    use ConfigAwareTrait;
+    use HttpClientAwareTrait;
+
+    /**
+     * @param Config $config
+     * @param HttpClientInterface $httpClient
+     */
+    public function __construct(Config $config, HttpClientInterface $httpClient)
+    {
+        $this->setConfig($config);
+        $this->setHttpClient($httpClient);
+    }
 
     /**
      * @param GrantType $grantType

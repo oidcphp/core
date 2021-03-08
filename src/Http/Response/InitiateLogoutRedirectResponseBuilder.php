@@ -4,24 +4,18 @@ declare(strict_types=1);
 
 namespace OpenIDConnect\Http\Response;
 
-use OpenIDConnect\Http\Builder;
-use Psr\Http\Message\ResponseInterface;
-
 /**
  * @see https://openid.net/specs/openid-connect-rpinitiated-1_0.html#RPLogout
  */
-class InitiateLogoutRedirectResponseBuilder extends Builder
+class InitiateLogoutRedirectResponseBuilder extends ConfigurableResponseBuilder
 {
     /**
-     * @param array $parameters
-     * @return ResponseInterface
+     * @var string
      */
-    public function build(array $parameters): ResponseInterface
-    {
-        return $this->httpClient->createResponse(302)
-            ->withHeader(
-                'Location',
-                (string)$this->generateRedirectUriWithProviderConfig('end_session_endpoint', $parameters)
-            );
-    }
+    protected $method = self::METHOD_REDIRECT;
+
+    /**
+     * @var string
+     */
+    protected $key = 'end_session_endpoint';
 }
