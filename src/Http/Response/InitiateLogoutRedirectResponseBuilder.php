@@ -8,10 +8,9 @@ use OpenIDConnect\Http\Builder;
 use Psr\Http\Message\ResponseInterface;
 
 /**
- * @see https://tools.ietf.org/html/rfc6749#section-4.1.1
- * @see https://tools.ietf.org/html/rfc6749#section-4.2.1
+ * @see https://openid.net/specs/openid-connect-rpinitiated-1_0.html#RPLogout
  */
-class AuthorizationRedirectResponseBuilder extends Builder
+class InitiateLogoutRedirectResponseBuilder extends Builder
 {
     /**
      * @param array $parameters
@@ -22,7 +21,7 @@ class AuthorizationRedirectResponseBuilder extends Builder
         return $this->httpClient->createResponse(302)
             ->withHeader(
                 'Location',
-                (string)$this->generateRedirectUriWithProviderConfig('authorization_endpoint', $parameters)
+                (string)$this->generateRedirectUriWithProviderConfig('end_session_endpoint', $parameters)
             );
     }
 }

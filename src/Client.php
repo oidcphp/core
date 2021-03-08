@@ -14,8 +14,10 @@ use OpenIDConnect\Exceptions\OAuth2ClientException;
 use OpenIDConnect\Exceptions\OAuth2ServerException;
 use OpenIDConnect\Http\Authentication\ClientAuthenticationAwareTrait;
 use OpenIDConnect\Http\Request\TokenRequestBuilder;
-use OpenIDConnect\Http\Response\AuthorizationFormResponseBuilder;
+use OpenIDConnect\Http\Response\AuthorizationFormPostResponseBuilder;
 use OpenIDConnect\Http\Response\AuthorizationRedirectResponseBuilder;
+use OpenIDConnect\Http\Response\InitiateLogoutFormPostResponseBuilder;
+use OpenIDConnect\Http\Response\InitiateLogoutRedirectResponseBuilder;
 use OpenIDConnect\OAuth2\Grant\AuthorizationCode;
 use OpenIDConnect\OAuth2\Grant\GrantType;
 use OpenIDConnect\Token\TokenFactory;
@@ -80,7 +82,7 @@ class Client
      */
     public function createAuthorizeFormPostResponse(array $parameters = []): ResponseInterface
     {
-        return (new AuthorizationFormResponseBuilder($this->config, $this->httpClient))
+        return (new AuthorizationFormPostResponseBuilder($this->config, $this->httpClient))
             ->build($this->generateAuthorizationParameters($parameters));
     }
 
@@ -93,6 +95,30 @@ class Client
     public function createAuthorizeRedirectResponse(array $parameters = []): ResponseInterface
     {
         return (new AuthorizationRedirectResponseBuilder($this->config, $this->httpClient))
+            ->build($this->generateAuthorizationParameters($parameters));
+    }
+
+    /**
+     * Create PSR-7 redirect response
+     *
+     * @param array $parameters
+     * @return ResponseInterface
+     */
+    public function initiateLogoutFormPostResponse(array $parameters = []): ResponseInterface
+    {
+        return (new InitiateLogoutFormPostResponseBuilder($this->config, $this->httpClient))
+            ->build($this->generateAuthorizationParameters($parameters));
+    }
+
+    /**
+     * Create PSR-7 redirect response
+     *
+     * @param array $parameters
+     * @return ResponseInterface
+     */
+    public function initiateLogoutRedirectResponse(array $parameters = []): ResponseInterface
+    {
+        return (new InitiateLogoutRedirectResponseBuilder($this->config, $this->httpClient))
             ->build($this->generateAuthorizationParameters($parameters));
     }
 
