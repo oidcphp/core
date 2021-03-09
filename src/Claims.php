@@ -203,11 +203,11 @@ class Claims
     }
 
     /**
-     * @return string
+     * @return array
      */
-    public function events(): string
+    public function events(): array
     {
-        return $this->claim('sub');
+        return $this->claim('events');
     }
 
     /**
@@ -217,7 +217,7 @@ class Claims
      */
     public function jti(): string
     {
-        return $this->claim('sub');
+        return $this->claim('jti');
     }
 
     /**
@@ -227,6 +227,6 @@ class Claims
      */
     public function sid(): ?string
     {
-        return $this->claim('sub');
+        return $this->claim('sid');
     }
 }
