@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace OpenIDConnect\Metadata;
 
+use OpenIDConnect\Jwt\JwkSet;
+
 trait ProviderMetadataAwareTrait
 {
     /**
@@ -31,5 +33,13 @@ trait ProviderMetadataAwareTrait
         $this->providerMetadata = $providerMetadata;
 
         return $this;
+    }
+
+    /**
+     * Short cut to get JWK Set
+     */
+    public function jwkSet(): JwkSet
+    {
+        return $this->providerMetadata->jwkSet();
     }
 }

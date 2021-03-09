@@ -4,19 +4,19 @@ namespace Tests\Unit\Jwt;
 
 use Jose\Component\Signature\Algorithm\ES256;
 use Jose\Component\Signature\Algorithm\RS256;
-use OpenIDConnect\Jwt\AlgorithmFactoryTrait;
+use OpenIDConnect\Jwt\Concerns\AlgorithmFactory;
 use PHPUnit\Framework\TestCase;
 
 class AlgorithmFactoryTraitTest extends TestCase
 {
     /**
-     * @var AlgorithmFactoryTrait
+     * @var AlgorithmFactory
      */
     private $target;
 
     protected function setUp(): void
     {
-        $this->target = $this->getObjectForTrait(AlgorithmFactoryTrait::class);
+        $this->target = $this->getObjectForTrait(AlgorithmFactory::class);
     }
 
     protected function tearDown(): void

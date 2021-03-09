@@ -14,9 +14,11 @@ use OpenIDConnect\Contracts\JwtVerifier;
 use OpenIDConnect\Exceptions\OpenIDProviderException;
 use OpenIDConnect\Exceptions\RelyingPartyException;
 use OpenIDConnect\Jwt\Checkers\BackChannelLogoutEventsChecker;
+use OpenIDConnect\Jwt\Checkers\NonceNotContainChecker;
 use OpenIDConnect\Jwt\ClaimCheckerManagerBuilder;
-use OpenIDConnect\Jwt\JwtFactory;
+use OpenIDConnect\Jwt\Factory as JwtFactory;
 use OpenIDConnect\Traits\ClockTolerance;
+use OpenIDConnect\Traits\ConfigAwareTrait;
 use UnexpectedValueException;
 
 /**
@@ -25,30 +27,24 @@ use UnexpectedValueException;
 class LogoutTokenVerifier implements JwtVerifier
 {
     use ClockTolerance;
+    use ConfigAwareTrait;
 
-    /**
-     * @var Config
-     */
-    private $config;
-
-    /**
-     * @var JwtFactory
-     */
-    private $factory;
-
-    public function __construct(Config $config, JwtFactory $factory, $clockTolerance = 10)
+    public function __construct(Config $config, $clockTolerance = 10)
     {
         $this->config = $config;
-        $this->factory = $factory;
         $this->clockTolerance = $clockTolerance;
     }
 
     public function verify(string $token, $extraMandatoryClaims = [], $check = []): void
     {
-        $loader = $this->factory->createJwsLoader();
+        $factory = new JwtFactory($this->config);
+
+        $loader = $factory->createJwsLoader();
 
         $signature = null;
 
+        // 2.  Validate the Logout Token signature in the same way that an ID
+        //     Token signature is validated, with the following refinements.
         try {
             $jws = $loader->loadAndVerifyWithKeySet(
                 $token,
@@ -82,22 +78,33 @@ class LogoutTokenVerifier implements JwtVerifier
             throw new RelyingPartyException('Relying party info is invalid: ' . $e->getMessage(), 0, $e);
         }
 
-        if (array_key_exists('nonce', $claims)) {
-            throw new OpenIDProviderException('Logout token should not contain nonce');
+        // 4. Verify that the Logout Token contains a sub Claim, a sid Claim, or both.
+        if (empty($claims['sub']) && empty($claims['sid'])) {
+            throw new RelyingPartyException('No sub and sid both in claims');
         }
     }
 
     /**
-     * @param array $check
      * @return ClaimCheckerManager
      */
     private function createClaimCheckerManager(): ClaimCheckerManager
     {
-        return (new ClaimCheckerManagerBuilder())
-            ->add(AudienceChecker::class, $this->config->requireClientMetadata('client_id'))
+        $builder = new ClaimCheckerManagerBuilder();
+
+        // 3.  Validate the iss, aud, and iat Claims in the same way they are
+        //     validated in ID Tokens.
+        $builder->add(AudienceChecker::class, $this->config->requireClientMetadata('client_id'))
             ->add(IssuerChecker::class, [$this->config->requireProviderMetadata('issuer')])
-            ->add(IssuedAtChecker::class, $this->clockTolerance())
-            ->add(BackChannelLogoutEventsChecker::class)
-            ->build();
+            ->add(IssuedAtChecker::class, $this->clockTolerance());
+
+        // 5.  Verify that the Logout Token contains an events Claim whose
+        //     value is JSON object containing the member name
+        //     http://schemas.openid.net/event/backchannel-logout.
+        $builder->add(BackChannelLogoutEventsChecker::class);
+
+        // 6.  Verify that the Logout Token does not contain a nonce Claim.
+        $builder->add(NonceNotContainChecker::class);
+
+        return $builder->build();
     }
 }

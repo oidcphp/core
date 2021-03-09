@@ -11,7 +11,7 @@ use Jose\Component\KeyManagement\JWKFactory;
 use Jose\Component\Signature\Algorithm\ES256;
 use Jose\Component\Signature\Algorithm\RS256;
 use Jose\Component\Signature\Serializer\CompactSerializer;
-use OpenIDConnect\Jwt\JwtFactory;
+use OpenIDConnect\Jwt\Factory as JwtFactory;
 use OutOfRangeException;
 use Tests\TestCase;
 

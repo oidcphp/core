@@ -10,7 +10,7 @@ use MilesChou\Psr\Http\Client\Testing\MockClient;
 use OpenIDConnect\Client;
 use OpenIDConnect\Config;
 use OpenIDConnect\Exceptions\RelyingPartyException;
-use OpenIDConnect\Jwt\JwtFactory;
+use OpenIDConnect\Jwt\Factory as JwtFactory;
 use Tests\TestCase;
 
 class ClientHandleOpenIDConnectCallbackTest extends TestCase
@@ -39,12 +39,7 @@ class ClientHandleOpenIDConnectCallbackTest extends TestCase
 
         $factory = new JwtFactory(new Config($providerMetadata, $clientMetadata));
 
-        $jws = $factory->createJwsBuilder()
-            ->withPayload(JsonConverter::encode($payload))
-            ->addSignature(new JWK($providerMetadata->jwkSet()->get(0)), ['alg' => 'RS256'])
-            ->build();
-
-        $expectedIdToken = (new CompactSerializer())->serialize($jws);
+        $expectedIdToken = $factory->createSerializeJws($payload);
 
         $mockClient = (new MockClient())->appendResponseWithJson(
             $this->createFakeTokenSetParameter(['id_token' => $expectedIdToken])

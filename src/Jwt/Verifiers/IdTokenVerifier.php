@@ -8,7 +8,6 @@ use Jose\Component\Checker\ClaimCheckerManager;
 use Jose\Component\Checker\ExpirationTimeChecker;
 use Jose\Component\Checker\IssuedAtChecker;
 use Jose\Component\Checker\IssuerChecker;
-use Jose\Component\Checker\NotBeforeChecker;
 use Jose\Component\Core\JWKSet;
 use Jose\Component\Core\Util\JsonConverter;
 use OpenIDConnect\Config;
@@ -17,8 +16,9 @@ use OpenIDConnect\Exceptions\OpenIDProviderException;
 use OpenIDConnect\Exceptions\RelyingPartyException;
 use OpenIDConnect\Jwt\Checkers\NonceChecker;
 use OpenIDConnect\Jwt\ClaimCheckerManagerBuilder;
-use OpenIDConnect\Jwt\JwtFactory;
+use OpenIDConnect\Jwt\Factory as JwtFactory;
 use OpenIDConnect\Traits\ClockTolerance;
+use OpenIDConnect\Traits\ConfigAwareTrait;
 use UnexpectedValueException;
 
 /**
@@ -27,27 +27,19 @@ use UnexpectedValueException;
 class IdTokenVerifier implements JwtVerifier
 {
     use ClockTolerance;
+    use ConfigAwareTrait;
 
-    /**
-     * @var Config
-     */
-    private $config;
-
-    /**
-     * @var JwtFactory
-     */
-    private $factory;
-
-    public function __construct(Config $config, JwtFactory $factory, $clockTolerance = 10)
+    public function __construct(Config $config, $clockTolerance = 10)
     {
         $this->config = $config;
-        $this->factory = $factory;
         $this->clockTolerance = $clockTolerance;
     }
 
     public function verify(string $token, $extraMandatoryClaims = [], $check = []): void
     {
-        $loader = $this->factory->createJwsLoader();
+        $factory = new JwtFactory($this->config);
+
+        $loader = $factory->createJwsLoader();
 
         $signature = null;
 
@@ -58,7 +50,7 @@ class IdTokenVerifier implements JwtVerifier
                 $signature
             );
         } catch (Exception $e) {
-            throw new OpenIDProviderException('Receive an invalid ID token: ' . $token, 0, $e);
+            throw new OpenIDProviderException('Receive an invalid ID token: ' . $e->getMessage(), 0, $e);
         }
 
         $payload = $jws->getPayload();
@@ -87,17 +79,47 @@ class IdTokenVerifier implements JwtVerifier
     /**
      * @param array $check
      * @return ClaimCheckerManager
-     * @link https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation
      */
     private function createClaimCheckerManager($check = []): ClaimCheckerManager
     {
-        return (new ClaimCheckerManagerBuilder())
-            ->add(AudienceChecker::class, $this->config->requireClientMetadata('client_id'))
-            ->add(IssuerChecker::class, [$this->config->requireProviderMetadata('issuer')])
-            ->add(ExpirationTimeChecker::class, $this->clockTolerance())
-            ->add(IssuedAtChecker::class, $this->clockTolerance())
-            ->add(NotBeforeChecker::class, $this->clockTolerance())
-            ->add(NonceChecker::class, $check['nonce'] ?? null)
-            ->build();
+        $builder = new ClaimCheckerManagerBuilder();
+
+        // 2.  The Issuer Identifier for the OpenID Provider (which is
+        //     typically obtained during Discovery) MUST exactly match
+        //     the value of the iss (issuer) Claim.
+        $builder->add(IssuerChecker::class, [$this->config->requireProviderMetadata('issuer')]);
+
+        // 3.  The Client MUST validate that the aud (audience) Claim contains
+        //     its client_id value registered at the Issuer identified by the
+        //     iss (issuer) Claim as an audience. The aud (audience) Claim MAY
+        //     contain an array with more than one element.
+        //
+        //     The ID Token MUST be rejected if the ID Token does not list the
+        //     Client as a valid audience, or if it contains additional
+        //     audiences not trusted by the Client.
+        $builder->add(AudienceChecker::class, $this->config->requireClientMetadata('client_id'));
+
+        // 9.  The current time MUST be before the time represented by the exp
+        //     Claim.
+        $builder->add(ExpirationTimeChecker::class, $this->clockTolerance());
+
+        // 10. The iat Claim can be used to reject tokens that were issued too
+        //     far away from the current time, limiting the amount of time that
+        //     nonces need to be stored to prevent attacks. The acceptable
+        //     range is Client specific.
+        $builder->add(IssuedAtChecker::class, $this->clockTolerance());
+
+        // 11. If a nonce value was sent in the Authentication Request, a nonce
+        //     Claim MUST be present and its value checked to verify that it is
+        //     the same value as the one that was sent in the Authentication
+        //     Request.
+        //
+        //     The Client SHOULD check the nonce value for replay attacks. The
+        //     precise method for detecting replay attacks is Client specific.
+        if (isset($check['nonce'])) {
+            $builder->add(NonceChecker::class, $check['nonce']);
+        }
+
+        return $builder->build();
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace OpenIDConnect\Jwt;
+namespace OpenIDConnect\Jwt\Concerns;
 
 use Jose\Component\Checker\AlgorithmChecker;
 use Jose\Component\Checker\HeaderCheckerManager;
@@ -12,28 +12,10 @@ use Jose\Component\Signature\JWSTokenSupport;
 use Jose\Component\Signature\JWSVerifier;
 use Jose\Component\Signature\Serializer\CompactSerializer;
 use Jose\Component\Signature\Serializer\JWSSerializerManager;
-use OpenIDConnect\Config;
-use OpenIDConnect\Traits\ConfigAwareTrait;
 
-class JwtFactory
+trait WebToken
 {
-    use AlgorithmFactoryTrait;
-    use ConfigAwareTrait;
-
-    /**
-     * Addition algorithms
-     *
-     * @var array
-     */
-    private $algorithms = [];
-
-    /**
-     * @param Config $config
-     */
-    public function __construct(Config $config)
-    {
-        $this->config = $config;
-    }
+    use AlgorithmFactory;
 
     /**
      * @return AlgorithmManager
@@ -101,29 +83,7 @@ class JwtFactory
     }
 
     /**
-     * @param array<int, mixed> $alg
-     * @return static
+     * @return array
      */
-    public function withAlgorithm(...$alg)
-    {
-        if (is_array($alg[0])) {
-            $alg = $alg[0];
-        }
-
-        $this->algorithms = $alg;
-
-        return $this;
-    }
-
-    private function resolveAlgorithms(): array
-    {
-        $providerMetadata = $this->config->providerMetadata();
-
-        return array_unique(array_merge(
-            $providerMetadata->require('id_token_signing_alg_values_supported'),
-            $providerMetadata->get('id_token_encryption_alg_values_supported', []),
-            $providerMetadata->get('id_token_encryption_enc_values_supported', []),
-            $this->algorithms
-        ));
-    }
+    abstract protected function resolveAlgorithms(): array;
 }

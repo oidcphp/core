@@ -1,16 +1,23 @@
 <?php
 
-namespace OpenIDConnect\Jwt;
+namespace OpenIDConnect\Jwt\Concerns;
 
 use Jose\Component\Core\Algorithm;
 use OutOfRangeException;
 
-trait AlgorithmFactoryTrait
+trait AlgorithmFactory
 {
     /**
      * @var array
      */
-    private $algorithmsInstance = [];
+    private $algorithms = [];
+
+    /**
+     * Extra algorithms
+     *
+     * @var array
+     */
+    private $extraAlgorithms = [];
 
     /**
      * Create instance use alias
@@ -72,12 +79,12 @@ trait AlgorithmFactoryTrait
             throw new OutOfRangeException("Algorithm alias '$alias' is not found");
         }
 
-        if (!isset($this->algorithmsInstance[$alias])) {
+        if (!isset($this->algorithms[$alias])) {
             $class = $aliases[$alias];
-            $this->algorithmsInstance[$alias] = new $class();
+            $this->algorithms[$alias] = new $class();
         }
 
-        return $this->algorithmsInstance[$alias];
+        return $this->algorithms[$alias];
     }
 
     /**
@@ -91,5 +98,20 @@ trait AlgorithmFactoryTrait
         return array_map(function ($alias) {
             return $this->createAlgorithm($alias);
         }, $aliases);
+    }
+
+    /**
+     * @param array $alg
+     * @return static
+     */
+    public function withAlgorithm(...$alg)
+    {
+        if (is_array($alg[0])) {
+            $alg = $alg[0];
+        }
+
+        $this->extraAlgorithms = $alg;
+
+        return $this;
     }
 }

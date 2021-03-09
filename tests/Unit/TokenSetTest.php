@@ -8,7 +8,7 @@ use Jose\Component\Core\Util\JsonConverter;
 use Jose\Component\KeyManagement\JWKFactory;
 use Jose\Component\Signature\Serializer\CompactSerializer;
 use OpenIDConnect\Config;
-use OpenIDConnect\Jwt\JwtFactory;
+use OpenIDConnect\Jwt\Factory as JwtFactory;
 use OpenIDConnect\Metadata\ProviderMetadata;
 use OpenIDConnect\TokenSet;
 use Tests\TestCase;

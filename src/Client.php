@@ -16,7 +16,6 @@ use OpenIDConnect\Http\Response\AuthorizationFormPostResponseBuilder;
 use OpenIDConnect\Http\Response\AuthorizationRedirectResponseBuilder;
 use OpenIDConnect\Http\Response\InitiateLogoutFormPostResponseBuilder;
 use OpenIDConnect\Http\Response\InitiateLogoutRedirectResponseBuilder;
-use OpenIDConnect\Jwt\JwtFactory;
 use OpenIDConnect\Jwt\Verifiers\IdTokenVerifier;
 use OpenIDConnect\OAuth2\Grant\AuthorizationCode;
 use OpenIDConnect\OAuth2\Grant\GrantType;
@@ -156,12 +155,7 @@ class Client
 
         // Verify ID Token when exist
         if ($tokenSet->idToken()) {
-            $idTokenVerifier = new IdTokenVerifier(
-                $this->config,
-                new JwtFactory($this->config),
-                $this->clockTolerance()
-            );
-
+            $idTokenVerifier = new IdTokenVerifier($this->config, $this->clockTolerance());
             $idTokenVerifier->verify($tokenSet->idToken());
         }
 
