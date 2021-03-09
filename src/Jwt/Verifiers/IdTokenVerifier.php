@@ -10,6 +10,7 @@ use Jose\Component\Checker\IssuedAtChecker;
 use Jose\Component\Checker\IssuerChecker;
 use Jose\Component\Core\JWKSet;
 use Jose\Component\Core\Util\JsonConverter;
+use OpenIDConnect\Claims;
 use OpenIDConnect\Config;
 use OpenIDConnect\Contracts\JwtVerifier;
 use OpenIDConnect\Exceptions\OpenIDProviderException;
@@ -35,7 +36,7 @@ class IdTokenVerifier implements JwtVerifier
         $this->clockTolerance = $clockTolerance;
     }
 
-    public function verify(string $token, $extraMandatoryClaims = [], $check = []): void
+    public function verify(string $token, $extraMandatoryClaims = [], $check = []): Claims
     {
         $factory = new JwtFactory($this->config);
 
@@ -74,6 +75,8 @@ class IdTokenVerifier implements JwtVerifier
         } catch (Exception $e) {
             throw new RelyingPartyException('Relying party info is invalid: ' . $e->getMessage(), 0, $e);
         }
+
+        return Claims::createFromJwt($jws);
     }
 
     /**

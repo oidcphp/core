@@ -9,6 +9,7 @@ use Jose\Component\Checker\IssuedAtChecker;
 use Jose\Component\Checker\IssuerChecker;
 use Jose\Component\Core\JWKSet;
 use Jose\Component\Core\Util\JsonConverter;
+use OpenIDConnect\Claims;
 use OpenIDConnect\Config;
 use OpenIDConnect\Contracts\JwtVerifier;
 use OpenIDConnect\Exceptions\OpenIDProviderException;
@@ -35,7 +36,7 @@ class LogoutTokenVerifier implements JwtVerifier
         $this->clockTolerance = $clockTolerance;
     }
 
-    public function verify(string $token, $extraMandatoryClaims = [], $check = []): void
+    public function verify(string $token, $extraMandatoryClaims = [], $check = []): Claims
     {
         $factory = new JwtFactory($this->config);
 
@@ -82,6 +83,8 @@ class LogoutTokenVerifier implements JwtVerifier
         if (empty($claims['sub']) && empty($claims['sid'])) {
             throw new RelyingPartyException('No sub and sid both in claims');
         }
+
+        return Claims::createFromJwt($jws);
     }
 
     /**

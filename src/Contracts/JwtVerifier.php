@@ -2,6 +2,8 @@
 
 namespace OpenIDConnect\Contracts;
 
+use OpenIDConnect\Claims;
+
 /**
  * Verify JWT token using Claims class
  *
@@ -13,7 +15,7 @@ interface JwtVerifier
      * @param string $token
      * @param array $extraMandatoryClaims
      * @param array $check
-     * @return void
+     * @return Claims
      */
-    public function verify(string $token, $extraMandatoryClaims = [], $check = []): void;
+    public function verify(string $token, $extraMandatoryClaims = [], $check = []): Claims;
 }
