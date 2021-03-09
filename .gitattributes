@@ -2,6 +2,7 @@
 * text=lf
 
 # Exclude unused files
+/.github export-ignore
 /tests export-ignore
 /.codacy.yml export-ignore
 /.gitattributes export-ignore
