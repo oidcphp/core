@@ -4,11 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Jwt\Verifiers;
 
-use Jose\Component\Core\JWK;
-use Jose\Component\Core\Util\JsonConverter;
-use Jose\Component\Signature\Serializer\CompactSerializer;
 use OpenIDConnect\Config;
-use OpenIDConnect\Jwt\Concerns\AlgorithmFactory;
 use OpenIDConnect\Jwt\Factory as JwtFactory;
 use OpenIDConnect\Jwt\Verifiers\IdTokenVerifier;
 use OpenIDConnect\Jwt\Verifiers\LogoutTokenVerifier;
