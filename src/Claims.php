@@ -201,4 +201,32 @@ class Claims
     {
         return $this->claim('azp');
     }
+
+    /**
+     * @return string
+     */
+    public function events(): string
+    {
+        return $this->claim('sub');
+    }
+
+    /**
+     * Unique identifier for the token
+     *
+     * @return string
+     */
+    public function jti(): string
+    {
+        return $this->claim('sub');
+    }
+
+    /**
+     * Session ID - String identifier for a Session.
+     *
+     * @return string
+     */
+    public function sid(): ?string
+    {
+        return $this->claim('sub');
+    }
 }
