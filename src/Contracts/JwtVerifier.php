@@ -2,7 +2,7 @@
 
 namespace OpenIDConnect\Contracts;
 
-use OpenIDConnect\Claims;
+use OpenIDConnect\Jwt\Claims;
 
 /**
  * Verify JWT token using Claims class

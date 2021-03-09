@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OpenIDConnect;
 
 use JsonSerializable;
+use OpenIDConnect\Jwt\Claims;
 use OpenIDConnect\Traits\ClockTolerance;
 use OpenIDConnect\Traits\ConfigAwareTrait;
 use OpenIDConnect\Traits\ParameterTrait;

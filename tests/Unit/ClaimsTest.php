@@ -4,7 +4,7 @@ namespace Tests\Unit;
 
 use Base64Url\Base64Url;
 use InvalidArgumentException;
-use OpenIDConnect\Claims;
+use OpenIDConnect\Jwt\Claims;
 use Tests\TestCase;
 
 class ClaimsTest extends TestCase

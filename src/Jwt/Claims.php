@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace OpenIDConnect;
+namespace OpenIDConnect\Jwt;
 
 use Base64Url\Base64Url;
 use InvalidArgumentException;
 use Jose\Component\Core\JWT;
 use Jose\Component\Core\Util\JsonConverter;
-use Jose\Component\Signature\JWS;
 
 /**
  * JWT Claims
  *
+ * @see https://tools.ietf.org/html/rfc7519#section-4
  * @see https://openid.net/specs/openid-connect-core-1_0.html#IDToken
  * @see https://openid.net/specs/openid-connect-backchannel-1_0.html#LogoutToken
  */
@@ -58,16 +58,6 @@ class Claims
         }
 
         return new self(JsonConverter::decode($payload));
-    }
-
-    /**
-     * @param JWS $jws
-     * @return Claims
-     * @deprecated use createFromJwt()
-     */
-    public static function createFromJWS(JWS $jws): Claims
-    {
-        return self::createFromJwt($jws);
     }
 
     /**
