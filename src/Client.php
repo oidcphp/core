@@ -11,18 +11,14 @@ use MilesChou\Psr\Http\Message\HttpFactoryAwareTrait;
 use OpenIDConnect\Exceptions\OAuth2ClientException;
 use OpenIDConnect\Exceptions\OAuth2ServerException;
 use OpenIDConnect\Http\Authentication\ClientAuthenticationAwareTrait;
-use OpenIDConnect\Http\Request\TokenRequestBuilder;
 use OpenIDConnect\Http\Response\AuthorizationFormPostResponseBuilder;
 use OpenIDConnect\Http\Response\AuthorizationRedirectResponseBuilder;
 use OpenIDConnect\Http\Response\InitiateLogoutFormPostResponseBuilder;
 use OpenIDConnect\Http\Response\InitiateLogoutRedirectResponseBuilder;
 use OpenIDConnect\Jwt\Verifiers\IdTokenVerifier;
-use OpenIDConnect\OAuth2\Grant\AuthorizationCode;
-use OpenIDConnect\OAuth2\Grant\GrantType;
 use OpenIDConnect\Traits\ClockTolerance;
 use OpenIDConnect\Traits\ConfigAwareTrait;
 use Psr\Container\ContainerInterface;
-use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Message\ResponseInterface;
 
 /**
@@ -30,6 +26,8 @@ use Psr\Http\Message\ResponseInterface;
  */
 class Client
 {
+    use Concerns\RevokeAction;
+    use Concerns\TokenAction;
     use ClientAuthenticationAwareTrait;
     use ClockTolerance;
     use ConfigAwareTrait;
@@ -149,7 +147,7 @@ class Client
             throw new OAuth2ClientException($msg);
         }
 
-        $parsed = $this->sendTokenRequest($parameters, $checks);
+        $parsed = $this->token($parameters, $checks);
 
         $tokenSet = new TokenSet($this->config, array_merge($checks, $parsed), $this->clockTolerance());
 
@@ -184,33 +182,6 @@ class Client
         if (null === $this->nonce) {
             $this->nonce = $this->generateRandomString();
         }
-    }
-
-    /**
-     * @param array<mixed> $parameters
-     * @param array<mixed> $checks
-     * @param GrantType|null $grant Default is AuthorizationCode.
-     * @return array
-     */
-    public function sendTokenRequest(
-        array $parameters = [],
-        array $checks = [],
-        GrantType $grant = null
-    ): array {
-        $grant = $grant ?? new AuthorizationCode();
-
-        $request = (new TokenRequestBuilder($this->config, $this->httpClient))
-            ->setClientAuthentication($this->clientAuthentication)
-            ->build(array_merge($parameters, $checks), $grant);
-
-        try {
-            $response = $request->send();
-        } catch (ClientExceptionInterface $e) {
-            $msg = 'Token endpoint return error: ' . $e->getMessage();
-            throw new OAuth2ServerException($msg, 0, $e);
-        }
-
-        return $this->parseTokenResponse($response);
     }
 
     /**
@@ -257,12 +228,12 @@ class Client
     }
 
     /**
-     * Parse response from token endpoint
+     * Parse response
      *
      * @param ResponseInterface $response
      * @return array
      */
-    private function parseTokenResponse(ResponseInterface $response): array
+    private function parseResponse(ResponseInterface $response): array
     {
         $content = (string)$response->getBody();
 

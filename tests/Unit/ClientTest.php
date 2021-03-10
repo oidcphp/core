@@ -21,7 +21,9 @@ class ClientTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->target = new Client($this->createConfig(), new MockClient());
+        $this->target = new Client($this->createConfig([
+            'revocation_endpoint' => 'http://some-revocation-endpoint',
+        ]), new MockClient());
     }
 
     protected function tearDown(): void
@@ -89,7 +91,7 @@ class ClientTest extends TestCase
 
         $this->target->setHttpClient($mockClient);
 
-        $actual = $this->target->sendTokenRequest([
+        $actual = $this->target->token([
             'code' => 'whatever',
             'redirect_uri' => 'whatever',
         ], []);
@@ -115,7 +117,7 @@ class ClientTest extends TestCase
 
         $this->target->setHttpClient($mockClient);
 
-        $this->target->sendTokenRequest([
+        $this->target->token([
             'code' => 'whatever',
             'redirect_uri' => 'whatever',
         ], []);
@@ -132,7 +134,7 @@ class ClientTest extends TestCase
 
         $this->target->setHttpClient($mockClient);
 
-        $this->target->sendTokenRequest([
+        $this->target->token([
             'code' => 'whatever',
             'redirect_uri' => 'whatever',
         ], []);
@@ -149,10 +151,60 @@ class ClientTest extends TestCase
 
         $this->target->setHttpClient($mockClient);
 
-        $this->target->sendTokenRequest([
+        $this->target->token([
             'code' => 'whatever',
             'redirect_uri' => 'whatever',
         ], []);
+    }
+
+    /**
+     * @test
+     */
+    public function shouldNothingWhenCallRevokeWithOkResponse(): void
+    {
+        $mockClient = (new MockClient())->appendResponseWith();
+
+        $this->target->setHttpClient($mockClient);
+
+        $this->target->revoke('some-token', ['extra' => 'some-extra']);
+
+        $this->assertSame('POST', $mockClient->requests[0]->getMethod());
+        $this->assertSame('http://some-revocation-endpoint', (string)$mockClient->requests[0]->getUri());
+    }
+
+    /**
+     * @test
+     */
+    public function shouldThrowOAuth2ServerExceptionWhenCallRevokeWithCatchRequestException(): void
+    {
+        $this->expectException(OAuth2ServerException::class);
+
+        $exception = new class extends \Exception implements NetworkExceptionInterface {
+            public function getRequest(): RequestInterface
+            {
+                return new Request('whatever', 'GET');
+            }
+        };
+
+        $mockClient = (new MockClient())->appendThrowable($exception);
+
+        $this->target->setHttpClient($mockClient);
+
+        $this->target->revoke('whatever');
+    }
+
+    /**
+     * @test
+     */
+    public function shouldThrowOAuth2ServerExceptionWhenCallRevokeWithReturnJsonHasErrorKey(): void
+    {
+        $this->expectException(OAuth2ServerException::class);
+
+        $mockClient = (new MockClient())->appendResponseWithJson(['error' => 'whatever']);
+
+        $this->target->setHttpClient($mockClient);
+
+        $this->target->revoke('whatever');
     }
 
     /**
