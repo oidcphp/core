@@ -21,8 +21,9 @@ OpenID Connect Core Library implementation for PHP.
 
 ## Required Packages
 
-* `guzzlehttp/guzzle=^6.0` for send HTTP request
-* `web-token/jwt-framework=^1.3` for verify JWT
+* PSR-7、PSR-17、PSR-18 implementations for process HTTP request / response.
+* PSR-11 implementation for handle service container.
+* `web-token/jwt-framework=^2.2` for verify JWT.
 
 ## Implemented specs
 
