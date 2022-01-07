@@ -107,7 +107,7 @@ class Claims
      *
      * @return string
      */
-    public function sub(): string
+    public function sub(): ?string
     {
         return $this->claim('sub');
     }
