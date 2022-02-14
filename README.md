@@ -1,23 +1,13 @@
 # OpenID Connect Core Library for PHP
 
 ![tests](https://github.com/oidcphp/core/workflows/tests/badge.svg)
-[![Coverage Status][coverage-svg]][coverage-link]
-[![Codacy Badge][codacy-svg]][codacy-link]
-[![Latest Stable Version][latest-stable-svg]][packagist-link]
-[![Total Downloads][total-download-svg]][packagist-link]
-[![License][license-svg]][license-link]
+[![Coverage Status](https://codecov.io/gh/oidcphp/core/branch/master/graph/badge.svg)](https://codecov.io/gh/oidcphp/core)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/47f59c13758f494fae2522b2fc15cb1b)](https://www.codacy.com/gh/oidcphp/core/dashboard)
+[![Latest Stable Version](https://poser.pugx.org/oidc/core/v/stable)](https://packagist.org/packages/oidc/core)
+[![Total Downloads](https://poser.pugx.org/oidc/core/d/total.svg)](https://packagist.org/packages/oidc/core)
+[![License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://github.com/oidcphp/core/blob/master/LICENSE)
 
 OpenID Connect Core Library implementation for PHP.
-
-[license-svg]: https://img.shields.io/badge/license-MIT-brightgreen.svg
-[license-link]: https://github.com/oidcphp/core/blob/master/LICENSE
-[coverage-svg]: https://codecov.io/gh/oidcphp/core/branch/master/graph/badge.svg
-[coverage-link]: https://codecov.io/gh/oidcphp/core
-[codacy-svg]: https://api.codacy.com/project/badge/Grade/d1d31fd3aa3644839e18bb929a20d993
-[codacy-link]: https://www.codacy.com/manual/oidcphp/core
-[latest-stable-svg]: https://poser.pugx.org/oidc/core/v/stable
-[total-download-svg]: https://poser.pugx.org/oidc/core/d/total.svg
-[packagist-link]: https://packagist.org/packages/oidc/core
 
 ## Required Packages
 
@@ -27,13 +17,9 @@ OpenID Connect Core Library implementation for PHP.
 
 ## Implemented specs
 
-* [OpenID Connect Core 1.0][spec-openid-core]
-* [OpenID Connect Discovery 1.0][spec-openid-discovery]
-* [RFC 6749 - The OAuth 2.0 Authorization Framework][spec-rfc6749]
-
-[spec-openid-core]: https://openid.net/specs/openid-connect-core-1_0.html
-[spec-openid-discovery]: https://openid.net/specs/openid-connect-discovery-1_0.html
-[spec-rfc6749]: https://tools.ietf.org/html/rfc6749
+* [OpenID Connect Core 1.0](https://openid.net/specs/openid-connect-core-1_0.html)
+* [OpenID Connect Discovery 1.0](https://openid.net/specs/openid-connect-discovery-1_0.html)
+* [RFC 6749 - The OAuth 2.0 Authorization Framework](https://tools.ietf.org/html/rfc6749)
 
 ## References
 
