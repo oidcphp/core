@@ -23,11 +23,13 @@ OpenID Connect Core Library implementation for PHP.
 
 ## References
 
-### OpenID Connect Discovery examples
+### OpenID Connect / OAuth 2.0 Discovery examples
 
-| IdP | well known |
+| IdP | well known link |
 | --- | --- |
 | [Apple ID](https://developer.apple.com/sign-in-with-apple/) | [Discovery](https://appleid.apple.com/.well-known/openid-configuration) |
+| [Facebook Limit Login](https://developers.facebook.com/docs/facebook-login/limited-login/token/) | [Discovery](https://www.facebook.com/.well-known/openid-configuration/) |
 | [Google](https://developers.google.com/identity/protocols/OpenIDConnect) | [Discovery](https://accounts.google.com/.well-known/openid-configuration) |
-| [Line](https://developers.line.biz/en/docs/line-login/web/integrate-line-login/) | [Discovery](https://access.line.me/.well-known/openid-configuration) |
+| [LINE](https://developers.line.biz/en/docs/line-login/web/integrate-line-login/) | [Discovery](https://access.line.me/.well-known/openid-configuration) |
+| [LinkedIn](https://www.linkedin.com/) | [Discovery](https://www.linkedin.com/oauth/.well-known/openid-configuration) |
 | [Office 365](https://www.office.com/) | [Discovery](https://login.microsoftonline.com/common/.well-known/openid-configuration) |
