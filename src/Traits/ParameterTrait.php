@@ -15,7 +15,7 @@ trait ParameterTrait
     protected static $snakeCache = [];
 
     /**
-     * @var array<mixed>
+     * @var array
      */
     protected $parameters = [];
 
@@ -45,7 +45,7 @@ trait ParameterTrait
 
     /**
      * @param string $name
-     * @param array<mixed> $arguments
+     * @param array $arguments
      * @return mixed
      */
     public function __call($name, $arguments)
@@ -69,9 +69,6 @@ trait ParameterTrait
         return $this;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function assertHasKey($key): void
     {
         if (!$this->has($key)) {
@@ -79,9 +76,6 @@ trait ParameterTrait
         }
     }
 
-    /**
-     * @inheritDoc
-     */
     public function assertHasKeys(array $keys): void
     {
         foreach ($keys as $key) {
@@ -89,17 +83,11 @@ trait ParameterTrait
         }
     }
 
-    /**
-     * @inheritDoc
-     */
     public function get($key, $default = null)
     {
         return $this->parameters[$key] ?? $default;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function has($key): bool
     {
         return isset($this->parameters[$key]);
@@ -113,9 +101,6 @@ trait ParameterTrait
         return $this->toArray();
     }
 
-    /**
-     * @inheritDoc
-     */
     public function merge(array $parameters)
     {
         $this->parameters = array_merge($this->parameters, $parameters);
@@ -123,9 +108,6 @@ trait ParameterTrait
         return $this;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function require($key)
     {
         $this->assertHasKey($key);
@@ -133,17 +115,11 @@ trait ParameterTrait
         return $this->get($key);
     }
 
-    /**
-     * @inheritDoc
-     */
     public function toArray(): array
     {
         return $this->parameters;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function with($key, $value)
     {
         $clone = clone $this;
