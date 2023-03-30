@@ -12,12 +12,12 @@ trait ParameterTrait
     /**
      * @var array<string>
      */
-    protected static $snakeCache = [];
+    protected static array $snakeCache = [];
 
     /**
      * @var array
      */
-    protected $parameters = [];
+    protected array $parameters = [];
 
     /**
      * Convert a string to snake case
@@ -48,7 +48,7 @@ trait ParameterTrait
      * @param array $arguments
      * @return mixed
      */
-    public function __call($name, $arguments)
+    public function __call(string $name, array $arguments)
     {
         $key = static::snake($name);
 
@@ -96,7 +96,7 @@ trait ParameterTrait
     /**
      * @inheritDoc
      */
-    public function jsonSerialize()
+    public function jsonSerialize(): mixed
     {
         return $this->toArray();
     }

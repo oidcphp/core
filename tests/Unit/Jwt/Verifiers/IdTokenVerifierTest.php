@@ -38,7 +38,7 @@ class IdTokenVerifierTest extends TestCase
         $this->target = null;
     }
 
-    public function validPayload(): iterable
+    public static function validPayload(): iterable
     {
         yield [
             [

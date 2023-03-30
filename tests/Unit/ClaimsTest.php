@@ -9,7 +9,7 @@ use Tests\TestCase;
 
 class ClaimsTest extends TestCase
 {
-    public function invalidToken(): iterable
+    public static function invalidToken(): iterable
     {
         yield [''];
         yield ['0'];

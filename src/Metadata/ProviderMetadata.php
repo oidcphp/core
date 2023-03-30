@@ -43,7 +43,7 @@ class ProviderMetadata implements JsonSerializable
     /**
      * @var JwkSet
      */
-    private $jwkSet;
+    private JwkSet $jwkSet;
 
     /**
      * @param array $metadata

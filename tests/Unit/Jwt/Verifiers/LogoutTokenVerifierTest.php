@@ -39,7 +39,7 @@ class LogoutTokenVerifierTest extends TestCase
         $this->target = null;
     }
 
-    public function validPayload(): iterable
+    public static function validPayload(): iterable
     {
         yield [
             [
@@ -94,7 +94,7 @@ class LogoutTokenVerifierTest extends TestCase
         );
     }
 
-    public function invalidPayload(): iterable
+    public static function invalidPayload(): iterable
     {
         // Invalid iss
         yield [

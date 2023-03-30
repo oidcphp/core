@@ -21,7 +21,7 @@ check:
 
 .PHONY: test
 test: clean check
-	phpdbg -qrr vendor/bin/phpunit
+	php -d xdebug.mode=coverage vendor/bin/phpunit
 
 .PHONY: coverage
 coverage: test
