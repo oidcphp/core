@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace OpenIDConnect\Jwt;
 
-use Base64Url\Base64Url;
 use InvalidArgumentException;
 use Jose\Component\Core\JWT;
 use Jose\Component\Core\Util\JsonConverter;
+use ParagonIE\ConstantTime\Base64UrlSafe;
 
 /**
  * JWT Claims
@@ -36,7 +36,7 @@ class Claims
         }
 
         $claims = json_decode(
-            Base64Url::decode($parts[1]),
+            Base64UrlSafe::decode($parts[1]),
             true,
             512,
             JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE

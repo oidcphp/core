@@ -2,9 +2,9 @@
 
 namespace Tests\Unit;
 
-use Base64Url\Base64Url;
 use InvalidArgumentException;
 use OpenIDConnect\Jwt\Claims;
+use ParagonIE\ConstantTime\Base64UrlSafe;
 use Tests\TestCase;
 
 class ClaimsTest extends TestCase
@@ -55,7 +55,7 @@ class ClaimsTest extends TestCase
      */
     public function shouldBeOkWhenParseLogoutToken(): void
     {
-        $payload = Base64Url::encode(json_encode([
+        $payload = Base64UrlSafe::encodeUnpadded(json_encode([
             'aud' => 'some-aud',
             'iss' => 'some-iss',
             'iat' => 1615284779,
