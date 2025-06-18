@@ -4,7 +4,6 @@ namespace Tests\Unit;
 
 use InvalidArgumentException;
 use OpenIDConnect\Jwt\Claims;
-use ParagonIE\ConstantTime\Base64UrlSafe;
 use Tests\TestCase;
 
 class ClaimsTest extends TestCase
@@ -55,17 +54,6 @@ class ClaimsTest extends TestCase
      */
     public function shouldBeOkWhenParseLogoutToken(): void
     {
-        $payload = Base64UrlSafe::encodeUnpadded(json_encode([
-            'aud' => 'some-aud',
-            'iss' => 'some-iss',
-            'iat' => 1615284779,
-            'jti' => 'some-jti',
-            'sid' => 'some-sid',
-            'events' => [
-                'http://schemas.openid.net/event/backchannel-logout' => [],
-            ],
-        ]));
-
         $token = 'eyJhbGciOiJSUzI1NiJ9.eyJhdWQiOiJzb21lLWF1ZCIsImlzcyI6InNvbWUtaXNzIiwiaWF0IjoxNjE1Mjg0Nzc5LCJqdGkiOiJzb21lLWp0aSIsInNpZCI6InNvbWUtc2lkIiwiZXZlbnRzIjp7Imh0dHA6XC9cL3NjaGVtYXMub3BlbmlkLm5ldFwvZXZlbnRcL2JhY2tjaGFubmVsLWxvZ291dCI6W119fQ.';
 
         $actual = Claims::createFromJwsString($token);

@@ -16,7 +16,7 @@ trait TokenAction
      * @param GrantType|null $grant Default is AuthorizationCode.
      * @return array
      */
-    public function token(array $parameters = [], array $checks = [], GrantType $grant = null): array
+    public function token(array $parameters = [], array $checks = [], ?GrantType $grant = null): array
     {
         $grant = $grant ?? new AuthorizationCode();
 

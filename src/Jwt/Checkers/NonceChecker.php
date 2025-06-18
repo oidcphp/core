@@ -19,7 +19,7 @@ class NonceChecker implements ClaimChecker
     /**
      * @param string|null $nonce
      */
-    public function __construct(string $nonce = null)
+    public function __construct(?string $nonce = null)
     {
         $this->nonce = $nonce;
     }
