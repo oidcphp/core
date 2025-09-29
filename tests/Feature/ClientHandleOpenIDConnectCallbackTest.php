@@ -45,7 +45,7 @@ class ClientHandleOpenIDConnectCallbackTest extends TestCase
             $this->createFakeTokenSetParameter(['id_token' => $expectedIdToken])
         );
 
-        $target = new Client(new Config($providerMetadata, $clientMetadata), $mockClient);
+        $target = new Client(new Config($providerMetadata, $clientMetadata), $mockClient, $this->createClock());
 
         $actual = $target->handleCallback([
             'code' => 'some-code',
@@ -101,7 +101,7 @@ class ClientHandleOpenIDConnectCallbackTest extends TestCase
             $this->createFakeTokenSetParameter(['id_token' => (new CompactSerializer())->serialize($jws)])
         );
 
-        $target = new Client(new Config($providerMetadata, $clientMetadata), $mockClient);
+        $target = new Client(new Config($providerMetadata, $clientMetadata), $mockClient, $this->createClock());
 
         $actual = $target->handleCallback([
             'code' => 'some-code',

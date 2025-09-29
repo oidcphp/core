@@ -31,7 +31,7 @@ class LogoutTokenVerifierTest extends TestCase
             'client_id' => 'some-aud',
         ]);
 
-        $this->target = new LogoutTokenVerifier($this->config);
+        $this->target = new LogoutTokenVerifier($this->config, $this->createClock());
     }
 
     protected function tearDown(): void

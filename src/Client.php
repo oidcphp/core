@@ -18,6 +18,7 @@ use OpenIDConnect\Http\Response\InitiateLogoutRedirectResponseBuilder;
 use OpenIDConnect\Jwt\Verifiers\IdTokenVerifier;
 use OpenIDConnect\Traits\ClockTolerance;
 use OpenIDConnect\Traits\ConfigAwareTrait;
+use Psr\Clock\ClockInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -52,11 +53,13 @@ class Client
     /**
      * @param Config $config
      * @param HttpClientInterface $httpClient
+     * @param ClockInterface $clock
      */
-    public function __construct(Config $config, HttpClientInterface $httpClient)
+    public function __construct(Config $config, HttpClientInterface $httpClient, ClockInterface $clock)
     {
         $this->setConfig($config);
         $this->setHttpClient($httpClient);
+        $this->clock = $clock;
     }
 
     /**
@@ -153,7 +156,7 @@ class Client
 
         // Verify ID Token when exist
         if ($tokenSet->idToken()) {
-            $idTokenVerifier = new IdTokenVerifier($this->config, $this->clockTolerance());
+            $idTokenVerifier = new IdTokenVerifier($this->config, $this->clock, $this->clockTolerance());
             $idTokenVerifier->verify($tokenSet->idToken());
         }
 

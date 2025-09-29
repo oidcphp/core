@@ -30,7 +30,7 @@ class IdTokenVerifierTest extends TestCase
             'client_id' => 'some-aud',
         ]);
 
-        $this->target = new IdTokenVerifier($this->config);
+        $this->target = new IdTokenVerifier($this->config, $this->createClock());
     }
 
     protected function tearDown(): void
