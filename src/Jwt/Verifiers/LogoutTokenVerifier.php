@@ -20,6 +20,7 @@ use OpenIDConnect\Jwt\Claims;
 use OpenIDConnect\Jwt\Factory as JwtFactory;
 use OpenIDConnect\Traits\ClockTolerance;
 use OpenIDConnect\Traits\ConfigAwareTrait;
+use Psr\Clock\ClockInterface;
 use UnexpectedValueException;
 
 /**
@@ -30,9 +31,10 @@ class LogoutTokenVerifier implements JwtVerifier
     use ClockTolerance;
     use ConfigAwareTrait;
 
-    public function __construct(Config $config, $clockTolerance = 10)
+    public function __construct(Config $config, ClockInterface $clock, $clockTolerance = 10)
     {
         $this->config = $config;
+        $this->clock = $clock;
         $this->clockTolerance = $clockTolerance;
     }
 
@@ -98,7 +100,7 @@ class LogoutTokenVerifier implements JwtVerifier
         //     validated in ID Tokens.
         $builder->add(AudienceChecker::class, $this->config->requireClientMetadata('client_id'))
             ->add(IssuerChecker::class, [$this->config->requireProviderMetadata('issuer')])
-            ->add(IssuedAtChecker::class, $this->clockTolerance());
+            ->add(IssuedAtChecker::class, $this->clock, $this->clockTolerance());
 
         // 5.  Verify that the Logout Token contains an events Claim whose
         //     value is JSON object containing the member name

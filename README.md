@@ -13,7 +13,8 @@ OpenID Connect Core Library implementation for PHP.
 
 * PSR-7、PSR-17、PSR-18 implementations for process HTTP request / response.
 * PSR-11 implementation for handle service container.
-* `web-token/jwt-framework=^2.2` for verify JWT.
+* PSR-20 implementation for create datetime instance.
+* `web-token/jwt-framework=^4.0` for verify JWT.
 
 ## Implemented specs
 

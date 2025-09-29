@@ -18,15 +18,16 @@
         "issues": "https://github.com/oidcphp/core/issues"
     },
     "require": {
-        "php": "^8.1",
+        "php": "^8.2",
         "ext-json": "*",
         "mileschou/psr": "^2.0",
         "paragonie/constant_time_encoding": "^2.6 | ^3",
+        "psr/clock": "^1.0",
         "psr/container": "^1.0 | ^2.0",
         "psr/http-client": "^1.0",
         "psr/http-factory": "^1.0",
         "psr/http-message": "^1.0 | ^2.0",
-        "web-token/jwt-library": "^3.3"
+        "web-token/jwt-library": "^4.0"
     },
     "suggest": {
         "laminas/laminas-diactoros": "Require if use Laravel and Laminas diactoros"

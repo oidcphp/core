@@ -2,8 +2,15 @@
 
 namespace OpenIDConnect\Traits;
 
+use Psr\Clock\ClockInterface;
+
 trait ClockTolerance
 {
+    /**
+     * @var ClockInterface
+     */
+    private $clock;
+
     /**
      * @var int
      */

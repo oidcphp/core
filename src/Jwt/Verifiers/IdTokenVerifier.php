@@ -20,6 +20,7 @@ use OpenIDConnect\Jwt\Claims;
 use OpenIDConnect\Jwt\Factory as JwtFactory;
 use OpenIDConnect\Traits\ClockTolerance;
 use OpenIDConnect\Traits\ConfigAwareTrait;
+use Psr\Clock\ClockInterface;
 use UnexpectedValueException;
 
 /**
@@ -30,9 +31,10 @@ class IdTokenVerifier implements JwtVerifier
     use ClockTolerance;
     use ConfigAwareTrait;
 
-    public function __construct(Config $config, $clockTolerance = 10)
+    public function __construct(Config $config, ClockInterface $clock, $clockTolerance = 10)
     {
         $this->config = $config;
+        $this->clock = $clock;
         $this->clockTolerance = $clockTolerance;
     }
 
@@ -83,7 +85,7 @@ class IdTokenVerifier implements JwtVerifier
      * @param array $check
      * @return ClaimCheckerManager
      */
-    private function createClaimCheckerManager($check = []): ClaimCheckerManager
+    private function createClaimCheckerManager(array $check = []): ClaimCheckerManager
     {
         $builder = new ClaimCheckerManagerBuilder();
 
@@ -104,13 +106,13 @@ class IdTokenVerifier implements JwtVerifier
 
         // 9.  The current time MUST be before the time represented by the exp
         //     Claim.
-        $builder->add(ExpirationTimeChecker::class, $this->clockTolerance());
+        $builder->add(ExpirationTimeChecker::class, $this->clock, $this->clockTolerance());
 
         // 10. The iat Claim can be used to reject tokens that were issued too
         //     far away from the current time, limiting the amount of time that
         //     nonces need to be stored to prevent attacks. The acceptable
         //     range is Client specific.
-        $builder->add(IssuedAtChecker::class, $this->clockTolerance());
+        $builder->add(IssuedAtChecker::class, $this->clock, $this->clockTolerance());
 
         // 11. If a nonce value was sent in the Authentication Request, a nonce
         //     Claim MUST be present and its value checked to verify that it is

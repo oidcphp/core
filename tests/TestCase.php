@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use DateTimeImmutable;
 use Jose\Component\Core\JWKSet;
 use Jose\Component\Core\Util\JsonConverter;
 use Jose\Component\KeyManagement\JWKFactory;
@@ -9,14 +10,25 @@ use OpenIDConnect\Config;
 use OpenIDConnect\Metadata\ClientMetadata;
 use OpenIDConnect\Metadata\ProviderMetadata;
 use PHPUnit\Framework\TestCase as BaseTestCase;
+use Psr\Clock\ClockInterface;
 
 class TestCase extends BaseTestCase
 {
+    protected function createClock(): ClockInterface
+    {
+        return new class implements ClockInterface {
+            public function now(): DateTimeImmutable
+            {
+                return new DateTimeImmutable();
+            }
+        };
+    }
+
     protected function createConfig($providerMetadata = [], $clientMetadata = []): Config
     {
         return new Config(
             $this->createProviderMetadata($providerMetadata),
-            $this->createClientMetadata($clientMetadata)
+            $this->createClientMetadata($clientMetadata),
         );
     }
 
@@ -52,7 +64,7 @@ class TestCase extends BaseTestCase
     {
         return new ProviderMetadata(
             $this->createProviderMetadataConfig($overwrite),
-            JsonConverter::decode(JsonConverter::encode($this->createJwkSet($jwks)))
+            JsonConverter::decode(JsonConverter::encode($this->createJwkSet($jwks))),
         );
     }
 
