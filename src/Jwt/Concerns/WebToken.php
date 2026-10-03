@@ -23,7 +23,7 @@ trait WebToken
     public function createAlgorithmManager(): AlgorithmManager
     {
         return new AlgorithmManager(
-            $this->createAlgorithms($this->resolveAlgorithms())
+            $this->createAlgorithms($this->resolveSupportedAlgorithms())
         );
     }
 
@@ -39,7 +39,7 @@ trait WebToken
         }
 
         return new HeaderCheckerManager([
-            new AlgorithmChecker($this->resolveAlgorithms()),
+            new AlgorithmChecker($this->resolveSupportedAlgorithms()),
         ], $tokenTypesSupport);
     }
 
@@ -86,4 +86,16 @@ trait WebToken
      * @return array
      */
     abstract protected function resolveAlgorithms(): array;
+
+    /**
+     * The provider may announce the algorithms that is unknown or not installed, ignore them.
+     *
+     * @return array
+     */
+    protected function resolveSupportedAlgorithms(): array
+    {
+        return array_values(array_filter($this->resolveAlgorithms(), function ($alias) {
+            return $this->hasAlgorithm($alias);
+        }));
+    }
 }

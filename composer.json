@@ -29,7 +29,9 @@
         "web-token/jwt-library": "^3.3"
     },
     "suggest": {
-        "laminas/laminas-diactoros": "Require if use Laravel and Laminas diactoros"
+        "laminas/laminas-diactoros": "Require if use Laravel and Laminas diactoros",
+        "spomky-labs/aes-key-wrap": "Require if use AES Key Wrap algorithms, e.g. A128KW, ECDH-ES+A128KW or PBES2-HS256+A128KW",
+        "web-token/jwt-experimental": "Require if use experimental algorithms, e.g. RSA-OAEP-384 or ES256K"
     },
     "require-dev": {
         "illuminate/container": "^6 | ^7 | ^8 | ^9 | ^10",
@@ -37,6 +39,7 @@
         "laminas/laminas-diactoros": "^3",
         "phpunit/phpunit": "^9.6",
         "slevomat/coding-standard": "^8.19",
+        "spomky-labs/aes-key-wrap": "^7.0",
         "squizlabs/php_codesniffer": "^3.7",
         "symfony/var-dumper": "^5.4 | ^6",
         "symfony/yaml": "^5.4 | ^6"
