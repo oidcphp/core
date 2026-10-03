@@ -32,7 +32,7 @@
     "suggest": {
         "laminas/laminas-diactoros": "Require if use Laravel and Laminas diactoros",
         "spomky-labs/aes-key-wrap": "Require if use AES Key Wrap algorithms, e.g. A128KW, ECDH-ES+A128KW or PBES2-HS256+A128KW",
-        "web-token/jwt-experimental": "Require if use experimental algorithms, e.g. RSA-OAEP-384 or ES256K"
+        "web-token/jwt-experimental": "Require if use experimental algorithms, e.g. RSA-OAEP-384 or ES256K, it needs PHP 8.2+ and web-token/jwt-library ^4"
     },
     "require-dev": {
         "illuminate/container": "^6 | ^7 | ^8 | ^9 | ^10",
