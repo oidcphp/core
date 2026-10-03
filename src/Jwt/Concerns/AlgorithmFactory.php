@@ -4,18 +4,19 @@ namespace OpenIDConnect\Jwt\Concerns;
 
 use Jose\Component\Core\Algorithm;
 use OutOfRangeException;
+use Throwable;
 
 trait AlgorithmFactory
 {
     /**
-     * @var array
+     * @var Algorithm[]
      */
     private $algorithms = [];
 
     /**
-     * Extra algorithms
+     * Extra algorithms, the key is algorithm name
      *
-     * @var array
+     * @var Algorithm[]
      */
     private $extraAlgorithms = [];
 
@@ -27,53 +28,11 @@ trait AlgorithmFactory
      */
     public function createAlgorithm(string $alias): Algorithm
     {
-        static $aliases = [
-            // See https://tools.ietf.org/html/rfc7518#section-3.1
-            'ES256' => 'Jose\\Component\\Signature\\Algorithm\\ES256',
-            'ES256K' => 'Jose\\Component\\Signature\\Algorithm\\ES256K',
-            'ES384' => 'Jose\\Component\\Signature\\Algorithm\\ES384',
-            'ES512' => 'Jose\\Component\\Signature\\Algorithm\\ES512',
-            'HS1' => 'Jose\\Component\\Signature\\Algorithm\\HS1',
-            'HS256' => 'Jose\\Component\\Signature\\Algorithm\\HS256',
-            'HS256/64' => 'Jose\\Component\\Signature\\Algorithm\\HS256_64',
-            'HS384' => 'Jose\\Component\\Signature\\Algorithm\\HS384',
-            'HS512' => 'Jose\\Component\\Signature\\Algorithm\\HS512',
-            'OKP' => 'Jose\\Component\\Signature\\Algorithm\\EdDSA',
-            'PS256' => 'Jose\\Component\\Signature\\Algorithm\\PS256',
-            'PS384' => 'Jose\\Component\\Signature\\Algorithm\\PS384',
-            'PS512' => 'Jose\\Component\\Signature\\Algorithm\\PS512',
-            'RS1' => 'Jose\\Component\\Signature\\Algorithm\\RS1',
-            'RS256' => 'Jose\\Component\\Signature\\Algorithm\\RS256',
-            'RS384' => 'Jose\\Component\\Signature\\Algorithm\\RS384',
-            'RS512' => 'Jose\\Component\\Signature\\Algorithm\\RS512',
-            'none' => 'Jose\\Component\\Signature\\Algorithm\\None',
+        if (isset($this->extraAlgorithms[$alias])) {
+            return $this->extraAlgorithms[$alias];
+        }
 
-            // See https://tools.ietf.org/html/rfc7518#section-4.1
-            'RSA1_5' => 'Jose\\Component\\Encryption\\Algorithm\\KeyEncryption\\RSA15',
-            'RSA-OAEP' => 'Jose\\Component\\Encryption\\Algorithm\\KeyEncryption\\RSAOAEP',
-            'RSA-OAEP-256' => 'Jose\\Component\\Encryption\\Algorithm\\KeyEncryption\\RSAOAEP256',
-            'A128KW' => 'Jose\\Component\\Encryption\\Algorithm\\KeyEncryption\\A128KW',
-            'A192KW' => 'Jose\\Component\\Encryption\\Algorithm\\KeyEncryption\\A192KW',
-            'A256KW' => 'Jose\\Component\\Encryption\\Algorithm\\KeyEncryption\\A256KW',
-            'ECDH-ES' => 'Jose\\Component\\Encryption\\Algorithm\\KeyEncryption\\ECDHES',
-            'ECDH-ES+A128KW' => 'Jose\\Component\\Encryption\\Algorithm\\KeyEncryption\\ECDHESA128KW',
-            'ECDH-ES+A192KW' => 'Jose\\Component\\Encryption\\Algorithm\\KeyEncryption\\ECDHESA192KW',
-            'ECDH-ES+A256KW' => 'Jose\\Component\\Encryption\\Algorithm\\KeyEncryption\\ECDHESA256KW',
-            'A128GCMKW' => 'Jose\\Component\\Encryption\\Algorithm\\KeyEncryption\\A128GCMKW',
-            'A192GCMKW' => 'Jose\\Component\\Encryption\\Algorithm\\KeyEncryption\\A192GCMKW',
-            'A256GCMKW' => 'Jose\\Component\\Encryption\\Algorithm\\KeyEncryption\\A256GCMKW',
-            'PBES2-HS256+A128KW' => 'Jose\\Component\\Encryption\\Algorithm\\KeyEncryption\\PBES2HS256A128KW',
-            'PBES2-HS384+A192KW' => 'Jose\\Component\\Encryption\\Algorithm\\KeyEncryption\\PBES2HS384A192KW',
-            'PBES2-HS512+A256KW' => 'Jose\\Component\\Encryption\\Algorithm\\KeyEncryption\\PBES2HS512A256KW',
-
-            // See https://tools.ietf.org/html/rfc7518#section-5.1
-            'A128CBC-HS256' => 'Jose\\Component\\Encryption\\Algorithm\\ContentEncryption\\A128CBCHS256',
-            'A192CBC-HS384' => 'Jose\\Component\\Encryption\\Algorithm\\ContentEncryption\\A192CBCHS384',
-            'A256CBC-HS512' => 'Jose\\Component\\Encryption\\Algorithm\\ContentEncryption\\A256CBCHS512',
-            'A128GCM' => 'Jose\\Component\\Encryption\\Algorithm\\ContentEncryption\\A128GCM',
-            'A192GCM' => 'Jose\\Component\\Encryption\\Algorithm\\ContentEncryption\\A192GCM',
-            'A256GCM' => 'Jose\\Component\\Encryption\\Algorithm\\ContentEncryption\\A256GCM',
-        ];
+        $aliases = $this->algorithmAliases();
 
         if (!isset($aliases[$alias])) {
             throw new OutOfRangeException("Algorithm alias '$alias' is not found");
@@ -101,7 +60,36 @@ trait AlgorithmFactory
     }
 
     /**
-     * @param array $alg
+     * Determine the algorithm can be created, it is false when the alias is unknown or the package of the
+     * algorithm is not installed
+     *
+     * @param string $alias
+     * @return bool
+     */
+    public function hasAlgorithm(string $alias): bool
+    {
+        if (isset($this->extraAlgorithms[$alias])) {
+            return true;
+        }
+
+        // Loading the key wrapping classes without spomky-labs/aes-key-wrap is a fatal error and cannot be caught
+        if (str_ends_with($alias, 'KW') && !class_exists('AESKW\\A128KW')) {
+            return false;
+        }
+
+        try {
+            $this->createAlgorithm($alias);
+        } catch (Throwable $e) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Register the algorithm instances, they are prior to the built-in aliases
+     *
+     * @param Algorithm|Algorithm[] ...$alg
      * @return static
      */
     public function withAlgorithm(...$alg)
@@ -110,8 +98,68 @@ trait AlgorithmFactory
             $alg = $alg[0];
         }
 
-        $this->extraAlgorithms = $alg;
+        foreach ($alg as $algorithm) {
+            $this->extraAlgorithms[$algorithm->name()] = $algorithm;
+        }
 
         return $this;
+    }
+
+    /**
+     * @return array
+     */
+    private function algorithmAliases(): array
+    {
+        return [
+            // See https://tools.ietf.org/html/rfc7518#section-3.1
+            'ES256' => 'Jose\\Component\\Signature\\Algorithm\\ES256',
+            'ES256K' => 'Jose\\Experimental\\Signature\\ES256K',
+            'ES384' => 'Jose\\Component\\Signature\\Algorithm\\ES384',
+            'ES512' => 'Jose\\Component\\Signature\\Algorithm\\ES512',
+            'HS1' => 'Jose\\Experimental\\Signature\\HS1',
+            'HS256' => 'Jose\\Component\\Signature\\Algorithm\\HS256',
+            'HS256/64' => 'Jose\\Experimental\\Signature\\HS256_64',
+            'HS384' => 'Jose\\Component\\Signature\\Algorithm\\HS384',
+            'HS512' => 'Jose\\Component\\Signature\\Algorithm\\HS512',
+            'EdDSA' => 'Jose\\Component\\Signature\\Algorithm\\EdDSA',
+            'OKP' => 'Jose\\Component\\Signature\\Algorithm\\EdDSA',
+            'PS256' => 'Jose\\Component\\Signature\\Algorithm\\PS256',
+            'PS384' => 'Jose\\Component\\Signature\\Algorithm\\PS384',
+            'PS512' => 'Jose\\Component\\Signature\\Algorithm\\PS512',
+            'RS1' => 'Jose\\Experimental\\Signature\\RS1',
+            'RS256' => 'Jose\\Component\\Signature\\Algorithm\\RS256',
+            'RS384' => 'Jose\\Component\\Signature\\Algorithm\\RS384',
+            'RS512' => 'Jose\\Component\\Signature\\Algorithm\\RS512',
+            'none' => 'Jose\\Component\\Signature\\Algorithm\\None',
+
+            // See https://tools.ietf.org/html/rfc7518#section-4.1
+            'RSA1_5' => 'Jose\\Component\\Encryption\\Algorithm\\KeyEncryption\\RSA15',
+            'RSA-OAEP' => 'Jose\\Component\\Encryption\\Algorithm\\KeyEncryption\\RSAOAEP',
+            'RSA-OAEP-256' => 'Jose\\Component\\Encryption\\Algorithm\\KeyEncryption\\RSAOAEP256',
+            'RSA-OAEP-384' => 'Jose\\Experimental\\KeyEncryption\\RSAOAEP384',
+            'RSA-OAEP-512' => 'Jose\\Experimental\\KeyEncryption\\RSAOAEP512',
+            'A128KW' => 'Jose\\Component\\Encryption\\Algorithm\\KeyEncryption\\A128KW',
+            'A192KW' => 'Jose\\Component\\Encryption\\Algorithm\\KeyEncryption\\A192KW',
+            'A256KW' => 'Jose\\Component\\Encryption\\Algorithm\\KeyEncryption\\A256KW',
+            'dir' => 'Jose\\Component\\Encryption\\Algorithm\\KeyEncryption\\Dir',
+            'ECDH-ES' => 'Jose\\Component\\Encryption\\Algorithm\\KeyEncryption\\ECDHES',
+            'ECDH-ES+A128KW' => 'Jose\\Component\\Encryption\\Algorithm\\KeyEncryption\\ECDHESA128KW',
+            'ECDH-ES+A192KW' => 'Jose\\Component\\Encryption\\Algorithm\\KeyEncryption\\ECDHESA192KW',
+            'ECDH-ES+A256KW' => 'Jose\\Component\\Encryption\\Algorithm\\KeyEncryption\\ECDHESA256KW',
+            'A128GCMKW' => 'Jose\\Component\\Encryption\\Algorithm\\KeyEncryption\\A128GCMKW',
+            'A192GCMKW' => 'Jose\\Component\\Encryption\\Algorithm\\KeyEncryption\\A192GCMKW',
+            'A256GCMKW' => 'Jose\\Component\\Encryption\\Algorithm\\KeyEncryption\\A256GCMKW',
+            'PBES2-HS256+A128KW' => 'Jose\\Component\\Encryption\\Algorithm\\KeyEncryption\\PBES2HS256A128KW',
+            'PBES2-HS384+A192KW' => 'Jose\\Component\\Encryption\\Algorithm\\KeyEncryption\\PBES2HS384A192KW',
+            'PBES2-HS512+A256KW' => 'Jose\\Component\\Encryption\\Algorithm\\KeyEncryption\\PBES2HS512A256KW',
+
+            // See https://tools.ietf.org/html/rfc7518#section-5.1
+            'A128CBC-HS256' => 'Jose\\Component\\Encryption\\Algorithm\\ContentEncryption\\A128CBCHS256',
+            'A192CBC-HS384' => 'Jose\\Component\\Encryption\\Algorithm\\ContentEncryption\\A192CBCHS384',
+            'A256CBC-HS512' => 'Jose\\Component\\Encryption\\Algorithm\\ContentEncryption\\A256CBCHS512',
+            'A128GCM' => 'Jose\\Component\\Encryption\\Algorithm\\ContentEncryption\\A128GCM',
+            'A192GCM' => 'Jose\\Component\\Encryption\\Algorithm\\ContentEncryption\\A192GCM',
+            'A256GCM' => 'Jose\\Component\\Encryption\\Algorithm\\ContentEncryption\\A256GCM',
+        ];
     }
 }
