@@ -6,13 +6,12 @@ use MilesChou\Psr\Http\Client\Testing\MockClient;
 use MilesChou\Psr\Http\Message\Testing\TestRequest;
 use OpenIDConnect\Http\Request\TokenRequestBuilder;
 use OpenIDConnect\OAuth2\Grant\AuthorizationCode;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class TokenRequestBuilderTest extends TestCase
 {
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldReturnCorrectRequestInstance(): void
     {
         $target = new TokenRequestBuilder($this->createConfigWithClientMetadata([

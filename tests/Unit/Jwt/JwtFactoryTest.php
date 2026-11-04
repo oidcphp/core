@@ -13,13 +13,12 @@ use Jose\Component\Signature\Algorithm\RS256;
 use Jose\Component\Signature\Serializer\CompactSerializer;
 use OpenIDConnect\Jwt\Factory as JwtFactory;
 use OutOfRangeException;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class JwtFactoryTest extends TestCase
 {
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldThrowExceptionWhenAlgorithmIsNotDefine(): void
     {
         $this->expectException(OutOfRangeException::class);
@@ -34,9 +33,7 @@ class JwtFactoryTest extends TestCase
         $this->assertInstanceOf(ES256::class, $actual->get('ES256'));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldReturnAlgorithmManagerContainAlgorithms(): void
     {
         $target = new JwtFactory($this->createConfig([
@@ -49,9 +46,7 @@ class JwtFactoryTest extends TestCase
         $this->assertInstanceOf(ES256::class, $actual->get('ES256'));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldReturnAlgorithmManagerContainEncryptionAlgorithms(): void
     {
         $target = new JwtFactory($this->createConfig([
@@ -68,9 +63,7 @@ class JwtFactoryTest extends TestCase
         $this->assertInstanceOf(A192CBCHS384::class, $actual->get('A192CBC-HS384'));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldThrowExceptionWhenAlgorithmIsNotFound(): void
     {
         $this->expectException(InvalidArgumentException::class);
@@ -84,9 +77,7 @@ class JwtFactoryTest extends TestCase
         $actual->get('ES256');
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldReturnHeaderCheckManagerContainAlgorithms(): void
     {
         $target = new JwtFactory($this->createConfig([
@@ -101,9 +92,7 @@ class JwtFactoryTest extends TestCase
         $this->assertNull($actual->checkHeader('ES256'));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldThrowExceptionWhenAlgorithmsNotFoundInHeaderCheckerManager(): void
     {
         $this->expectException(InvalidHeaderException::class);
@@ -118,9 +107,8 @@ class JwtFactoryTest extends TestCase
 
     /**
      * A full flow for sign and verify
-     *
-     * @test
      */
+    #[Test]
     public function shouldBuildJwtAndVerifyAndStringAndSerializeStringAndLoadUsingRS256(): void
     {
         $target = new JwtFactory($this->createConfig());

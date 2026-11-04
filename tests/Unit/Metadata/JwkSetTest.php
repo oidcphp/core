@@ -4,16 +4,14 @@ namespace Tests\Unit\Metadata;
 
 use InvalidArgumentException;
 use OpenIDConnect\Jwt\JwkSet;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
-/**
- * @covers \OpenIDConnect\Jwt\JwkSet
- */
+#[CoversClass(JwkSet::class)]
 class JwkSetTest extends TestCase
 {
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldBeEmptyWhenNoJwk(): void
     {
         $target = new JwkSet();
@@ -21,9 +19,7 @@ class JwkSetTest extends TestCase
         $this->assertSame(['keys' => []], $target->toArray());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldBeInitWhenProvisionJwkSet(): void
     {
         $target = new JwkSet([
@@ -38,9 +34,7 @@ class JwkSetTest extends TestCase
         $this->assertSame(['foo' => 'bar'], $target->get(0));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldSaveOneKeyWhenAddJwk(): void
     {
         $target = new JwkSet();
@@ -50,9 +44,7 @@ class JwkSetTest extends TestCase
         $this->assertSame(['keys' => [['kid' => 'whatever']]], $target->jsonSerialize());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldGetSpecifyKeyWhenCallGet(): void
     {
         $target = new JwkSet();
@@ -61,9 +53,7 @@ class JwkSetTest extends TestCase
         $this->assertSame(['kid' => 'whatever'], $target->get('whatever'));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldUseIntKeyWhenNoKidInJwk(): void
     {
         $target = new JwkSet();
@@ -72,9 +62,7 @@ class JwkSetTest extends TestCase
         $this->assertSame(['foo' => 'bar'], $target->get(0));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldThrowExceptionWhenNoIndex(): void
     {
         $this->expectException(InvalidArgumentException::class);

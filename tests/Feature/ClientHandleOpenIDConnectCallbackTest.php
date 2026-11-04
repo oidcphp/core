@@ -11,13 +11,12 @@ use OpenIDConnect\Client;
 use OpenIDConnect\Config;
 use OpenIDConnect\Exceptions\RelyingPartyException;
 use OpenIDConnect\Jwt\Factory as JwtFactory;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class ClientHandleOpenIDConnectCallbackTest extends TestCase
 {
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldReturnTokenSetWhenEverythingOkay(): void
     {
         $providerMetadata = $this->createProviderMetadata([
@@ -68,9 +67,7 @@ class ClientHandleOpenIDConnectCallbackTest extends TestCase
         $this->assertSame('some-sub', $claims->sub());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldReturnTokenSetWhenNonceIsNotMatch(): void
     {
         $this->expectException(RelyingPartyException::class);

@@ -5,13 +5,12 @@ namespace Tests\Unit\Http\Response;
 use MilesChou\Psr\Http\Client\Testing\MockClient;
 use MilesChou\Psr\Http\Message\Testing\TestResponse;
 use OpenIDConnect\Http\Response\AuthorizationFormPostResponseBuilder;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class AuthorizationFormResponseBuilderTest extends TestCase
 {
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldReturnAuthorizationHtmlWhenCallBuild(): void
     {
         $target = new AuthorizationFormPostResponseBuilder($this->createConfig(), new MockClient());

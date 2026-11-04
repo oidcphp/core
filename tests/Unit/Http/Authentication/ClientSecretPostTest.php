@@ -4,13 +4,12 @@ namespace Tests\Unit\Http\Authentication;
 
 use Laminas\Diactoros\RequestFactory;
 use OpenIDConnect\Http\Authentication\ClientSecretPost;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 class ClientSecretPostTest extends TestCase
 {
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldReturnClientSecretParameter(): void
     {
         $target = new ClientSecretPost('c', 's');
