@@ -11,7 +11,7 @@ This repository implements the Relying Party (client) side of [OpenID Connect Co
 
 Every piece of code should show which part of a specification it implements.
 
-- Link the section in the class or method docblock with `@see`, using the anchor URL of the section, for example `@see https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation` or `@see https://tools.ietf.org/html/rfc6749#section-2.3.1`.
+- Link the section in the class or method docblock with `@link`, using the anchor URL of the section, for example `@link https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation` or `@link https://tools.ietf.org/html/rfc6749#section-2.3.1`.
 - When implementing validation or processing steps, copy the specification text verbatim into line comments right above the code for each step. Keep the step number, spacing, and line breaks of the original text, for example:
 
   ```php
@@ -23,6 +23,12 @@ Every piece of code should show which part of a specification it implements.
   See `src/Jwt/Verifiers/IdTokenVerifier.php` and `src/Jwt/Verifiers/LogoutTokenVerifier.php`.
 - For accessors of claims and metadata, use the definition from the specification as the description, for example `Expiration time on or after which the ID Token MUST NOT be accepted for processing` in `src/Jwt/Claims.php`.
 - When the library makes a decision the specification leaves open, explain it in a separate sentence next to the quote, for example `PHP Server will be a confidential client, so secret is REQUIRED.` in `src/Metadata/ClientMetadata.php`.
+
+## PHPDoc references
+
+- Use `@see` for references to code (FQSEN), such as `@see \OpenIDConnect\Client::handleCallback()`.
+- Use `@link` for references to websites (URI), such as specifications.
+- A description after the reference is not required.
 
 ## Writing
 
