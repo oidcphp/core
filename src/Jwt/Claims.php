@@ -12,9 +12,9 @@ use ParagonIE\ConstantTime\Base64UrlSafe;
 /**
  * JWT Claims
  *
- * @see https://tools.ietf.org/html/rfc7519#section-4
- * @see https://openid.net/specs/openid-connect-core-1_0.html#IDToken
- * @see https://openid.net/specs/openid-connect-backchannel-1_0.html#LogoutToken
+ * @link https://www.rfc-editor.org/rfc/rfc7519.html#section-4
+ * @link https://openid.net/specs/openid-connect-core-1_0.html#IDToken
+ * @link https://openid.net/specs/openid-connect-backchannel-1_0.html#LogoutToken
  */
 class Claims
 {

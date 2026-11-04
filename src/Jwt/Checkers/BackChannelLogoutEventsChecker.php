@@ -8,7 +8,7 @@ use Jose\Component\Checker\ClaimChecker;
 use RuntimeException;
 
 /**
- * @see https://openid.net/specs/openid-connect-backchannel-1_0.html#Validation
+ * @link https://openid.net/specs/openid-connect-backchannel-1_0.html#Validation
  */
 class BackChannelLogoutEventsChecker implements ClaimChecker
 {

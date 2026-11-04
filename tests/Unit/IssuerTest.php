@@ -11,7 +11,7 @@ class IssuerTest extends TestCase
     /**
      * OpenID Connect config from Google
      *
-     * @see https://accounts.google.com/.well-known/openid-configuration
+     * @link https://accounts.google.com/.well-known/openid-configuration
      */
     private const GOOGLE_OPENID_CONNECT_CONFIG = [
         'issuer' => 'https://accounts.google.com',

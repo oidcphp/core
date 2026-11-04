@@ -15,7 +15,7 @@ use OpenIDConnect\Traits\ConfigAwareTrait;
 /**
  * Generate Request for userinfo endpoint
  *
- * @see https://openid.net/specs/openid-connect-core-1_0.html#UserInfoRequest
+ * @link https://openid.net/specs/openid-connect-core-1_0.html#UserInfoRequest
  */
 class UserInfoRequestBuilder
 {

@@ -7,7 +7,7 @@ namespace OpenIDConnect\Jwt;
 use InvalidArgumentException;
 
 /**
- * @see https://tools.ietf.org/html/rfc7517#section-5
+ * @link https://www.rfc-editor.org/rfc/rfc7517.html#section-5
  */
 class JwkSet
 {

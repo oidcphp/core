@@ -23,7 +23,7 @@ use OpenIDConnect\Traits\ConfigAwareTrait;
 use UnexpectedValueException;
 
 /**
- * @see https://openid.net/specs/openid-connect-backchannel-1_0.html#Validation
+ * @link https://openid.net/specs/openid-connect-backchannel-1_0.html#Validation
  */
 class LogoutTokenVerifier implements JwtVerifier
 {

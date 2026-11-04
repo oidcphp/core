@@ -237,7 +237,7 @@ class Client
     {
         $content = (string)$response->getBody();
 
-        // Just using JSON decode, See https://tools.ietf.org/html/rfc6749#section-5.1
+        // Just using JSON decode, See https://www.rfc-editor.org/rfc/rfc6749.html#section-5.1
         $parsed = json_decode($content, true);
 
         if (!is_array($parsed)) {

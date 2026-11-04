@@ -28,7 +28,7 @@ trait AlgorithmFactory
     public function createAlgorithm(string $alias): Algorithm
     {
         static $aliases = [
-            // See https://tools.ietf.org/html/rfc7518#section-3.1
+            // See https://www.rfc-editor.org/rfc/rfc7518.html#section-3.1
             'ES256' => 'Jose\\Component\\Signature\\Algorithm\\ES256',
             'ES256K' => 'Jose\\Component\\Signature\\Algorithm\\ES256K',
             'ES384' => 'Jose\\Component\\Signature\\Algorithm\\ES384',
@@ -48,7 +48,7 @@ trait AlgorithmFactory
             'RS512' => 'Jose\\Component\\Signature\\Algorithm\\RS512',
             'none' => 'Jose\\Component\\Signature\\Algorithm\\None',
 
-            // See https://tools.ietf.org/html/rfc7518#section-4.1
+            // See https://www.rfc-editor.org/rfc/rfc7518.html#section-4.1
             'RSA1_5' => 'Jose\\Component\\Encryption\\Algorithm\\KeyEncryption\\RSA15',
             'RSA-OAEP' => 'Jose\\Component\\Encryption\\Algorithm\\KeyEncryption\\RSAOAEP',
             'RSA-OAEP-256' => 'Jose\\Component\\Encryption\\Algorithm\\KeyEncryption\\RSAOAEP256',
@@ -66,7 +66,7 @@ trait AlgorithmFactory
             'PBES2-HS384+A192KW' => 'Jose\\Component\\Encryption\\Algorithm\\KeyEncryption\\PBES2HS384A192KW',
             'PBES2-HS512+A256KW' => 'Jose\\Component\\Encryption\\Algorithm\\KeyEncryption\\PBES2HS512A256KW',
 
-            // See https://tools.ietf.org/html/rfc7518#section-5.1
+            // See https://www.rfc-editor.org/rfc/rfc7518.html#section-5.1
             'A128CBC-HS256' => 'Jose\\Component\\Encryption\\Algorithm\\ContentEncryption\\A128CBCHS256',
             'A192CBC-HS384' => 'Jose\\Component\\Encryption\\Algorithm\\ContentEncryption\\A192CBCHS384',
             'A256CBC-HS512' => 'Jose\\Component\\Encryption\\Algorithm\\ContentEncryption\\A256CBCHS512',

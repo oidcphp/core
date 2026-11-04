@@ -15,7 +15,7 @@ use OpenIDConnect\Traits\ConfigAwareTrait;
 /**
  * Generate Request for revocation endpoint
  *
- * @see https://tools.ietf.org/html/rfc7009#section-2.1
+ * @link https://www.rfc-editor.org/rfc/rfc7009.html#section-2.1
  */
 class RevokeRequestBuilder
 {
@@ -44,7 +44,7 @@ class RevokeRequestBuilder
             $this->config->requireClientMetadata('client_secret')
         );
 
-        // See https://tools.ietf.org/html/rfc8414#section-2
+        // See https://www.rfc-editor.org/rfc/rfc8414.html#section-2
         $uri = $this->config->requireProviderMetadata('revocation_endpoint');
 
         $request = $this->httpClient->createRequest('POST', $uri)

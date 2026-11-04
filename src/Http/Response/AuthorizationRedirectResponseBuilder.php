@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace OpenIDConnect\Http\Response;
 
 /**
- * @see https://tools.ietf.org/html/rfc6749#section-4.1.1
- * @see https://tools.ietf.org/html/rfc6749#section-4.2.1
+ * @link https://www.rfc-editor.org/rfc/rfc6749.html#section-4.1.1
+ * @link https://www.rfc-editor.org/rfc/rfc6749.html#section-4.2.1
  */
 class AuthorizationRedirectResponseBuilder extends ConfigurableResponseBuilder
 {
