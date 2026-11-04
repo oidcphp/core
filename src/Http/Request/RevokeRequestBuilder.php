@@ -15,7 +15,7 @@ use OpenIDConnect\Traits\ConfigAwareTrait;
 /**
  * Generate Request for revocation endpoint
  *
- * @see https://tools.ietf.org/html/rfc7009#section-2.1
+ * @link https://tools.ietf.org/html/rfc7009#section-2.1
  */
 class RevokeRequestBuilder
 {

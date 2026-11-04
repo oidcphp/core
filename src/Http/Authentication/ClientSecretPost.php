@@ -9,7 +9,7 @@ use OpenIDConnect\Http\Query;
 use Psr\Http\Message\RequestInterface;
 
 /**
- * @see https://tools.ietf.org/html/rfc6749#section-2.3.1
+ * @link https://tools.ietf.org/html/rfc6749#section-2.3.1
  */
 class ClientSecretPost implements ClientAuthentication
 {

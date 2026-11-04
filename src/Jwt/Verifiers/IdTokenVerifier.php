@@ -23,7 +23,7 @@ use OpenIDConnect\Traits\ConfigAwareTrait;
 use UnexpectedValueException;
 
 /**
- * @see https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation
+ * @link https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation
  */
 class IdTokenVerifier implements JwtVerifier
 {

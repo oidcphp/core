@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace OpenIDConnect\Http\Response;
 
 /**
- * @see https://openid.net/specs/openid-connect-rpinitiated-1_0.html#RPLogout
+ * @link https://openid.net/specs/openid-connect-rpinitiated-1_0.html#RPLogout
  */
 class InitiateLogoutRedirectResponseBuilder extends ConfigurableResponseBuilder
 {

@@ -9,7 +9,7 @@ use InvalidArgumentException;
 /**
  * Represents a type of authorization grant.
  *
- * @see https://tools.ietf.org/html/rfc6749#section-1.3
+ * @link https://tools.ietf.org/html/rfc6749#section-1.3
  */
 abstract class GrantType
 {

@@ -22,7 +22,7 @@ trait ParameterTrait
     /**
      * Convert a string to snake case
      *
-     * @see https://github.com/laravel/framework/blob/v6.5.0/src/Illuminate/Support/Str.php#L525-L540
+     * @link https://github.com/laravel/framework/blob/v6.5.0/src/Illuminate/Support/Str.php#L525-L540
      * @param string $str
      * @return string
      */

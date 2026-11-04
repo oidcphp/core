@@ -34,7 +34,7 @@ use OpenIDConnect\Traits\ParameterTrait;
  * @method string|null opPolicyUri() URL that how the client can use the data provided
  * @method string|null opTosUri() URL that about the authorization server's terms of service
  *
- * @see https://tools.ietf.org/html/rfc8414#section-2
+ * @link https://tools.ietf.org/html/rfc8414#section-2
  */
 class ProviderMetadata implements JsonSerializable
 {
