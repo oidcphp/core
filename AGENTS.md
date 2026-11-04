@@ -17,7 +17,6 @@ Every piece of code should show which part of a specification it implements.
   ```php
   // 9.  The current time MUST be before the time represented by the exp
   //     Claim.
-  $builder->add(ExpirationTimeChecker::class, $this->clockTolerance());
   ```
 
   See `src/Jwt/Verifiers/IdTokenVerifier.php` and `src/Jwt/Verifiers/LogoutTokenVerifier.php`.
