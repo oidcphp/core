@@ -31,6 +31,14 @@ Every piece of code should show which part of a specification it implements.
 - A description after the reference is not required.
 - Link RFCs to the RFC Editor HTML page, `https://www.rfc-editor.org/rfc/rfcNNNN.html`, with `#section-X.Y` for a section, such as `https://www.rfc-editor.org/rfc/rfc6749.html#section-2.3.1`. Do not use `tools.ietf.org`, which now redirects to an info page without the section anchor.
 
+## Dependencies
+
+The goal for the 1.x release is that `require` in `composer.json` SHOULD only depend on PSR packages (`psr/*`), besides PHP itself and PHP extensions (`ext-*`).
+
+- Do not add a non-PSR package to `require` without a reason. State the reason in the pull request that adds it, and record it in this section.
+- Packages in `require-dev` are fine, since integration and testing sometimes need them.
+- The current non-PSR packages in `require` are `mileschou/psr`, `paragonie/constant_time_encoding` and `web-token/jwt-library`. Each of them needs a recorded reason, or should be removed before the 1.x release.
+
 ## Writing
 
 - Write everything in the repository and on GitHub in English, including files, commit messages, issues, pull requests, releases, and reports.
