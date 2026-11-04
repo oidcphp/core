@@ -6,7 +6,7 @@ This repository implements the Relying Party (client) side of [OpenID Connect Co
 
 - Treat the specification as the source of truth. Implement every MUST requirement, and do not skip a validation step for convenience.
 - When code implements a specification step, quote the step in a comment and link the section, as `src/Jwt/Verifiers/IdTokenVerifier.php` does for ID Token validation.
-- Conformance is checked by [oidcphp/certification](https://github.com/oidcphp/certification) against the OpenID certification RP tests. A behavior that fails a certification test is a bug in this library.
+- Conformance is checked by [oidcphp/certification](https://github.com/oidcphp/certification) against the OpenID certification RP tests. Investigate a failing certification test as a bug in this library first.
 
 ## Writing
 
