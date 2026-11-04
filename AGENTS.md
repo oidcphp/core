@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This repository implements the Relying Party (client) side of [OpenID Connect Core 1.0](https://openid.net/specs/openid-connect-core-1_0.html) for PHP. The goal is a library whose behavior conforms to the specification, together with the related specifications listed in `README.md`, such as [OpenID Connect Discovery 1.0](https://openid.net/specs/openid-connect-discovery-1_0.html) and [RFC 6749](https://tools.ietf.org/html/rfc6749).
+This repository implements the Relying Party (client) side of [OpenID Connect Core 1.0](https://openid.net/specs/openid-connect-core-1_0.html) for PHP. The goal is a library whose behavior conforms to the specification, together with the related specifications listed in `README.md`, such as [OpenID Connect Discovery 1.0](https://openid.net/specs/openid-connect-discovery-1_0.html) and [RFC 6749](https://www.rfc-editor.org/rfc/rfc6749.html).
 
 - Treat the specification as the source of truth. Implement every MUST requirement, and do not skip a validation step for convenience.
 - Conformance is checked by [oidcphp/certification](https://github.com/oidcphp/certification) against the OpenID certification RP tests. Investigate a failing certification test as a bug in this library first.
@@ -11,7 +11,7 @@ This repository implements the Relying Party (client) side of [OpenID Connect Co
 
 Every piece of code should show which part of a specification it implements.
 
-- Link the section in the class or method docblock with `@link`, using the anchor URL of the section, for example `@link https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation` or `@link https://tools.ietf.org/html/rfc6749#section-2.3.1`.
+- Link the section in the class or method docblock with `@link`, using the anchor URL of the section, for example `@link https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation` or `@link https://www.rfc-editor.org/rfc/rfc6749.html#section-2.3.1`.
 - When implementing validation or processing steps, copy the specification text verbatim into line comments right above the code for each step. Keep the step number, spacing, and line breaks of the original text, for example:
 
   ```php
@@ -29,6 +29,7 @@ Every piece of code should show which part of a specification it implements.
 - Use `@see` for references to code (FQSEN), such as `@see \OpenIDConnect\Client::handleCallback()`.
 - Use `@link` for references to websites (URI), such as specifications.
 - A description after the reference is not required.
+- Link RFCs to the RFC Editor HTML page, `https://www.rfc-editor.org/rfc/rfcNNNN.html`, with `#section-X.Y` for a section, such as `https://www.rfc-editor.org/rfc/rfc6749.html#section-2.3.1`. Do not use `tools.ietf.org`, which now redirects to an info page without the section anchor.
 
 ## Writing
 

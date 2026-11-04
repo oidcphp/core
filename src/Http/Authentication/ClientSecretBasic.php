@@ -10,7 +10,7 @@ use Psr\Http\Message\RequestInterface;
 /**
  * Default method for client authentication
  *
- * @link https://tools.ietf.org/html/rfc6749#section-2.3.1
+ * @link https://www.rfc-editor.org/rfc/rfc6749.html#section-2.3.1
  */
 class ClientSecretBasic implements ClientAuthentication
 {

@@ -32,7 +32,7 @@ class Issuer
      * @param string $uri
      * @return ProviderMetadata
      * @throws ClientExceptionInterface
-     * @link https://tools.ietf.org/html/rfc8414#section-3
+     * @link https://www.rfc-editor.org/rfc/rfc8414.html#section-3
      * @link https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfig
      */
     public function discover(string $uri): ProviderMetadata

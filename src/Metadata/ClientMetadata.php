@@ -10,8 +10,8 @@ use OpenIDConnect\Traits\ParameterTrait;
 /**
  * Client metadata
  *
- * @link https://tools.ietf.org/html/rfc7591#section-2
- * @link https://tools.ietf.org/html/rfc7591#section-3.2.1
+ * @link https://www.rfc-editor.org/rfc/rfc7591.html#section-2
+ * @link https://www.rfc-editor.org/rfc/rfc7591.html#section-3.2.1
  */
 class ClientMetadata implements JsonSerializable
 {

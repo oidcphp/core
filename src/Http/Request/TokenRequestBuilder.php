@@ -16,7 +16,7 @@ use OpenIDConnect\Traits\ConfigAwareTrait;
 /**
  * Generate Request for token endpoint
  *
- * @link https://tools.ietf.org/html/rfc6749#section-3.2
+ * @link https://www.rfc-editor.org/rfc/rfc6749.html#section-3.2
  */
 class TokenRequestBuilder
 {

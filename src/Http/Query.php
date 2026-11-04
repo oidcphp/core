@@ -7,7 +7,7 @@ namespace OpenIDConnect\Http;
 /**
  * General query builder and parser for process query and post body
  *
- * @link https://tools.ietf.org/html/rfc3986
+ * @link https://www.rfc-editor.org/rfc/rfc3986.html
  */
 class Query
 {
