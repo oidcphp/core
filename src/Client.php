@@ -127,6 +127,7 @@ class Client
      * @param array $parameters
      * @param array $checks
      * @return TokenSet
+     * @link https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation
      */
     public function handleCallback(array $parameters, array $checks = []): TokenSet
     {
@@ -147,14 +148,24 @@ class Client
             throw new OAuth2ClientException($msg);
         }
 
-        $parsed = $this->token($parameters, $checks);
+        // The nonce is only used to validate the ID Token, it is not a parameter of the token request.
+        $parsed = $this->token($parameters, array_diff_key($checks, ['nonce' => true]));
 
         $tokenSet = new TokenSet($this->config, array_merge($checks, $parsed), $this->clockTolerance());
 
         // Verify ID Token when exist
         if ($tokenSet->idToken()) {
             $idTokenVerifier = new IdTokenVerifier($this->config, $this->clockTolerance());
-            $idTokenVerifier->verify($tokenSet->idToken());
+
+            // If a nonce value was sent in the Authentication Request, the nonce Claim MUST be present
+            // and its value MUST be the same as the one that was sent.
+            $hasNonce = isset($checks['nonce']);
+
+            $idTokenVerifier->verify(
+                $tokenSet->idToken(),
+                $hasNonce ? ['nonce'] : [],
+                $hasNonce ? ['nonce' => $checks['nonce']] : []
+            );
         }
 
         return $tokenSet;

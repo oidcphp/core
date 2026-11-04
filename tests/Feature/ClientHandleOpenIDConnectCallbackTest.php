@@ -16,6 +16,11 @@ use Tests\TestCase;
 class ClientHandleOpenIDConnectCallbackTest extends TestCase
 {
     /**
+     * @var Config
+     */
+    private $config;
+
+    /**
      * @test
      */
     public function shouldReturnTokenSetWhenEverythingOkay(): void
@@ -111,5 +116,79 @@ class ClientHandleOpenIDConnectCallbackTest extends TestCase
         ]);
 
         $actual->idTokenClaims();
+    }
+
+    /**
+     * @test
+     */
+    public function shouldThrowExceptionWhenNonceClaimIsNotMatch(): void
+    {
+        $this->expectException(RelyingPartyException::class);
+
+        $target = $this->createClientWithIdToken(['nonce' => 'not-the-nonce-you-sent']);
+
+        $target->handleCallback(['code' => 'some-code'], [
+            'redirect_uri' => 'https://someredirect',
+            'nonce' => 'expected-nonce',
+        ]);
+    }
+
+    /**
+     * @test
+     */
+    public function shouldThrowExceptionWhenNonceClaimIsMissingButNonceWasSent(): void
+    {
+        $this->expectException(RelyingPartyException::class);
+
+        $target = $this->createClientWithIdToken([]);
+
+        $target->handleCallback(['code' => 'some-code'], [
+            'redirect_uri' => 'https://someredirect',
+            'nonce' => 'expected-nonce',
+        ]);
+    }
+
+    /**
+     * @test
+     */
+    public function shouldNotSendNonceToTokenEndpoint(): void
+    {
+        $mockClient = $this->createMockClientWithIdToken(['nonce' => 'expected-nonce']);
+
+        $target = new Client($this->config, $mockClient);
+
+        $target->handleCallback(['code' => 'some-code'], [
+            'redirect_uri' => 'https://someredirect',
+            'nonce' => 'expected-nonce',
+        ]);
+
+        $this->assertStringNotContainsString('nonce', (string)$mockClient->testRequest()->getBody());
+    }
+
+    private function createClientWithIdToken(array $claims): Client
+    {
+        $mockClient = $this->createMockClientWithIdToken($claims);
+
+        return new Client($this->config, $mockClient);
+    }
+
+    private function createMockClientWithIdToken(array $claims): MockClient
+    {
+        $providerMetadata = $this->createProviderMetadata(['issuer' => 'some-iss']);
+        $clientMetadata = $this->createClientMetadata(['client_id' => 'some-aud']);
+
+        $this->config = new Config($providerMetadata, $clientMetadata);
+
+        $idToken = (new JwtFactory($this->config))->createSerializeJws(array_merge([
+            'aud' => 'some-aud',
+            'exp' => time() + 3600,
+            'iat' => time(),
+            'iss' => 'some-iss',
+            'sub' => 'some-sub',
+        ], $claims));
+
+        return (new MockClient())->appendResponseWithJson(
+            $this->createFakeTokenSetParameter(['id_token' => $idToken])
+        );
     }
 }
