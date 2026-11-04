@@ -325,6 +325,55 @@ class ClientTest extends TestCase
     /**
      * @test
      */
+    public function shouldSendTokenParametersAndNotSendChecksToTokenEndpointWhenHandleCallback(): void
+    {
+        $mockClient = (new MockClient())->appendResponseWithJson(
+            $this->createFakeTokenSetParameter(['access_token' => 'some-access-token'])
+        );
+
+        $this->target->setHttpClient($mockClient);
+
+        $this->target->handleCallback([
+            'code' => 'some-code',
+            'state' => 'some-state',
+        ], [
+            'state' => 'some-state',
+            'nonce' => 'some-nonce',
+        ], [
+            'redirect_uri' => 'https://someredirect',
+        ]);
+
+        $request = $mockClient->testRequest();
+
+        $request->assertBodyContains('code=some-code');
+        $request->assertBodyContains('redirect_uri=' . rawurlencode('https://someredirect'));
+
+        $body = (string)$request->getBody();
+        $this->assertStringNotContainsString('state', $body);
+        $this->assertStringNotContainsString('nonce', $body);
+    }
+
+    /**
+     * @test
+     */
+    public function shouldStillSendOtherKeysOfChecksToTokenEndpointWhenHandleCallback(): void
+    {
+        $mockClient = (new MockClient())->appendResponseWithJson(
+            $this->createFakeTokenSetParameter(['access_token' => 'some-access-token'])
+        );
+
+        $this->target->setHttpClient($mockClient);
+
+        $this->target->handleCallback(['code' => 'some-code'], [
+            'redirect_uri' => 'https://someredirect',
+        ]);
+
+        $mockClient->testRequest()->assertBodyContains('redirect_uri=' . rawurlencode('https://someredirect'));
+    }
+
+    /**
+     * @test
+     */
     public function shouldReturnAuthorizationUrlWhenCallCreateAuthorizeRedirectResponse(): void
     {
         $actual = $this->target->createAuthorizeRedirectResponse([

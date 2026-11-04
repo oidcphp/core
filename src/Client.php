@@ -124,11 +124,25 @@ class Client
     }
 
     /**
+     * Handle the Authentication Response, and exchange the code for tokens at the Token Endpoint.
+     *
+     * - `$parameters` are the parameters of the Authentication Response sent by the OpenID Provider, e.g. `code`
+     *   and `state`.
+     * - `$checks` are the values the Relying Party sent in the Authentication Request and expects to be given back,
+     *   e.g. `state` and `nonce`. They are only used to validate the response, and are never sent to the Token
+     *   Endpoint.
+     * - `$tokenParameters` are the additional parameters of the Token Request, e.g. `redirect_uri`.
+     *
+     * For backward compatibility, keys other than `state` and `nonce` in `$checks` are still sent to the Token
+     * Endpoint, but it is deprecated. Use `$tokenParameters` instead.
+     *
      * @param array $parameters
      * @param array $checks
+     * @param array $tokenParameters
      * @return TokenSet
+     * @link https://www.rfc-editor.org/rfc/rfc6749.html#section-4.1.3
      */
-    public function handleCallback(array $parameters, array $checks = []): TokenSet
+    public function handleCallback(array $parameters, array $checks = [], array $tokenParameters = []): TokenSet
     {
         if (!isset($parameters['code'])) {
             throw new InvalidArgumentException("'code' missing from the response");
@@ -147,7 +161,14 @@ class Client
             throw new OAuth2ClientException($msg);
         }
 
-        $parsed = $this->token($parameters, $checks);
+        // `state` and `nonce` are for validation only, they are not parameters of the Token Request.
+        $checkOnlyKeys = ['state' => true, 'nonce' => true];
+
+        $parsed = $this->token(array_merge(
+            array_diff_key($parameters, $checkOnlyKeys),
+            array_diff_key($checks, $checkOnlyKeys),
+            $tokenParameters
+        ));
 
         $tokenSet = new TokenSet($this->config, array_merge($checks, $parsed), $this->clockTolerance());
 
