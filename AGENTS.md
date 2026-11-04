@@ -15,8 +15,9 @@ Every piece of code should show which part of a specification it implements.
 - When implementing validation or processing steps, copy the specification text verbatim into line comments right above the code for each step. Keep the step number, spacing, and line breaks of the original text, for example:
 
   ```php
-  // 9.  The current time MUST be before the time represented by the exp
-  //     Claim.
+  // 2.  The Issuer Identifier for the OpenID Provider (which is
+  //     typically obtained during Discovery) MUST exactly match
+  //     the value of the iss (issuer) Claim.
   ```
 
   See `src/Jwt/Verifiers/IdTokenVerifier.php` and `src/Jwt/Verifiers/LogoutTokenVerifier.php`.
