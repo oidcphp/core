@@ -33,8 +33,9 @@ Every piece of code should show which part of a specification it implements.
 
 ## Dependencies
 
-The goal for the 1.x release is that `require` in `composer.json` SHOULD only depend on PSR packages (`psr/*`), besides PHP itself and PHP extensions (`ext-*`).
+The goal for the 1.x release is that `require` in `composer.json` SHOULD only depend on PHP itself and PSR packages (`psr/*`).
 
+- PHP extensions (`ext-*`) that are always available in PHP and cannot be disabled, such as `ext-json` since PHP 8.0, are fine. Other extensions, such as `ext-openssl` or `ext-sodium`, need a reason like non-PSR packages.
 - Do not add a non-PSR package to `require` without a reason. State the reason in the pull request that adds it, and record it in this section.
 - Packages in `require-dev` are fine, since integration and testing sometimes need them.
 - The current non-PSR packages in `require` are `mileschou/psr`, `paragonie/constant_time_encoding` and `web-token/jwt-library`. Each of them needs a recorded reason, or should be removed before the 1.x release.
