@@ -208,11 +208,13 @@ class Client
     }
 
     /**
-     * Initial the authorization parameters
+     * Initial the context of the Authentication Request, which `getState()` and `getNonce()` read from.
+     *
+     * The `state` and `nonce` are random unless they are given, or already initialized.
      *
      * @param array<mixed> $options
      */
-    public function initAuthorizationParameters(array $options = []): void
+    public function initAuthenticationRequestContext(array $options = []): void
     {
         $current = $this->authenticationRequestContext;
 
@@ -221,6 +223,18 @@ class Client
             !empty($options['state']) ? $options['state'] : $current?->state ?? $this->generateRandomString(),
             !empty($options['nonce']) ? $options['nonce'] : $current?->nonce ?? $this->generateRandomString()
         );
+    }
+
+    /**
+     * Initial the authorization parameters
+     *
+     * @param array<mixed> $options
+     * @deprecated Use {@see Client::initAuthenticationRequestContext()} instead.
+     */
+    #[\Deprecated(message: 'Use initAuthenticationRequestContext() instead')]
+    public function initAuthorizationParameters(array $options = []): void
+    {
+        $this->initAuthenticationRequestContext($options);
     }
 
     /**
@@ -241,7 +255,7 @@ class Client
      */
     private function generateAuthorizationParameters(array $parameters): array
     {
-        $this->initAuthorizationParameters($parameters);
+        $this->initAuthenticationRequestContext($parameters);
 
         $parameters['state'] = $this->authenticationRequestContext->state;
 

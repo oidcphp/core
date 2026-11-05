@@ -7,6 +7,7 @@ use MilesChou\Psr\Http\Client\Testing\MockClient;
 use OpenIDConnect\AuthenticationRequestContext;
 use OpenIDConnect\Client;
 use OpenIDConnect\Exceptions\OAuth2ServerException;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use PHPUnit\Framework\Attributes\Test;
 use Psr\Http\Client\NetworkExceptionInterface;
 use Psr\Http\Message\RequestInterface;
@@ -34,11 +35,24 @@ class ClientTest extends TestCase
     #[Test]
     public function shouldReturnPreparedStateWhenInitParameters(): void
     {
-        $this->target->initAuthorizationParameters([
+        $this->target->initAuthenticationRequestContext([
             'state' => 'expected-state',
         ]);
 
         $this->assertSame('expected-state', $this->target->getState());
+    }
+
+    #[Test]
+    #[IgnoreDeprecations]
+    public function shouldStillInitContextWhenCallDeprecatedInitAuthorizationParameters(): void
+    {
+        $this->target->initAuthorizationParameters([
+            'state' => 'expected-state',
+            'nonce' => 'expected-nonce',
+        ]);
+
+        $this->assertSame('expected-state', $this->target->getState());
+        $this->assertSame('expected-nonce', $this->target->getNonce());
     }
 
     #[Test]
@@ -273,7 +287,7 @@ class ClientTest extends TestCase
         $this->assertNull($this->target->getNonce());
         $this->assertNull($this->target->getState());
 
-        $this->target->initAuthorizationParameters();
+        $this->target->initAuthenticationRequestContext();
 
         $this->assertNotNull($this->target->getNonce());
         $this->assertNotNull($this->target->getState());
@@ -282,12 +296,12 @@ class ClientTest extends TestCase
     #[Test]
     public function shouldReturnSameStateAndNonceWhenInitAuthorizationParametersTwice(): void
     {
-        $this->target->initAuthorizationParameters();
+        $this->target->initAuthenticationRequestContext();
 
         $expectedNonce = $this->target->getNonce();
         $expectedState = $this->target->getState();
 
-        $this->target->initAuthorizationParameters();
+        $this->target->initAuthenticationRequestContext();
 
         $this->assertSame($expectedNonce, $this->target->getNonce());
         $this->assertSame($expectedState, $this->target->getState());
@@ -299,7 +313,7 @@ class ClientTest extends TestCase
         $expectedNonce = 'some-nonce';
         $expectedState = 'some-state';
 
-        $this->target->initAuthorizationParameters([
+        $this->target->initAuthenticationRequestContext([
             'nonce' => $expectedNonce,
             'state' => $expectedState,
         ]);
