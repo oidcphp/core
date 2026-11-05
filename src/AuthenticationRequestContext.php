@@ -46,7 +46,14 @@ final class AuthenticationRequestContext
      */
     private $nonce;
 
-    private function __construct(string $redirectUri, string $state, string $nonce)
+    /**
+     * A plain mapping of the values to the properties, they are not generated or normalized here.
+     *
+     * @param string $redirectUri Kept as given, so the Token Request sends the same string
+     * @param string $state
+     * @param string $nonce
+     */
+    public function __construct(string $redirectUri, string $state, string $nonce)
     {
         foreach (['redirect_uri' => $redirectUri, 'state' => $state, 'nonce' => $nonce] as $name => $value) {
             if ('' === $value) {
