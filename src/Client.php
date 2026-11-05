@@ -290,7 +290,11 @@ class Client
             return $parameters;
         }
 
-        return array_merge($parameters, $context->toArray());
+        return array_merge($parameters, [
+            'redirect_uri' => $context->redirectUri,
+            'state' => $context->state,
+            'nonce' => $context->nonce,
+        ]);
     }
 
     /**

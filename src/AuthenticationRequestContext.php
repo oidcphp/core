@@ -16,9 +16,7 @@ namespace OpenIDConnect;
  * - `redirectUri`: it MUST be sent to the Token Endpoint with the same value as in the Authentication Request.
  *
  * Use {@see \OpenIDConnect\Client::createAuthenticationRequestContext()} to get random `state` and `nonce`. Keep
- * the object in the user's session using {@see AuthenticationRequestContext::toArray()}, restore it by
- * {@see AuthenticationRequestContext::fromArray()} when the user comes back, and remove it from the session once
- * the callback is handled, so a `state` cannot be used twice.
+ * the values in the user's session, and remove them once the callback is handled, so a `state` cannot be used twice.
  *
  * @link https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest
  * @link https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation
@@ -33,30 +31,5 @@ final class AuthenticationRequestContext
         public readonly string $state,
         public readonly string $nonce
     ) {
-    }
-
-    /**
-     * Map the array, which was made by {@see AuthenticationRequestContext::toArray()}, to the properties.
-     *
-     * A missing key or a value which is not a string is a TypeError, because of the property types.
-     *
-     * @param array<mixed> $data
-     * @return self
-     */
-    public static function fromArray(array $data): self
-    {
-        return new self($data['redirect_uri'] ?? null, $data['state'] ?? null, $data['nonce'] ?? null);
-    }
-
-    /**
-     * @return array<string, string>
-     */
-    public function toArray(): array
-    {
-        return [
-            'redirect_uri' => $this->redirectUri,
-            'state' => $this->state,
-            'nonce' => $this->nonce,
-        ];
     }
 }
