@@ -11,13 +11,12 @@ use OpenIDConnect\Config;
 use OpenIDConnect\Jwt\Factory as JwtFactory;
 use OpenIDConnect\Metadata\ProviderMetadata;
 use OpenIDConnect\TokenSet;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class TokenSetTest extends TestCase
 {
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldBeOkayWhenAllInformationIsReady(): void
     {
         $target = new TokenSet($this->createConfig(), [
@@ -43,9 +42,7 @@ class TokenSetTest extends TestCase
         $this->assertSame('whatever', $target->get('custom'));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldThrowExceptionWhenRequireKeyIsMissing(): void
     {
         $this->expectException(DomainException::class);
@@ -55,9 +52,7 @@ class TokenSetTest extends TestCase
         $target->accessToken();
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldReturnNullWhenNoScope(): void
     {
         $target = new TokenSet($this->createConfig(), []);
@@ -65,9 +60,7 @@ class TokenSetTest extends TestCase
         $this->assertNull($target->scope());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldReturnArrayDirectlyWhenScopeIsArray(): void
     {
         $target = new TokenSet($this->createConfig(), [
@@ -77,9 +70,7 @@ class TokenSetTest extends TestCase
         $this->assertSame(['a-b', 'c d'], $target->scope());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldSerializeToJsonByParameterArray(): void
     {
         $target = new TokenSet($this->createConfig(), [
@@ -89,9 +80,7 @@ class TokenSetTest extends TestCase
         $this->assertSame('{"foo":"bar"}', json_encode($target));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldBeOkayWhenDataIsOkay(): void
     {
         $target = new TokenSet($this->createConfig(), $this->createFakeTokenSetParameter([
@@ -114,9 +103,7 @@ class TokenSetTest extends TestCase
         $this->assertFalse($target->has('whatever'));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldBeOkayWhenUseAdditionJwk(): void
     {
         $jwk = JWKFactory::createRSAKey(1024, ['alg' => 'RS256']);
@@ -171,9 +158,7 @@ class TokenSetTest extends TestCase
         $this->assertNull($actual->azp());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldThrowWhenCallValueWithDefaultKeys(): void
     {
         $jwk = JWKFactory::createRSAKey(1024, ['alg' => 'RS256']);

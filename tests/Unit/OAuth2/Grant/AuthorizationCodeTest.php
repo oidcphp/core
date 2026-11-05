@@ -4,13 +4,12 @@ namespace Tests\Unit\OAuth2\Grant;
 
 use InvalidArgumentException;
 use OpenIDConnect\OAuth2\Grant\AuthorizationCode;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 class AuthorizationCodeTest extends TestCase
 {
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldReturnOkayWhenRequireParametersIsReady(): void
     {
         $target = new AuthorizationCode();
@@ -24,9 +23,7 @@ class AuthorizationCodeTest extends TestCase
         $this->assertSame('some', $actual['code']);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldThrowExceptionWhenParameterIsMissing(): void
     {
         $this->expectException(InvalidArgumentException::class);

@@ -8,6 +8,7 @@ use MilesChou\Psr\Http\Client\Testing\MockClient;
 use OpenIDConnect\Client;
 use OpenIDConnect\Exceptions\OAuth2ClientException;
 use OpenIDConnect\Exceptions\OAuth2ServerException;
+use PHPUnit\Framework\Attributes\Test;
 use Psr\Http\Client\NetworkExceptionInterface;
 use Psr\Http\Message\RequestInterface;
 use Tests\TestCase;
@@ -31,9 +32,7 @@ class ClientTest extends TestCase
         $this->target = null;
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldReturnPreparedStateWhenInitParameters(): void
     {
         $this->target->initAuthorizationParameters([
@@ -43,9 +42,7 @@ class ClientTest extends TestCase
         $this->assertSame('expected-state', $this->target->getState());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldReturnHtmlWhenCallCreateFormPost(): void
     {
         $actual = $this->target->createAuthorizeFormPostResponse([
@@ -62,9 +59,7 @@ class ClientTest extends TestCase
         $this->assertStringContainsString('name="client_id" value="some_id"', (string)$actual->getBody());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldReturnRedirectWhenCallCreateRedirect(): void
     {
         $actual = $this->target->createAuthorizeRedirectResponse([
@@ -80,9 +75,7 @@ class ClientTest extends TestCase
         $this->assertStringContainsString('client_id=some_id', $actualLocation);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldReturnTokenSetInstanceWhenCallSendTokenRequest(): void
     {
         $mockClient = (new MockClient())->appendResponseWithJson(
@@ -99,9 +92,7 @@ class ClientTest extends TestCase
         $this->assertSame('some-access-token', $actual['access_token']);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldThrowOAuth2ServerExceptionWhenCatchRequestException(): void
     {
         $this->expectException(OAuth2ServerException::class);
@@ -123,9 +114,7 @@ class ClientTest extends TestCase
         ], []);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldThrowOAuth2ServerExceptionWhenPayloadIsNotJson(): void
     {
         $this->expectException(OAuth2ServerException::class);
@@ -140,9 +129,7 @@ class ClientTest extends TestCase
         ], []);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldThrowOAuth2ServerExceptionWhenReturnJsonHasErrorKey(): void
     {
         $this->expectException(OAuth2ServerException::class);
@@ -157,9 +144,7 @@ class ClientTest extends TestCase
         ], []);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldNothingWhenCallRevokeWithOkResponse(): void
     {
         $mockClient = (new MockClient())->appendResponseWith();
@@ -172,9 +157,7 @@ class ClientTest extends TestCase
         $this->assertSame('http://some-revocation-endpoint', (string)$mockClient->requests[0]->getUri());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldThrowOAuth2ServerExceptionWhenCallRevokeWithCatchRequestException(): void
     {
         $this->expectException(OAuth2ServerException::class);
@@ -193,9 +176,7 @@ class ClientTest extends TestCase
         $this->target->revoke('whatever');
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldThrowOAuth2ServerExceptionWhenCallRevokeWithReturnJsonHasErrorKey(): void
     {
         $this->expectException(OAuth2ServerException::class);
@@ -207,9 +188,7 @@ class ClientTest extends TestCase
         $this->target->revoke('whatever');
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldThrowInvalidArgumentExceptionWhenHandleCallbackWithParameterMissingCode(): void
     {
         $this->expectException(InvalidArgumentException::class);
@@ -217,9 +196,7 @@ class ClientTest extends TestCase
         $this->target->handleCallback([]);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldThrowInvalidArgumentExceptionWhenHandleCallbackWithParameterGivenStateButChecksNot(): void
     {
         $this->expectException(InvalidArgumentException::class);
@@ -237,9 +214,7 @@ class ClientTest extends TestCase
         ]);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldThrowOAuth2ClientExceptionWhenHandleCallbackWithChecksGivenStateButParametersNot(): void
     {
         $this->expectException(OAuth2ClientException::class);
@@ -258,9 +233,7 @@ class ClientTest extends TestCase
         ]);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldThrowOAuth2ClientExceptionWhenHandleCallbackWithBothGivenButNotSame(): void
     {
         $this->expectException(OAuth2ClientException::class);
@@ -280,9 +253,7 @@ class ClientTest extends TestCase
         ]);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldReturnTokenWhenHandleCallbackWithStateIsNotGiven(): void
     {
         $mockClient = (new MockClient())->appendResponseWithJson(
@@ -299,9 +270,7 @@ class ClientTest extends TestCase
         $this->assertSame('some-access-token', $actual->accessToken());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldReturnTokenWhenHandleCallbackWithBothGivenAndSame(): void
     {
         $mockClient = (new MockClient())->appendResponseWithJson(
@@ -322,9 +291,7 @@ class ClientTest extends TestCase
     }
 
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldSendTokenParametersAndNotSendChecksToTokenEndpointWhenHandleCallback(): void
     {
         $mockClient = (new MockClient())->appendResponseWithJson(
@@ -353,9 +320,7 @@ class ClientTest extends TestCase
         $this->assertStringNotContainsString('nonce', $body);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldStillSendOtherKeysOfChecksToTokenEndpointWhenHandleCallback(): void
     {
         $mockClient = (new MockClient())->appendResponseWithJson(
@@ -371,9 +336,7 @@ class ClientTest extends TestCase
         $mockClient->testRequest()->assertBodyContains('redirect_uri=' . rawurlencode('https://someredirect'));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldReturnAuthorizationUrlWhenCallCreateAuthorizeRedirectResponse(): void
     {
         $actual = $this->target->createAuthorizeRedirectResponse([
@@ -391,9 +354,7 @@ class ClientTest extends TestCase
         $this->assertStringContainsStringIgnoringCase('client_id=some_id', $actualLocation);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldReturnAuthorizationPostFormWhenCallCreateAuthorizeFormPostResponse(): void
     {
         $actual = $this->target->createAuthorizeFormPostResponse([
@@ -413,9 +374,7 @@ class ClientTest extends TestCase
         $this->assertStringContainsStringIgnoringCase('name="client_id" value="some_id"', (string)$actual->getBody());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldReturnStringStateAndNonceWhenInitAuthorizationParameters(): void
     {
         $this->assertNull($this->target->getNonce());
@@ -427,9 +386,7 @@ class ClientTest extends TestCase
         $this->assertNotNull($this->target->getState());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldReturnSameStateAndNonceWhenInitAuthorizationParametersTwice(): void
     {
         $this->target->initAuthorizationParameters();
@@ -443,9 +400,7 @@ class ClientTest extends TestCase
         $this->assertSame($expectedState, $this->target->getState());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldReturnPrepareStateAndNonceWhenInitAuthorizationParametersWithOptions(): void
     {
         $expectedNonce = 'some-nonce';

@@ -3,13 +3,12 @@
 namespace Tests\Unit\Metadata;
 
 use OpenIDConnect\Metadata\ClientMetadata;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class ClientMetadataTest extends TestCase
 {
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldBeOkayWhenNewInstance(): void
     {
         $target = new ClientMetadata([

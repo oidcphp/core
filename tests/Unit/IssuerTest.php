@@ -4,6 +4,7 @@ namespace Tests\Unit;
 
 use MilesChou\Psr\Http\Client\Testing\MockClient;
 use OpenIDConnect\Issuer;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class IssuerTest extends TestCase
@@ -61,9 +62,7 @@ class IssuerTest extends TestCase
         ],
     ];
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldProviderMetadataWhenDiscover(): void
     {
         $mockClient = (new MockClient())

@@ -4,6 +4,8 @@ namespace Tests\Unit;
 
 use InvalidArgumentException;
 use OpenIDConnect\Jwt\Claims;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class ClaimsTest extends TestCase
@@ -16,10 +18,8 @@ class ClaimsTest extends TestCase
         yield ['a.b.c.d'];
     }
 
-    /**
-     * @test
-     * @dataProvider invalidToken
-     */
+    #[Test]
+    #[DataProvider('invalidToken')]
     public function shouldThrowInvalidArgumentExceptionWithUnsupportedType($invalidInput): void
     {
         $this->expectException(InvalidArgumentException::class);
@@ -27,9 +27,7 @@ class ClaimsTest extends TestCase
         Claims::createFromJwsString($invalidInput);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldBeOkWhenBasicJwsType(): void
     {
         // W10 means [] with base64url encoded
@@ -38,9 +36,7 @@ class ClaimsTest extends TestCase
         $this->assertSame([], $actual->all());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldBeOkWhenBasicJwsTypeWithNoneAlg(): void
     {
         // W10 means [] with base64url encoded
@@ -49,9 +45,7 @@ class ClaimsTest extends TestCase
         $this->assertSame([], $actual->all());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldBeOkWhenParseLogoutToken(): void
     {
         $token = 'eyJhbGciOiJSUzI1NiJ9.eyJhdWQiOiJzb21lLWF1ZCIsImlzcyI6InNvbWUtaXNzIiwiaWF0IjoxNjE1Mjg0Nzc5LCJqdGkiOiJzb21lLWp0aSIsInNpZCI6InNvbWUtc2lkIiwiZXZlbnRzIjp7Imh0dHA6XC9cL3NjaGVtYXMub3BlbmlkLm5ldFwvZXZlbnRcL2JhY2tjaGFubmVsLWxvZ291dCI6W119fQ.';
