@@ -55,10 +55,16 @@ final class AuthenticationRequestContext
      */
     public function __construct(string $redirectUri, string $state, string $nonce)
     {
-        foreach (['redirect_uri' => $redirectUri, 'state' => $state, 'nonce' => $nonce] as $name => $value) {
-            if ('' === $value) {
-                throw new InvalidArgumentException("'{$name}' must not be empty");
-            }
+        if ('' === $redirectUri) {
+            throw new InvalidArgumentException("'redirect_uri' must not be empty");
+        }
+
+        if ('' === $state) {
+            throw new InvalidArgumentException("'state' must not be empty");
+        }
+
+        if ('' === $nonce) {
+            throw new InvalidArgumentException("'nonce' must not be empty");
         }
 
         $this->redirectUri = $redirectUri;
