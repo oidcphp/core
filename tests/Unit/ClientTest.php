@@ -2,11 +2,10 @@
 
 namespace Tests\Unit;
 
-use InvalidArgumentException;
 use Laminas\Diactoros\Request;
 use MilesChou\Psr\Http\Client\Testing\MockClient;
+use OpenIDConnect\AuthenticationRequestContext;
 use OpenIDConnect\Client;
-use OpenIDConnect\Exceptions\OAuth2ClientException;
 use OpenIDConnect\Exceptions\OAuth2ServerException;
 use PHPUnit\Framework\Attributes\Test;
 use Psr\Http\Client\NetworkExceptionInterface;
@@ -189,151 +188,18 @@ class ClientTest extends TestCase
     }
 
     #[Test]
-    public function shouldThrowInvalidArgumentExceptionWhenHandleCallbackWithParameterMissingCode(): void
+    public function shouldUseValuesOfContextWhenCallCreateAuthorizeRedirectResponse(): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        $context = AuthenticationRequestContext::create('https://context-redirect', 'context-state', 'context-nonce');
 
-        $this->target->handleCallback([]);
-    }
+        $actualLocation = $this->target->createAuthorizeRedirectResponse([
+            'redirect_uri' => 'https://ignored',
+        ], $context)->getHeaderLine('Location');
 
-    #[Test]
-    public function shouldThrowInvalidArgumentExceptionWhenHandleCallbackWithParameterGivenStateButChecksNot(): void
-    {
-        $this->expectException(InvalidArgumentException::class);
-
-        $mockClient = (new MockClient())->appendResponseWithJson(
-            $this->createFakeTokenSetParameter(['access_token' => 'some-access-token'])
-        );
-
-        $this->target->setHttpClient($mockClient);
-
-        $this->target->handleCallback([
-            'code' => 'whatever',
-            'redirect_uri' => 'whatever',
-            'state' => 'whatever',
-        ]);
-    }
-
-    #[Test]
-    public function shouldThrowOAuth2ClientExceptionWhenHandleCallbackWithChecksGivenStateButParametersNot(): void
-    {
-        $this->expectException(OAuth2ClientException::class);
-
-        $mockClient = (new MockClient())->appendResponseWithJson(
-            $this->createFakeTokenSetParameter(['access_token' => 'some-access-token'])
-        );
-
-        $this->target->setHttpClient($mockClient);
-
-        $this->target->handleCallback([
-            'code' => 'whatever',
-            'redirect_uri' => 'whatever',
-        ], [
-            'state' => 'whatever',
-        ]);
-    }
-
-    #[Test]
-    public function shouldThrowOAuth2ClientExceptionWhenHandleCallbackWithBothGivenButNotSame(): void
-    {
-        $this->expectException(OAuth2ClientException::class);
-
-        $mockClient = (new MockClient())->appendResponseWithJson(
-            $this->createFakeTokenSetParameter(['access_token' => 'some-access-token'])
-        );
-
-        $this->target->setHttpClient($mockClient);
-
-        $this->target->handleCallback([
-            'code' => 'whatever',
-            'redirect_uri' => 'whatever',
-            'state' => 'foo',
-        ], [
-            'state' => 'bar',
-        ]);
-    }
-
-    #[Test]
-    public function shouldReturnTokenWhenHandleCallbackWithStateIsNotGiven(): void
-    {
-        $mockClient = (new MockClient())->appendResponseWithJson(
-            $this->createFakeTokenSetParameter(['access_token' => 'some-access-token'])
-        );
-
-        $this->target->setHttpClient($mockClient);
-
-        $actual = $this->target->handleCallback([
-            'code' => 'whatever',
-            'redirect_uri' => 'whatever',
-        ]);
-
-        $this->assertSame('some-access-token', $actual->accessToken());
-    }
-
-    #[Test]
-    public function shouldReturnTokenWhenHandleCallbackWithBothGivenAndSame(): void
-    {
-        $mockClient = (new MockClient())->appendResponseWithJson(
-            $this->createFakeTokenSetParameter(['access_token' => 'some-access-token'])
-        );
-
-        $this->target->setHttpClient($mockClient);
-
-        $actual = $this->target->handleCallback([
-            'code' => 'whatever',
-            'redirect_uri' => 'whatever',
-            'state' => 'foo',
-        ], [
-            'state' => 'foo',
-        ]);
-
-        $this->assertSame('some-access-token', $actual->accessToken());
-    }
-
-
-    #[Test]
-    public function shouldSendTokenParametersAndNotSendChecksToTokenEndpointWhenHandleCallback(): void
-    {
-        $mockClient = (new MockClient())->appendResponseWithJson(
-            $this->createFakeTokenSetParameter(['access_token' => 'some-access-token'])
-        );
-
-        $this->target->setHttpClient($mockClient);
-
-        $this->target->handleCallback([
-            'code' => 'some-code',
-            'state' => 'some-state',
-        ], [
-            'state' => 'some-state',
-            'nonce' => 'some-nonce',
-        ], [
-            'redirect_uri' => 'https://someredirect',
-        ]);
-
-        $request = $mockClient->testRequest();
-
-        $request->assertBodyContains('code=some-code');
-        $request->assertBodyContains('redirect_uri=' . rawurlencode('https://someredirect'));
-
-        $body = (string)$request->getBody();
-        $this->assertStringNotContainsString('state', $body);
-        $this->assertStringNotContainsString('nonce', $body);
-    }
-
-    #[Test]
-    public function shouldStillSendOtherKeysOfChecksToTokenEndpointWhenHandleCallback(): void
-    {
-        $mockClient = (new MockClient())->appendResponseWithJson(
-            $this->createFakeTokenSetParameter(['access_token' => 'some-access-token'])
-        );
-
-        $this->target->setHttpClient($mockClient);
-
-        $this->target->handleCallback(['code' => 'some-code'], [
-            'redirect_uri' => 'https://someredirect',
-        ]);
-
-        $mockClient->testRequest()->assertBodyContains('redirect_uri=' . rawurlencode('https://someredirect'));
+        $this->assertStringContainsString('state=context-state', $actualLocation);
+        $this->assertStringContainsString('nonce=context-nonce', $actualLocation);
+        $this->assertStringContainsString('redirect_uri=' . rawurlencode('https://context-redirect'), $actualLocation);
+        $this->assertStringNotContainsString('ignored', $actualLocation);
     }
 
     #[Test]

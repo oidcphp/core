@@ -11,6 +11,7 @@ use MilesChou\Psr\Http\Message\HttpFactoryAwareTrait;
 use OpenIDConnect\Exceptions\OAuth2ClientException;
 use OpenIDConnect\Exceptions\OAuth2ServerException;
 use OpenIDConnect\Http\Authentication\ClientAuthenticationAwareTrait;
+use OpenIDConnect\Http\Query;
 use OpenIDConnect\Http\Response\AuthorizationFormPostResponseBuilder;
 use OpenIDConnect\Http\Response\AuthorizationRedirectResponseBuilder;
 use OpenIDConnect\Http\Response\InitiateLogoutFormPostResponseBuilder;
@@ -20,6 +21,7 @@ use OpenIDConnect\Traits\ClockTolerance;
 use OpenIDConnect\Traits\ConfigAwareTrait;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\UriInterface;
 
 /**
  * OAuth 2.0 / OpenID Connect Client
@@ -63,24 +65,30 @@ class Client
      * Create PSR-7 response with form post
      *
      * @param array $parameters
+     * @param AuthenticationRequestContext|null $context Given `state`, `nonce` and `redirect_uri` are used
      * @return ResponseInterface
      */
-    public function createAuthorizeFormPostResponse(array $parameters = []): ResponseInterface
-    {
+    public function createAuthorizeFormPostResponse(
+        array $parameters = [],
+        ?AuthenticationRequestContext $context = null
+    ): ResponseInterface {
         return (new AuthorizationFormPostResponseBuilder($this->config, $this->httpClient))
-            ->build($this->generateAuthorizationParameters($parameters));
+            ->build($this->generateAuthorizationParameters($this->applyContext($parameters, $context)));
     }
 
     /**
      * Create PSR-7 redirect response
      *
      * @param array $parameters
+     * @param AuthenticationRequestContext|null $context Given `state`, `nonce` and `redirect_uri` are used
      * @return ResponseInterface
      */
-    public function createAuthorizeRedirectResponse(array $parameters = []): ResponseInterface
-    {
+    public function createAuthorizeRedirectResponse(
+        array $parameters = [],
+        ?AuthenticationRequestContext $context = null
+    ): ResponseInterface {
         return (new AuthorizationRedirectResponseBuilder($this->config, $this->httpClient))
-            ->build($this->generateAuthorizationParameters($parameters));
+            ->build($this->generateAuthorizationParameters($this->applyContext($parameters, $context)));
     }
 
     /**
@@ -126,56 +134,62 @@ class Client
     /**
      * Handle the Authentication Response, and exchange the code for tokens at the Token Endpoint.
      *
-     * - `$parameters` are the parameters of the Authentication Response sent by the OpenID Provider, e.g. `code`
-     *   and `state`.
-     * - `$checks` are the values the Relying Party sent in the Authentication Request and expects to be given back,
-     *   e.g. `state` and `nonce`. They are only used to validate the response, and are never sent to the Token
-     *   Endpoint.
-     * - `$tokenParameters` are the additional parameters of the Token Request, e.g. `redirect_uri`.
+     * The context MUST be the one which was created before redirecting the user to the OpenID Provider.
      *
-     * For backward compatibility, keys other than `state` and `nonce` in `$checks` are still sent to the Token
-     * Endpoint, but it is deprecated. Use `$tokenParameters` instead.
-     *
-     * @param array $parameters
-     * @param array $checks
-     * @param array $tokenParameters
+     * @param UriInterface $callbackUri The full URI which the OpenID Provider redirected the user to
+     * @param AuthenticationRequestContext $context
      * @return TokenSet
+     * @link https://openid.net/specs/openid-connect-core-1_0.html#AuthResponse
+     * @link https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation
+     * @link https://www.rfc-editor.org/rfc/rfc6749.html#section-4.1.2
      * @link https://www.rfc-editor.org/rfc/rfc6749.html#section-4.1.3
      */
-    public function handleCallback(array $parameters, array $checks = [], array $tokenParameters = []): TokenSet
+    public function handleCallback(UriInterface $callbackUri, AuthenticationRequestContext $context): TokenSet
     {
-        if (!isset($parameters['code'])) {
-            throw new InvalidArgumentException("'code' missing from the response");
-        }
+        $parameters = Query::parse($callbackUri->getQuery());
 
-        if (isset($parameters['state']) && !isset($checks['state'])) {
-            throw new InvalidArgumentException("'state' argument is missing");
-        }
-
-        if (!isset($parameters['state']) && isset($checks['state'])) {
+        // The `state` was sent in the Authentication Request, so the response MUST give it back unchanged.
+        // It is compared in constant time.
+        if (!isset($parameters['state']) || !is_string($parameters['state'])) {
             throw new OAuth2ClientException("'state' missing from the response");
         }
 
-        if (isset($parameters['state'], $checks['state']) && ($checks['state'] !== $parameters['state'])) {
-            $msg = "State mismatch, expected {$checks['state']}, got: {$parameters['state']}";
-            throw new OAuth2ClientException($msg);
+        if (!hash_equals($context->state(), $parameters['state'])) {
+            throw new OAuth2ClientException('State mismatch');
         }
 
-        // `state` and `nonce` are for validation only, they are not parameters of the Token Request.
-        $checkOnlyKeys = ['state' => true, 'nonce' => true];
+        // An error response is only trusted after its `state` is validated.
+        if (isset($parameters['error'])) {
+            $error = is_string($parameters['error']) ? $parameters['error'] : 'invalid_response';
+            $description = isset($parameters['error_description']) && is_string($parameters['error_description'])
+                ? ': ' . $parameters['error_description']
+                : '';
 
-        $parsed = $this->token(array_merge(
-            array_diff_key($parameters, $checkOnlyKeys),
-            array_diff_key($checks, $checkOnlyKeys),
-            $tokenParameters
-        ));
+            throw new OAuth2ServerException($error . $description);
+        }
 
-        $tokenSet = new TokenSet($this->config, array_merge($checks, $parsed), $this->clockTolerance());
+        if (!isset($parameters['code']) || !is_string($parameters['code'])) {
+            throw new InvalidArgumentException("'code' missing from the response");
+        }
+
+        // Only the parameters of the Token Request are sent. The `state` and `nonce` are for validation only.
+        $parsed = $this->token([
+            'code' => $parameters['code'],
+            'redirect_uri' => $context->redirectUri(),
+        ]);
+
+        $tokenSet = new TokenSet($this->config, $parsed, $this->clockTolerance());
 
         // Verify ID Token when exist
         if ($tokenSet->idToken()) {
             $idTokenVerifier = new IdTokenVerifier($this->config, $this->clockTolerance());
-            $idTokenVerifier->verify($tokenSet->idToken());
+
+            // 11. If a nonce value was sent in the Authentication Request, a nonce Claim MUST be present and its
+            //     value checked to verify that it is the same value as the one that was sent in the
+            //     Authentication Request.
+            //
+            // The context always has a nonce, so a nonce Claim is always required.
+            $idTokenVerifier->verify($tokenSet->idToken(), ['nonce'], ['nonce' => $context->nonce()]);
         }
 
         return $tokenSet;
@@ -246,6 +260,22 @@ class Client
         $parameters['client_id'] = $this->config->requireClientMetadata('client_id');
 
         return $parameters;
+    }
+
+    /**
+     * The values in the context win, so the Authentication Request and the later callback use the same values.
+     *
+     * @param array<mixed> $parameters
+     * @param AuthenticationRequestContext|null $context
+     * @return array<mixed>
+     */
+    private function applyContext(array $parameters, ?AuthenticationRequestContext $context): array
+    {
+        if (null === $context) {
+            return $parameters;
+        }
+
+        return array_merge($parameters, $context->toArray());
     }
 
     /**
