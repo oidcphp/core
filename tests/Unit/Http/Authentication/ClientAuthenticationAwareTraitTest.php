@@ -5,13 +5,12 @@ namespace Tests\Unit\Http\Authentication;
 use OpenIDConnect\Http\Authentication\ClientAuthenticationAwareTrait;
 use OpenIDConnect\Http\Authentication\ClientSecretBasic;
 use OpenIDConnect\Http\Authentication\ClientSecretPost;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 class ClientAuthenticationAwareTraitTest extends TestCase
 {
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldReturnClientSecretBasicDefault(): void
     {
         /** @var ClientAuthenticationAwareTrait $target */
@@ -22,9 +21,7 @@ class ClientAuthenticationAwareTraitTest extends TestCase
         $this->assertInstanceOf(ClientSecretBasic::class, $actual);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldReturnPrepareAuthenticationWhenSetBefore(): void
     {
         /** @var ClientAuthenticationAwareTrait $target */

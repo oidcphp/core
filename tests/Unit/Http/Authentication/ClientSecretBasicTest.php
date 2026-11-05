@@ -4,13 +4,12 @@ namespace Tests\Unit\Http\Authentication;
 
 use Laminas\Diactoros\RequestFactory;
 use OpenIDConnect\Http\Authentication\ClientSecretBasic;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 class ClientSecretBasicTest extends TestCase
 {
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldReturnClientSecretParameterOnHeader(): void
     {
         $expected = base64_encode('c:s');

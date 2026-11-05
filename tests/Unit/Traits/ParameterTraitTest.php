@@ -5,13 +5,12 @@ namespace Tests\Unit\Traits;
 use BadMethodCallException;
 use DomainException;
 use OpenIDConnect\Traits\ParameterTrait;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class ParameterTraitTest extends TestCase
 {
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldReturnCorrectValueWhenCallAppend(): void
     {
         /** @var ParameterTrait $target */
@@ -30,9 +29,7 @@ class ParameterTraitTest extends TestCase
         $this->assertSame('value', $actual->get(2));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldMergeItemsWhenCallMerge(): void
     {
         /** @var ParameterTrait $target */
@@ -47,9 +44,7 @@ class ParameterTraitTest extends TestCase
         $this->assertSame(4, $actual->get('baz'));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldReturnCorrectValueWhenCallHas(): void
     {
         /** @var ParameterTrait $target */
@@ -61,9 +56,7 @@ class ParameterTraitTest extends TestCase
         $this->assertFalse($actual->has('whatever'));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldReturnDefaultValueWhenGet(): void
     {
         /** @var ParameterTrait $target */
@@ -72,9 +65,7 @@ class ParameterTraitTest extends TestCase
         $this->assertSame('d', $target->get('some', 'd'));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldReturnNewObjectWhenUsingWithMetadata(): void
     {
         /** @var ParameterTrait $target */
@@ -86,9 +77,7 @@ class ParameterTraitTest extends TestCase
         $this->assertSame('value', $actual->get('some'));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldReturnArrayWhenCallToArray(): void
     {
         /** @var ParameterTrait $target */
@@ -106,9 +95,7 @@ class ParameterTraitTest extends TestCase
         $this->assertSame($expected, $actual->jsonSerialize());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldThrowExceptionWhenAssertWithoutKey(): void
     {
         $this->expectException(DomainException::class);
@@ -119,9 +106,7 @@ class ParameterTraitTest extends TestCase
         $target->assertHasKey('not-exist');
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldThrowExceptionWhenAssertWithoutKeys(): void
     {
         $this->expectException(DomainException::class);
@@ -134,9 +119,7 @@ class ParameterTraitTest extends TestCase
         $actual->assertHasKeys(['foo', 'not-exist']);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldReturnValueWhenUsingMagicCall(): void
     {
         /** @var ParameterTrait $target */
@@ -150,9 +133,7 @@ class ParameterTraitTest extends TestCase
         $this->assertSame('bar', $actual->foo());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldReturnValueWhenUsingMagicCallWithCamelCase(): void
     {
         /** @var ParameterTrait $target */
@@ -163,9 +144,7 @@ class ParameterTraitTest extends TestCase
         $this->assertSame('bar', $actual->camelCase());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldThrowBadMethodCallExceptionWhenNoParameter(): void
     {
         $this->expectException(BadMethodCallException::class);

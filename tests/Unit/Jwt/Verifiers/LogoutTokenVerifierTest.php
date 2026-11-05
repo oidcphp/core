@@ -8,6 +8,8 @@ use OpenIDConnect\Config;
 use OpenIDConnect\Exceptions\RelyingPartyException;
 use OpenIDConnect\Jwt\Factory as JwtFactory;
 use OpenIDConnect\Jwt\Verifiers\LogoutTokenVerifier;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 use stdClass;
 use Tests\TestCase;
 
@@ -79,10 +81,8 @@ class LogoutTokenVerifierTest extends TestCase
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider validPayload
-     */
+    #[Test]
+    #[DataProvider('validPayload')]
     public function shouldBeOkayWhenVerifyValidLogoutToken($validPayload): void
     {
         $this->expectNotToPerformAssertions();
@@ -149,10 +149,8 @@ class LogoutTokenVerifierTest extends TestCase
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider invalidPayload
-     */
+    #[Test]
+    #[DataProvider('invalidPayload')]
     public function shouldThrowExceptionWhenIssuer($expectedException, $invalidPayload): void
     {
         $this->expectException($expectedException);

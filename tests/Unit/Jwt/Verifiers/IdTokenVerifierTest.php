@@ -8,6 +8,8 @@ use OpenIDConnect\Config;
 use OpenIDConnect\Jwt\Factory as JwtFactory;
 use OpenIDConnect\Jwt\Verifiers\IdTokenVerifier;
 use OpenIDConnect\Jwt\Verifiers\LogoutTokenVerifier;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class IdTokenVerifierTest extends TestCase
@@ -52,10 +54,8 @@ class IdTokenVerifierTest extends TestCase
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider validPayload
-     */
+    #[Test]
+    #[DataProvider('validPayload')]
     public function shouldBeOkayWhenVerifyValidIdToken($validPayload): void
     {
         $this->expectNotToPerformAssertions();

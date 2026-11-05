@@ -3,13 +3,12 @@
 namespace Tests\Unit\OAuth2\Grant;
 
 use OpenIDConnect\OAuth2\Grant\Password;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 class PasswordTest extends TestCase
 {
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldReturnOkayWhenRequireParametersIsReady(): void
     {
         $target = new Password();

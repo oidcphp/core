@@ -5,6 +5,7 @@ namespace Tests\Unit\Jwt;
 use Jose\Component\Signature\Algorithm\ES256;
 use Jose\Component\Signature\Algorithm\RS256;
 use OpenIDConnect\Jwt\Concerns\AlgorithmFactory;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 class AlgorithmFactoryTraitTest extends TestCase
@@ -24,17 +25,13 @@ class AlgorithmFactoryTraitTest extends TestCase
         $this->target = null;
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldReturnInstanceWhenCallCreateSignatureAlgorithm(): void
     {
         $this->assertInstanceOf(RS256::class, $this->target->createAlgorithm('RS256'));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function shouldReturnInstancesWhenCallCreateSignatureAlgorithms(): void
     {
         $actual = $this->target->createAlgorithms([
