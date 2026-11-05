@@ -11,17 +11,14 @@ use OpenIDConnect\Config;
 use OpenIDConnect\Exceptions\OAuth2ClientException;
 use OpenIDConnect\Exceptions\OAuth2ServerException;
 use OpenIDConnect\Exceptions\RelyingPartyException;
+use OpenIDConnect\Http\Query;
 use OpenIDConnect\Jwt\Factory as JwtFactory;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class ClientHandleOpenIDConnectCallbackTest extends TestCase
 {
-    /**
-     * @var Config
-     */
-    private $config;
-
     private function context(): AuthenticationRequestContext
     {
         return new AuthenticationRequestContext('https://someredirect', 'expected-state', 'expected-nonce');
@@ -29,7 +26,7 @@ class ClientHandleOpenIDConnectCallbackTest extends TestCase
 
     private function callbackUri(array $query = ['code' => 'some-code', 'state' => 'expected-state']): Uri
     {
-        return new Uri('https://someredirect?' . http_build_query($query));
+        return new Uri('https://someredirect?' . Query::build($query));
     }
 
     /**
@@ -40,7 +37,7 @@ class ClientHandleOpenIDConnectCallbackTest extends TestCase
         $providerMetadata = $this->createProviderMetadata(['issuer' => 'some-iss']);
         $clientMetadata = $this->createClientMetadata(['client_id' => 'some-aud']);
 
-        $this->config = new Config($providerMetadata, $clientMetadata);
+        $config = new Config($providerMetadata, $clientMetadata);
 
         $payload = array_filter(array_merge([
             'aud' => 'some-aud',
@@ -51,13 +48,13 @@ class ClientHandleOpenIDConnectCallbackTest extends TestCase
             'sub' => 'some-sub',
         ], $claims), static fn ($value) => null !== $value);
 
-        $idToken = (new JwtFactory($this->config))->createSerializeJws($payload);
+        $idToken = (new JwtFactory($config))->createSerializeJws($payload);
 
         $mockClient = (new MockClient())->appendResponseWithJson(
             $this->createFakeTokenSetParameter(['id_token' => $idToken])
         );
 
-        return [new Client($this->config, $mockClient), $mockClient, $idToken];
+        return [new Client($config, $mockClient), $mockClient, $idToken];
     }
 
     #[Test]
@@ -96,55 +93,42 @@ class ClientHandleOpenIDConnectCallbackTest extends TestCase
     }
 
     #[Test]
-    public function shouldThrowExceptionWhenNonceClaimIsNotMatch(): void
+    #[DataProvider('invalidNonceClaim')]
+    public function shouldThrowExceptionWhenNonceClaimIsInvalid(array $claims): void
     {
         $this->expectException(RelyingPartyException::class);
 
-        [$target] = $this->createClient(['nonce' => 'not-the-nonce-you-sent']);
+        [$target] = $this->createClient($claims);
 
         $target->handleCallback($this->callbackUri(), $this->context());
     }
 
-    #[Test]
-    public function shouldThrowExceptionWhenNonceClaimIsMissing(): void
+    public static function invalidNonceClaim(): array
     {
-        $this->expectException(RelyingPartyException::class);
-
-        [$target] = $this->createClient(['nonce' => null]);
-
-        $target->handleCallback($this->callbackUri(), $this->context());
+        return [
+            'not match' => [['nonce' => 'not-the-nonce-you-sent']],
+            'missing' => [['nonce' => null]],
+        ];
     }
 
     #[Test]
-    public function shouldThrowExceptionWhenStateIsNotMatch(): void
+    #[DataProvider('invalidState')]
+    public function shouldThrowExceptionWhenStateIsInvalid(string $query): void
     {
         $this->expectException(OAuth2ClientException::class);
 
         [$target] = $this->createClient();
 
-        $target->handleCallback($this->callbackUri(['code' => 'some-code', 'state' => 'other']), $this->context());
+        $target->handleCallback(new Uri('https://someredirect?' . $query), $this->context());
     }
 
-    #[Test]
-    public function shouldThrowExceptionWhenStateIsMissing(): void
+    public static function invalidState(): array
     {
-        $this->expectException(OAuth2ClientException::class);
-
-        [$target] = $this->createClient();
-
-        $target->handleCallback($this->callbackUri(['code' => 'some-code']), $this->context());
-    }
-
-    #[Test]
-    public function shouldThrowExceptionWhenStateIsArray(): void
-    {
-        $this->expectException(OAuth2ClientException::class);
-
-        [$target] = $this->createClient();
-
-        $uri = new Uri('https://someredirect?code=some-code&state[]=expected-state');
-
-        $target->handleCallback($uri, $this->context());
+        return [
+            'not match' => ['code=some-code&state=other'],
+            'missing' => ['code=some-code'],
+            'array' => ['code=some-code&state[]=expected-state'],
+        ];
     }
 
     #[Test]
