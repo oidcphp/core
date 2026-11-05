@@ -188,9 +188,23 @@ class ClientTest extends TestCase
     }
 
     #[Test]
+    public function shouldCreateContextWithRandomStateAndNonce(): void
+    {
+        $a = $this->target->createAuthenticationRequestContext('https://someredirect');
+        $b = $this->target->createAuthenticationRequestContext('https://someredirect');
+
+        $this->assertSame('https://someredirect', $a->redirectUri);
+        $this->assertSame(32, strlen($a->state));
+        $this->assertSame(32, strlen($a->nonce));
+        $this->assertNotSame($a->state, $a->nonce);
+        $this->assertNotSame($a->state, $b->state);
+        $this->assertNotSame($a->nonce, $b->nonce);
+    }
+
+    #[Test]
     public function shouldUseValuesOfContextWhenCallCreateAuthorizeRedirectResponse(): void
     {
-        $context = AuthenticationRequestContext::create('https://context-redirect', 'context-state', 'context-nonce');
+        $context = new AuthenticationRequestContext('https://context-redirect', 'context-state', 'context-nonce');
 
         $actualLocation = $this->target->createAuthorizeRedirectResponse([
             'redirect_uri' => 'https://ignored',

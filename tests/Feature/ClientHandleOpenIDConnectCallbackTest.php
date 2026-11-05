@@ -24,7 +24,7 @@ class ClientHandleOpenIDConnectCallbackTest extends TestCase
 
     private function context(): AuthenticationRequestContext
     {
-        return AuthenticationRequestContext::create('https://someredirect', 'expected-state', 'expected-nonce');
+        return new AuthenticationRequestContext('https://someredirect', 'expected-state', 'expected-nonce');
     }
 
     private function callbackUri(array $query = ['code' => 'some-code', 'state' => 'expected-state']): Uri

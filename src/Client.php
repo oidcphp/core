@@ -132,6 +132,21 @@ class Client
     }
 
     /**
+     * Create a context for a new Authentication Request, with random `state` and `nonce`.
+     *
+     * @param string $redirectUri
+     * @return AuthenticationRequestContext
+     */
+    public function createAuthenticationRequestContext(string $redirectUri): AuthenticationRequestContext
+    {
+        return new AuthenticationRequestContext(
+            $redirectUri,
+            $this->generateRandomString(),
+            $this->generateRandomString()
+        );
+    }
+
+    /**
      * Handle the Authentication Response, and exchange the code for tokens at the Token Endpoint.
      *
      * The context MUST be the one which was created before redirecting the user to the OpenID Provider.
@@ -154,7 +169,7 @@ class Client
             throw new OAuth2ClientException("'state' missing from the response");
         }
 
-        if (!hash_equals($context->state(), $parameters['state'])) {
+        if (!hash_equals($context->state, $parameters['state'])) {
             throw new OAuth2ClientException('State mismatch');
         }
 
@@ -175,7 +190,7 @@ class Client
         // Only the parameters of the Token Request are sent. The `state` and `nonce` are for validation only.
         $parsed = $this->token([
             'code' => $parameters['code'],
-            'redirect_uri' => $context->redirectUri(),
+            'redirect_uri' => $context->redirectUri,
         ]);
 
         $tokenSet = new TokenSet($this->config, $parsed, $this->clockTolerance());
@@ -189,7 +204,7 @@ class Client
             //     Authentication Request.
             //
             // The context always has a nonce, so a nonce Claim is always required.
-            $idTokenVerifier->verify($tokenSet->idToken(), ['nonce'], ['nonce' => $context->nonce()]);
+            $idTokenVerifier->verify($tokenSet->idToken(), ['nonce'], ['nonce' => $context->nonce]);
         }
 
         return $tokenSet;

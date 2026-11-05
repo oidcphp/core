@@ -2,41 +2,28 @@
 
 namespace Tests\Unit;
 
-use InvalidArgumentException;
 use OpenIDConnect\AuthenticationRequestContext;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
+use TypeError;
 
 class AuthenticationRequestContextTest extends TestCase
 {
     #[Test]
-    public function shouldGenerateDifferentRandomStateAndNonce(): void
+    public function shouldMapValuesToProperties(): void
     {
-        $a = AuthenticationRequestContext::create('https://someredirect');
-        $b = AuthenticationRequestContext::create('https://someredirect');
+        $target = new AuthenticationRequestContext('https://someredirect', 'some-state', 'some-nonce');
 
-        $this->assertSame(32, strlen($a->state()));
-        $this->assertSame(32, strlen($a->nonce()));
-        $this->assertNotSame($a->state(), $a->nonce());
-        $this->assertNotSame($a->state(), $b->state());
-        $this->assertNotSame($a->nonce(), $b->nonce());
+        $this->assertSame('https://someredirect', $target->redirectUri);
+        $this->assertSame('some-state', $target->state);
+        $this->assertSame('some-nonce', $target->nonce);
     }
 
     #[Test]
-    public function shouldKeepGivenValues(): void
+    public function shouldBeRestoredFromArrayWhichWasStoredAsJson(): void
     {
-        $target = AuthenticationRequestContext::create('https://someredirect', 'some-state', 'some-nonce');
-
-        $this->assertSame('https://someredirect', $target->redirectUri());
-        $this->assertSame('some-state', $target->state());
-        $this->assertSame('some-nonce', $target->nonce());
-    }
-
-    #[Test]
-    public function shouldBeRestoredFromArray(): void
-    {
-        $expected = AuthenticationRequestContext::create('https://someredirect');
+        $expected = new AuthenticationRequestContext('https://someredirect', 'some-state', 'some-nonce');
 
         $actual = AuthenticationRequestContext::fromArray(json_decode(json_encode($expected->toArray()), true));
 
@@ -44,18 +31,10 @@ class AuthenticationRequestContextTest extends TestCase
     }
 
     #[Test]
-    public function shouldThrowExceptionWhenCreateWithEmptyValue(): void
-    {
-        $this->expectException(InvalidArgumentException::class);
-
-        AuthenticationRequestContext::create('https://someredirect', '');
-    }
-
-    #[Test]
     #[DataProvider('invalidArray')]
-    public function shouldThrowExceptionWhenRestoreFromInvalidArray(array $data): void
+    public function shouldThrowTypeErrorWhenRestoreFromArrayWithMissingKeyOrNotString(array $data): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(TypeError::class);
 
         AuthenticationRequestContext::fromArray($data);
     }
@@ -69,9 +48,7 @@ class AuthenticationRequestContextTest extends TestCase
             'missing state' => [array_diff_key($valid, ['state' => 1])],
             'missing nonce' => [array_diff_key($valid, ['nonce' => 1])],
             'missing redirect_uri' => [array_diff_key($valid, ['redirect_uri' => 1])],
-            'unknown key' => [$valid + ['scope' => 'openid']],
             'not string' => [array_merge($valid, ['state' => ['a']])],
-            'empty string' => [array_merge($valid, ['nonce' => ''])],
         ];
     }
 }
