@@ -42,14 +42,11 @@ class Client
     protected $container;
 
     /**
-     * @var null|string
+     * The values of the latest Authentication Request. `getState()` and `getNonce()` read from it.
+     *
+     * @var null|AuthenticationRequestContext
      */
-    private $nonce;
-
-    /**
-     * @var null|string
-     */
-    private $state;
+    private $authenticationRequestContext;
 
     /**
      * @param Config $config
@@ -120,7 +117,7 @@ class Client
      */
     public function getNonce(): ?string
     {
-        return $this->nonce;
+        return $this->authenticationRequestContext?->nonce;
     }
 
     /**
@@ -128,7 +125,7 @@ class Client
      */
     public function getState(): ?string
     {
-        return $this->state;
+        return $this->authenticationRequestContext?->state;
     }
 
     /**
@@ -217,21 +214,13 @@ class Client
      */
     public function initAuthorizationParameters(array $options = []): void
     {
-        if (!empty($options['state'])) {
-            $this->state = $options['state'];
-        }
+        $current = $this->authenticationRequestContext;
 
-        if (null === $this->state) {
-            $this->state = $this->generateRandomString();
-        }
-
-        if (!empty($options['nonce'])) {
-            $this->nonce = $options['nonce'];
-        }
-
-        if (null === $this->nonce) {
-            $this->nonce = $this->generateRandomString();
-        }
+        $this->authenticationRequestContext = new AuthenticationRequestContext(
+            $options['redirect_uri'] ?? $current?->redirectUri ?? '',
+            !empty($options['state']) ? $options['state'] : $current?->state ?? $this->generateRandomString(),
+            !empty($options['nonce']) ? $options['nonce'] : $current?->nonce ?? $this->generateRandomString()
+        );
     }
 
     /**
@@ -254,7 +243,7 @@ class Client
     {
         $this->initAuthorizationParameters($parameters);
 
-        $parameters['state'] = $this->state;
+        $parameters['state'] = $this->authenticationRequestContext->state;
 
         if (empty($parameters['scope'])) {
             $parameters['scope'] = ['openid'];

@@ -217,6 +217,19 @@ class ClientTest extends TestCase
     }
 
     #[Test]
+    public function shouldReturnStateAndNonceOfContextWhenCallCreateAuthorizeRedirectResponse(): void
+    {
+        $this->target->createAuthorizeRedirectResponse([], new AuthenticationRequestContext(
+            'https://context-redirect',
+            'context-state',
+            'context-nonce'
+        ));
+
+        $this->assertSame('context-state', $this->target->getState());
+        $this->assertSame('context-nonce', $this->target->getNonce());
+    }
+
+    #[Test]
     public function shouldReturnAuthorizationUrlWhenCallCreateAuthorizeRedirectResponse(): void
     {
         $actual = $this->target->createAuthorizeRedirectResponse([
