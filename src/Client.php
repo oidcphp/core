@@ -231,7 +231,6 @@ class Client
      * @param array<mixed> $options
      * @deprecated Use {@see Client::initAuthenticationRequestContext()} instead.
      */
-    #[\Deprecated(message: 'Use initAuthenticationRequestContext() instead')]
     public function initAuthorizationParameters(array $options = []): void
     {
         $this->initAuthenticationRequestContext($options);

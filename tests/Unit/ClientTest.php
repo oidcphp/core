@@ -7,7 +7,6 @@ use MilesChou\Psr\Http\Client\Testing\MockClient;
 use OpenIDConnect\AuthenticationRequestContext;
 use OpenIDConnect\Client;
 use OpenIDConnect\Exceptions\OAuth2ServerException;
-use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use PHPUnit\Framework\Attributes\Test;
 use Psr\Http\Client\NetworkExceptionInterface;
 use Psr\Http\Message\RequestInterface;
@@ -43,7 +42,6 @@ class ClientTest extends TestCase
     }
 
     #[Test]
-    #[IgnoreDeprecations]
     public function shouldStillInitContextWhenCallDeprecatedInitAuthorizationParameters(): void
     {
         $this->target->initAuthorizationParameters([
