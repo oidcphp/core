@@ -93,6 +93,31 @@ class ClientHandleOpenIDConnectCallbackTest extends TestCase
     }
 
     #[Test]
+    public function shouldSendCodeVerifierToTokenEndpointWhenPkceIsUsed(): void
+    {
+        [$target, $mockClient] = $this->createClient();
+
+        $target->handleCallback($this->callbackUri(), new AuthenticationRequestContext(
+            'https://someredirect',
+            'expected-state',
+            'expected-nonce',
+            'some-code-verifier'
+        ));
+
+        $mockClient->testRequest()->assertBodyContains('code_verifier=some-code-verifier');
+    }
+
+    #[Test]
+    public function shouldNotSendCodeVerifierToTokenEndpointWhenPkceIsNotUsed(): void
+    {
+        [$target, $mockClient] = $this->createClient();
+
+        $target->handleCallback($this->callbackUri(), $this->context());
+
+        $this->assertStringNotContainsString('code_verifier', (string)$mockClient->testRequest()->getBody());
+    }
+
+    #[Test]
     #[DataProvider('invalidNonceClaim')]
     public function shouldThrowExceptionWhenNonceClaimIsInvalid(array $claims): void
     {

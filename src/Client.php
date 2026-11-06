@@ -185,10 +185,12 @@ class Client
         }
 
         // Only the parameters of the Token Request are sent. The `state` and `nonce` are for validation only.
-        $parsed = $this->token([
+        // The `code_verifier` is a parameter of the Token Request when PKCE is used.
+        $parsed = $this->token(array_filter([
             'code' => $parameters['code'],
             'redirect_uri' => $context->redirectUri,
-        ]);
+            'code_verifier' => $context->codeVerifier,
+        ], static fn ($value) => null !== $value));
 
         $tokenSet = new TokenSet($this->config, $parsed, $this->clockTolerance());
 
