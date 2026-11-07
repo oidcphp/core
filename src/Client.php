@@ -19,6 +19,7 @@ use OpenIDConnect\Http\Response\InitiateLogoutRedirectResponseBuilder;
 use OpenIDConnect\Jwt\Verifiers\IdTokenVerifier;
 use OpenIDConnect\Traits\ClockTolerance;
 use OpenIDConnect\Traits\ConfigAwareTrait;
+use ParagonIE\ConstantTime\Base64UrlSafe;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UriInterface;
@@ -131,15 +132,30 @@ class Client
     /**
      * Create a context for a new Authentication Request, with random `state` and `nonce`.
      *
+     * PKCE is used by default, so the context has a random `codeVerifier`, and `createAuthorize*Response()` adds the
+     * `code_challenge` of it. To handle PKCE by yourself, give your own `$codeVerifier`, or turn `$pkce` off and
+     * give `code_challenge` and `code_challenge_method` as parameters of `createAuthorize*Response()`.
+     *
      * @param string $redirectUri
+     * @param bool $pkce Create a random `codeVerifier` when `$codeVerifier` is not given
+     * @param string|null $codeVerifier Used as it is, so it MUST follow RFC 7636 section 4.1
      * @return AuthenticationRequestContext
+     * @link https://www.rfc-editor.org/rfc/rfc7636.html#section-4.1
      */
-    public function createAuthenticationRequestContext(string $redirectUri): AuthenticationRequestContext
-    {
+    public function createAuthenticationRequestContext(
+        string $redirectUri,
+        bool $pkce = true,
+        ?string $codeVerifier = null
+    ): AuthenticationRequestContext {
+        // It is RECOMMENDED that the output of a suitable random number generator be used to create a
+        // 32-octet sequence. The octet sequence is then base64url-encoded to produce a 43-octet URL safe string.
+        $codeVerifier ??= $pkce ? Base64UrlSafe::encodeUnpadded(random_bytes(32)) : null;
+
         return new AuthenticationRequestContext(
             $redirectUri,
             $this->generateRandomString(),
-            $this->generateRandomString()
+            $this->generateRandomString(),
+            $codeVerifier
         );
     }
 
@@ -155,6 +171,7 @@ class Client
      * @link https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation
      * @link https://www.rfc-editor.org/rfc/rfc6749.html#section-4.1.2
      * @link https://www.rfc-editor.org/rfc/rfc6749.html#section-4.1.3
+     * @link https://www.rfc-editor.org/rfc/rfc7636.html#section-4.5
      */
     public function handleCallback(UriInterface $callbackUri, AuthenticationRequestContext $context): TokenSet
     {
@@ -294,11 +311,26 @@ class Client
             return $parameters;
         }
 
-        return array_merge($parameters, [
+        $parameters = array_merge($parameters, [
             'redirect_uri' => $context->redirectUri,
             'state' => $context->state,
             'nonce' => $context->nonce,
         ]);
+
+        // The `code_verifier` is never sent in the Authentication Request. A `code_challenge` given by the caller is
+        // kept, so the caller is able to handle PKCE by itself.
+        if (null !== $context->codeVerifier && !isset($parameters['code_challenge'])) {
+            // code_challenge = BASE64URL-ENCODE(SHA256(ASCII(code_verifier)))
+            //
+            // If the client is capable of using "S256", it MUST use "S256", as "S256" is Mandatory To Implement (MTI)
+            // on the server.
+            //
+            // The `code_challenge_method` defaults to "plain" if it is not present, so "S256" is always given.
+            $parameters['code_challenge'] = Base64UrlSafe::encodeUnpadded(hash('sha256', $context->codeVerifier, true));
+            $parameters['code_challenge_method'] = 'S256';
+        }
+
+        return $parameters;
     }
 
     /**

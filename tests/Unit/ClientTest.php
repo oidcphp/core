@@ -242,6 +242,69 @@ class ClientTest extends TestCase
     }
 
     #[Test]
+    public function shouldCreateContextWithRandomCodeVerifierByDefault(): void
+    {
+        $a = $this->target->createAuthenticationRequestContext('https://someredirect');
+        $b = $this->target->createAuthenticationRequestContext('https://someredirect');
+
+        $this->assertMatchesRegularExpression('/^[A-Za-z0-9\-._~]{43}$/', $a->codeVerifier);
+        $this->assertNotSame($a->codeVerifier, $b->codeVerifier);
+    }
+
+    #[Test]
+    public function shouldCreateContextWithoutCodeVerifierWhenPkceIsOff(): void
+    {
+        $actual = $this->target->createAuthenticationRequestContext('https://someredirect', false);
+
+        $this->assertNull($actual->codeVerifier);
+
+        $location = $this->target->createAuthorizeRedirectResponse([], $actual)->getHeaderLine('Location');
+
+        $this->assertStringNotContainsString('code_challenge', $location);
+    }
+
+    #[Test]
+    public function shouldUseGivenCodeVerifierWhenCreateContext(): void
+    {
+        $actual = $this->target->createAuthenticationRequestContext('https://someredirect', true, 'my-own-verifier');
+
+        $this->assertSame('my-own-verifier', $actual->codeVerifier);
+    }
+
+    #[Test]
+    public function shouldAddS256CodeChallengeWhenContextHasCodeVerifier(): void
+    {
+        // The test vector of RFC 7636 Appendix B
+        $context = new AuthenticationRequestContext(
+            'https://someredirect',
+            'some-state',
+            'some-nonce',
+            'dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk'
+        );
+
+        $location = $this->target->createAuthorizeRedirectResponse([], $context)->getHeaderLine('Location');
+
+        $this->assertStringContainsString('code_challenge=E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM', $location);
+        $this->assertStringContainsString('code_challenge_method=S256', $location);
+        $this->assertStringNotContainsString('code_verifier', $location);
+        $this->assertStringNotContainsString('dBjftJeZ4CVP', $location);
+    }
+
+    #[Test]
+    public function shouldKeepCodeChallengeGivenByCallerWhenContextHasCodeVerifier(): void
+    {
+        $context = $this->target->createAuthenticationRequestContext('https://someredirect');
+
+        $location = $this->target->createAuthorizeRedirectResponse([
+            'code_challenge' => 'caller-challenge',
+            'code_challenge_method' => 'S256',
+        ], $context)->getHeaderLine('Location');
+
+        $this->assertStringContainsString('code_challenge=caller-challenge', $location);
+        $this->assertSame(1, substr_count($location, 'code_challenge='));
+    }
+
+    #[Test]
     public function shouldReturnAuthorizationUrlWhenCallCreateAuthorizeRedirectResponse(): void
     {
         $actual = $this->target->createAuthorizeRedirectResponse([
