@@ -2,11 +2,10 @@
 
 namespace Tests\Unit;
 
-use InvalidArgumentException;
 use Laminas\Diactoros\Request;
 use MilesChou\Psr\Http\Client\Testing\MockClient;
+use OpenIDConnect\AuthenticationRequestContext;
 use OpenIDConnect\Client;
-use OpenIDConnect\Exceptions\OAuth2ClientException;
 use OpenIDConnect\Exceptions\OAuth2ServerException;
 use PHPUnit\Framework\Attributes\Test;
 use Psr\Http\Client\NetworkExceptionInterface;
@@ -35,11 +34,23 @@ class ClientTest extends TestCase
     #[Test]
     public function shouldReturnPreparedStateWhenInitParameters(): void
     {
-        $this->target->initAuthorizationParameters([
+        $this->target->initAuthenticationRequestContext([
             'state' => 'expected-state',
         ]);
 
         $this->assertSame('expected-state', $this->target->getState());
+    }
+
+    #[Test]
+    public function shouldStillInitContextWhenCallDeprecatedInitAuthorizationParameters(): void
+    {
+        $this->target->initAuthorizationParameters([
+            'state' => 'expected-state',
+            'nonce' => 'expected-nonce',
+        ]);
+
+        $this->assertSame('expected-state', $this->target->getState());
+        $this->assertSame('expected-nonce', $this->target->getNonce());
     }
 
     #[Test]
@@ -189,107 +200,109 @@ class ClientTest extends TestCase
     }
 
     #[Test]
-    public function shouldThrowInvalidArgumentExceptionWhenHandleCallbackWithParameterMissingCode(): void
+    public function shouldCreateContextWithRandomStateAndNonce(): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        $a = $this->target->createAuthenticationRequestContext('https://someredirect');
+        $b = $this->target->createAuthenticationRequestContext('https://someredirect');
 
-        $this->target->handleCallback([]);
+        $this->assertSame('https://someredirect', $a->redirectUri);
+        $this->assertSame(32, strlen($a->state));
+        $this->assertSame(32, strlen($a->nonce));
+        $this->assertNotSame($a->state, $a->nonce);
+        $this->assertNotSame($a->state, $b->state);
+        $this->assertNotSame($a->nonce, $b->nonce);
     }
 
     #[Test]
-    public function shouldThrowInvalidArgumentExceptionWhenHandleCallbackWithParameterGivenStateButChecksNot(): void
+    public function shouldUseValuesOfContextWhenCallCreateAuthorizeRedirectResponse(): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        $context = new AuthenticationRequestContext('https://context-redirect', 'context-state', 'context-nonce');
 
-        $mockClient = (new MockClient())->appendResponseWithJson(
-            $this->createFakeTokenSetParameter(['access_token' => 'some-access-token'])
-        );
+        $actualLocation = $this->target->createAuthorizeRedirectResponse([
+            'redirect_uri' => 'https://ignored',
+        ], $context)->getHeaderLine('Location');
 
-        $this->target->setHttpClient($mockClient);
-
-        $this->target->handleCallback([
-            'code' => 'whatever',
-            'redirect_uri' => 'whatever',
-            'state' => 'whatever',
-        ]);
+        $this->assertStringContainsString('state=context-state', $actualLocation);
+        $this->assertStringContainsString('nonce=context-nonce', $actualLocation);
+        $this->assertStringContainsString('redirect_uri=' . rawurlencode('https://context-redirect'), $actualLocation);
+        $this->assertStringNotContainsString('ignored', $actualLocation);
     }
 
     #[Test]
-    public function shouldThrowOAuth2ClientExceptionWhenHandleCallbackWithChecksGivenStateButParametersNot(): void
+    public function shouldReturnStateAndNonceOfContextWhenCallCreateAuthorizeRedirectResponse(): void
     {
-        $this->expectException(OAuth2ClientException::class);
+        $this->target->createAuthorizeRedirectResponse([], new AuthenticationRequestContext(
+            'https://context-redirect',
+            'context-state',
+            'context-nonce'
+        ));
 
-        $mockClient = (new MockClient())->appendResponseWithJson(
-            $this->createFakeTokenSetParameter(['access_token' => 'some-access-token'])
-        );
-
-        $this->target->setHttpClient($mockClient);
-
-        $this->target->handleCallback([
-            'code' => 'whatever',
-            'redirect_uri' => 'whatever',
-        ], [
-            'state' => 'whatever',
-        ]);
+        $this->assertSame('context-state', $this->target->getState());
+        $this->assertSame('context-nonce', $this->target->getNonce());
     }
 
     #[Test]
-    public function shouldThrowOAuth2ClientExceptionWhenHandleCallbackWithBothGivenButNotSame(): void
+    public function shouldCreateContextWithRandomCodeVerifierByDefault(): void
     {
-        $this->expectException(OAuth2ClientException::class);
+        $a = $this->target->createAuthenticationRequestContext('https://someredirect');
+        $b = $this->target->createAuthenticationRequestContext('https://someredirect');
 
-        $mockClient = (new MockClient())->appendResponseWithJson(
-            $this->createFakeTokenSetParameter(['access_token' => 'some-access-token'])
-        );
-
-        $this->target->setHttpClient($mockClient);
-
-        $this->target->handleCallback([
-            'code' => 'whatever',
-            'redirect_uri' => 'whatever',
-            'state' => 'foo',
-        ], [
-            'state' => 'bar',
-        ]);
+        $this->assertMatchesRegularExpression('/^[A-Za-z0-9\-._~]{43}$/', $a->codeVerifier);
+        $this->assertNotSame($a->codeVerifier, $b->codeVerifier);
     }
 
     #[Test]
-    public function shouldReturnTokenWhenHandleCallbackWithStateIsNotGiven(): void
+    public function shouldCreateContextWithoutCodeVerifierWhenPkceIsOff(): void
     {
-        $mockClient = (new MockClient())->appendResponseWithJson(
-            $this->createFakeTokenSetParameter(['access_token' => 'some-access-token'])
-        );
+        $actual = $this->target->createAuthenticationRequestContext('https://someredirect', false);
 
-        $this->target->setHttpClient($mockClient);
+        $this->assertNull($actual->codeVerifier);
 
-        $actual = $this->target->handleCallback([
-            'code' => 'whatever',
-            'redirect_uri' => 'whatever',
-        ]);
+        $location = $this->target->createAuthorizeRedirectResponse([], $actual)->getHeaderLine('Location');
 
-        $this->assertSame('some-access-token', $actual->accessToken());
+        $this->assertStringNotContainsString('code_challenge', $location);
     }
 
     #[Test]
-    public function shouldReturnTokenWhenHandleCallbackWithBothGivenAndSame(): void
+    public function shouldUseGivenCodeVerifierWhenCreateContext(): void
     {
-        $mockClient = (new MockClient())->appendResponseWithJson(
-            $this->createFakeTokenSetParameter(['access_token' => 'some-access-token'])
-        );
+        $actual = $this->target->createAuthenticationRequestContext('https://someredirect', true, 'my-own-verifier');
 
-        $this->target->setHttpClient($mockClient);
-
-        $actual = $this->target->handleCallback([
-            'code' => 'whatever',
-            'redirect_uri' => 'whatever',
-            'state' => 'foo',
-        ], [
-            'state' => 'foo',
-        ]);
-
-        $this->assertSame('some-access-token', $actual->accessToken());
+        $this->assertSame('my-own-verifier', $actual->codeVerifier);
     }
 
+    #[Test]
+    public function shouldAddS256CodeChallengeWhenContextHasCodeVerifier(): void
+    {
+        // The test vector of RFC 7636 Appendix B
+        $context = new AuthenticationRequestContext(
+            'https://someredirect',
+            'some-state',
+            'some-nonce',
+            'dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk'
+        );
+
+        $location = $this->target->createAuthorizeRedirectResponse([], $context)->getHeaderLine('Location');
+
+        $this->assertStringContainsString('code_challenge=E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM', $location);
+        $this->assertStringContainsString('code_challenge_method=S256', $location);
+        $this->assertStringNotContainsString('code_verifier', $location);
+        $this->assertStringNotContainsString('dBjftJeZ4CVP', $location);
+    }
+
+    #[Test]
+    public function shouldKeepCodeChallengeGivenByCallerWhenContextHasCodeVerifier(): void
+    {
+        $context = $this->target->createAuthenticationRequestContext('https://someredirect');
+
+        $location = $this->target->createAuthorizeRedirectResponse([
+            'code_challenge' => 'caller-challenge',
+            'code_challenge_method' => 'S256',
+        ], $context)->getHeaderLine('Location');
+
+        $this->assertStringContainsString('code_challenge=caller-challenge', $location);
+        $this->assertSame(1, substr_count($location, 'code_challenge='));
+    }
 
     #[Test]
     public function shouldReturnAuthorizationUrlWhenCallCreateAuthorizeRedirectResponse(): void
@@ -335,7 +348,7 @@ class ClientTest extends TestCase
         $this->assertNull($this->target->getNonce());
         $this->assertNull($this->target->getState());
 
-        $this->target->initAuthorizationParameters();
+        $this->target->initAuthenticationRequestContext();
 
         $this->assertNotNull($this->target->getNonce());
         $this->assertNotNull($this->target->getState());
@@ -344,12 +357,12 @@ class ClientTest extends TestCase
     #[Test]
     public function shouldReturnSameStateAndNonceWhenInitAuthorizationParametersTwice(): void
     {
-        $this->target->initAuthorizationParameters();
+        $this->target->initAuthenticationRequestContext();
 
         $expectedNonce = $this->target->getNonce();
         $expectedState = $this->target->getState();
 
-        $this->target->initAuthorizationParameters();
+        $this->target->initAuthenticationRequestContext();
 
         $this->assertSame($expectedNonce, $this->target->getNonce());
         $this->assertSame($expectedState, $this->target->getState());
@@ -361,7 +374,7 @@ class ClientTest extends TestCase
         $expectedNonce = 'some-nonce';
         $expectedState = 'some-state';
 
-        $this->target->initAuthorizationParameters([
+        $this->target->initAuthenticationRequestContext([
             'nonce' => $expectedNonce,
             'state' => $expectedState,
         ]);
