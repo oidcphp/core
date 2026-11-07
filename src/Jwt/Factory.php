@@ -22,8 +22,8 @@ class Factory
     }
 
     /**
-     * @param array $payload
-     * @param array $header
+     * @param array<string, mixed> $payload
+     * @param array<string, mixed> $header
      * @param int $jwk
      * @return JWS
      */
@@ -44,6 +44,12 @@ class Factory
             ->build();
     }
 
+    /**
+     * @param array<string, mixed> $payload
+     * @param array<string, mixed> $header
+     * @param int $jwk
+     * @return string
+     */
     public function createSerializeJws(array $payload = [], $header = [], int $jwk = 0): string
     {
         return (new CompactSerializer())->serialize(
@@ -51,6 +57,9 @@ class Factory
         );
     }
 
+    /**
+     * @return array<string>
+     */
     protected function resolveAlgorithms(): array
     {
         $providerMetadata = $this->config->providerMetadata();

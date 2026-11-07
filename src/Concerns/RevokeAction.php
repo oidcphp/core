@@ -8,6 +8,9 @@ use Psr\Http\Client\ClientExceptionInterface;
 
 trait RevokeAction
 {
+    /**
+     * @param array<string, mixed> $parameters
+     */
     public function revoke(string $token, array $parameters = []): void
     {
         $request = (new RevokeRequestBuilder($this->config, $this->httpClient))

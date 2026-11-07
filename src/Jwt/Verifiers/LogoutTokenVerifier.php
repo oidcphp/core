@@ -30,6 +30,10 @@ class LogoutTokenVerifier implements JwtVerifier
     use ClockTolerance;
     use ConfigAwareTrait;
 
+    /**
+     * @param Config $config
+     * @param int $clockTolerance
+     */
     public function __construct(Config $config, $clockTolerance = 10)
     {
         $this->config = $config;

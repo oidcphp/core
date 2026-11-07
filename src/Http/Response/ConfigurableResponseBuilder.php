@@ -35,6 +35,9 @@ class ConfigurableResponseBuilder implements ResponseBuilder
         $this->setHttpClient($httpClient);
     }
 
+    /**
+     * @param array<string, mixed> $parameters
+     */
     public function build(array $parameters): ResponseInterface
     {
         switch ($this->method) {

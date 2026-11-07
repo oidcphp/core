@@ -19,8 +19,12 @@ clean-all: clean
 check:
 	php ${GLOBAL_CONFIG} vendor/bin/phpcs --parallel=${PROCESSORS_NUM}
 
+.PHONY: analyse
+analyse:
+	php ${GLOBAL_CONFIG} vendor/bin/phpstan analyse --memory-limit=-1
+
 .PHONY: test
-test: clean check
+test: clean check analyse
 	php -d xdebug.mode=coverage vendor/bin/phpunit
 
 .PHONY: coverage

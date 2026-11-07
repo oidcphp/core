@@ -39,6 +39,9 @@ jobs:
       - name: Execute phpcs
         run: php vendor/bin/phpcs
 
+      - name: Execute phpstan
+        run: php vendor/bin/phpstan analyse --memory-limit=-1 --no-progress
+
       - name: Execute tests
         run: php -d xdebug.mode=coverage vendor/bin/phpunit
 

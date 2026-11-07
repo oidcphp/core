@@ -24,7 +24,7 @@ class NonceChecker implements ClaimChecker
         $this->nonce = $nonce;
     }
 
-    public function checkClaim($value): void
+    public function checkClaim(mixed $value): void
     {
         if ($this->nonce !== null && $value !== $this->nonce) {
             throw new InvalidClaimException('Nonce check error', self::CLAIM_NAME, $value);

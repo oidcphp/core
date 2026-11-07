@@ -15,7 +15,7 @@ trait ParameterTrait
     protected static array $snakeCache = [];
 
     /**
-     * @var array
+     * @var array<mixed>
      */
     protected array $parameters = [];
 
@@ -45,7 +45,7 @@ trait ParameterTrait
 
     /**
      * @param string $name
-     * @param array $arguments
+     * @param array<mixed> $arguments
      * @return mixed
      */
     public function __call(string $name, array $arguments)
@@ -60,7 +60,8 @@ trait ParameterTrait
     }
 
     /**
-     * @inheritDoc
+     * @param mixed $item
+     * @return static
      */
     public function append($item)
     {
@@ -69,6 +70,9 @@ trait ParameterTrait
         return $this;
     }
 
+    /**
+     * @param array-key $key
+     */
     public function assertHasKey($key): void
     {
         if (!$this->has($key)) {
@@ -76,6 +80,9 @@ trait ParameterTrait
         }
     }
 
+    /**
+     * @param array<array-key> $keys
+     */
     public function assertHasKeys(array $keys): void
     {
         foreach ($keys as $key) {
@@ -83,11 +90,19 @@ trait ParameterTrait
         }
     }
 
+    /**
+     * @param array-key $key
+     * @param mixed $default
+     * @return mixed
+     */
     public function get($key, $default = null)
     {
         return $this->parameters[$key] ?? $default;
     }
 
+    /**
+     * @param array-key $key
+     */
     public function has($key): bool
     {
         return isset($this->parameters[$key]);
@@ -101,6 +116,10 @@ trait ParameterTrait
         return $this->toArray();
     }
 
+    /**
+     * @param array<mixed> $parameters
+     * @return static
+     */
     public function merge(array $parameters)
     {
         $this->parameters = array_merge($this->parameters, $parameters);
@@ -108,6 +127,10 @@ trait ParameterTrait
         return $this;
     }
 
+    /**
+     * @param array-key $key
+     * @return mixed
+     */
     public function require($key)
     {
         $this->assertHasKey($key);
@@ -115,11 +138,19 @@ trait ParameterTrait
         return $this->get($key);
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function toArray(): array
     {
         return $this->parameters;
     }
 
+    /**
+     * @param array-key $key
+     * @param mixed $value
+     * @return static
+     */
     public function with($key, $value)
     {
         $clone = clone $this;

@@ -19,13 +19,13 @@ use ParagonIE\ConstantTime\Base64UrlSafe;
 class Claims
 {
     /**
-     * @var array
+     * @var array<string, mixed>
      */
     private $claims;
 
     /**
      * @param string $token
-     * @return mixed
+     * @return Claims
      */
     public static function createFromJwsString(string $token): Claims
     {
@@ -38,8 +38,7 @@ class Claims
         $claims = json_decode(
             Base64UrlSafe::decode($parts[1]),
             true,
-            512,
-            JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+            512
         );
 
         return new self($claims);
@@ -61,7 +60,7 @@ class Claims
     }
 
     /**
-     * @param array $claims
+     * @param array<string, mixed> $claims
      */
     public function __construct(array $claims = [])
     {
@@ -71,7 +70,7 @@ class Claims
     /**
      * Return all claims
      *
-     * @return array
+     * @return array<string, mixed>
      */
     public function all(): array
     {
@@ -115,7 +114,7 @@ class Claims
     /**
      * Audience(s) that this ID Token is intended for
      *
-     * @return string|array
+     * @return string|array<string>
      */
     public function aud()
     {
@@ -193,7 +192,7 @@ class Claims
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
      */
     public function events(): array
     {

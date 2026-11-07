@@ -30,6 +30,10 @@ class IdTokenVerifier implements JwtVerifier
     use ClockTolerance;
     use ConfigAwareTrait;
 
+    /**
+     * @param Config $config
+     * @param int $clockTolerance
+     */
     public function __construct(Config $config, $clockTolerance = 10)
     {
         $this->config = $config;
@@ -80,7 +84,7 @@ class IdTokenVerifier implements JwtVerifier
     }
 
     /**
-     * @param array $check
+     * @param array<string, mixed> $check
      * @return ClaimCheckerManager
      */
     private function createClaimCheckerManager($check = []): ClaimCheckerManager

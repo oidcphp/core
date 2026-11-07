@@ -16,16 +16,26 @@ trait ClientMetadataAwareTrait
         return $this->clientMetadata;
     }
 
+    /**
+     * @param mixed $default
+     * @return mixed
+     */
     public function getClientMetadata(string $name, $default = null)
     {
         return $this->clientMetadata->get($name, $default);
     }
 
+    /**
+     * @return mixed
+     */
     public function requireClientMetadata(string $name)
     {
         return $this->clientMetadata->require($name);
     }
 
+    /**
+     * @return static
+     */
     public function setClientMetadata(ClientMetadata $clientMetadata)
     {
         $this->clientMetadata = $clientMetadata;
