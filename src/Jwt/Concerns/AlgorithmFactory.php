@@ -8,14 +8,14 @@ use OutOfRangeException;
 trait AlgorithmFactory
 {
     /**
-     * @var array
+     * @var array<string, Algorithm>
      */
     private $algorithms = [];
 
     /**
      * Extra algorithms
      *
-     * @var array
+     * @var array<mixed>
      */
     private $extraAlgorithms = [];
 
@@ -27,6 +27,7 @@ trait AlgorithmFactory
      */
     public function createAlgorithm(string $alias): Algorithm
     {
+        /** @var array<string, class-string<Algorithm>> $aliases */
         static $aliases = [
             // See https://www.rfc-editor.org/rfc/rfc7518.html#section-3.1
             'ES256' => 'Jose\\Component\\Signature\\Algorithm\\ES256',
@@ -90,8 +91,8 @@ trait AlgorithmFactory
     /**
      * Create instances use aliases
      *
-     * @param array $aliases
-     * @return array
+     * @param array<string> $aliases
+     * @return array<Algorithm>
      */
     public function createAlgorithms(array $aliases): array
     {
@@ -101,7 +102,9 @@ trait AlgorithmFactory
     }
 
     /**
-     * @param array $alg
+     * Accepts either variadic aliases or a single array of aliases.
+     *
+     * @param string|array<string> ...$alg
      * @return static
      */
     public function withAlgorithm(...$alg)

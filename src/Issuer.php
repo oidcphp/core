@@ -71,7 +71,7 @@ class Issuer
      * Send request to discovery endpoint and process response
      *
      * @param string $uri
-     * @return array
+     * @return array<string, mixed>
      * @throws ClientExceptionInterface
      */
     private function sendRequest(string $uri): array
@@ -85,7 +85,7 @@ class Issuer
 
     /**
      * @param ResponseInterface $response
-     * @return array
+     * @return array<string, mixed>
      */
     private function processResponse(ResponseInterface $response): array
     {

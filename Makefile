@@ -2,6 +2,7 @@
 
 PROCESSORS_NUM := $(shell getconf _NPROCESSORS_ONLN)
 GLOBAL_CONFIG := -d memory_limit=-1
+CACHED_PHP_FILES = $(shell git diff --cached --name-only --diff-filter=ACM | grep -e '^src' | grep -e '\.php$$')
 
 .PHONY: all
 all: test
@@ -17,10 +18,21 @@ clean-all: clean
 
 .PHONY: check
 check:
-	php ${GLOBAL_CONFIG} vendor/bin/phpcs --parallel=${PROCESSORS_NUM}
+	@mkdir -p .cache/phpcs
+	php ${GLOBAL_CONFIG} vendor/bin/phpcs --parallel=${PROCESSORS_NUM} --cache=.cache/phpcs/.phpcs.cache
+
+.PHONY: analyse
+analyse:
+	php ${GLOBAL_CONFIG} vendor/bin/phpstan analyse --memory-limit=-1
+
+.PHONY: fast-stan
+fast-stan:
+	@if [ -z "${CACHED_PHP_FILES}" ]; then echo "No staged PHP files in src, skip."; else \
+		php ${GLOBAL_CONFIG} vendor/bin/phpstan analyse --memory-limit=-1 ${CACHED_PHP_FILES}; \
+	fi
 
 .PHONY: test
-test: clean check
+test: clean check analyse
 	php -d xdebug.mode=coverage vendor/bin/phpunit
 
 .PHONY: coverage

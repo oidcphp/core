@@ -15,7 +15,7 @@ trait Psr7ResponseBuilder
      * Using form post
      *
      * @param string $uri
-     * @param array $parameters
+     * @param array<string, mixed> $parameters
      * @return string
      */
     protected function generateFormPostHtml(string $uri, array $parameters = []): string
@@ -36,7 +36,7 @@ HTML;
 
     /**
      * @param string $key
-     * @param array $parameters
+     * @param array<string, mixed> $parameters
      * @return string
      */
     protected function generateFormPostHtmlWithProviderConfig(string $key, array $parameters = []): string
@@ -46,7 +46,7 @@ HTML;
 
     /**
      * @param string $uri
-     * @param array $parameters
+     * @param array<string, mixed> $parameters
      * @return UriInterface
      */
     protected function generateRedirectUri(string $uri, array $parameters = []): UriInterface
@@ -57,7 +57,7 @@ HTML;
 
     /**
      * @param string $key
-     * @param array $parameters
+     * @param array<string, mixed> $parameters
      * @return UriInterface
      */
     protected function generateRedirectUriWithProviderConfig(string $key, array $parameters = []): UriInterface

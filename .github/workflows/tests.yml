@@ -36,8 +36,20 @@ jobs:
           max_attempts: 5
           command: composer update --${{ matrix.stability }} --prefer-dist --no-interaction --no-progress
 
+      - name: Cache static analysis results
+        uses: actions/cache@v4
+        with:
+          path: .cache
+          key: static-analysis-php${{ matrix.php }}-${{ matrix.stability }}-${{ hashFiles('composer.json') }}-${{ github.sha }}
+          restore-keys: |
+            static-analysis-php${{ matrix.php }}-${{ matrix.stability }}-${{ hashFiles('composer.json') }}-
+            static-analysis-php${{ matrix.php }}-
+
       - name: Execute phpcs
         run: php vendor/bin/phpcs
+
+      - name: Execute phpstan
+        run: php vendor/bin/phpstan analyse --memory-limit=-1 --no-progress
 
       - name: Execute tests
         run: php -d xdebug.mode=coverage vendor/bin/phpunit

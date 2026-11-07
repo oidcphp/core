@@ -11,10 +11,10 @@ use Psr\Http\Client\ClientExceptionInterface;
 trait TokenAction
 {
     /**
-     * @param array $parameters
-     * @param array $checks
+     * @param array<string, mixed> $parameters
+     * @param array<string, mixed> $checks
      * @param GrantType|null $grant Default is AuthorizationCode.
-     * @return array
+     * @return array<string, mixed>
      */
     public function token(array $parameters = [], array $checks = [], ?GrantType $grant = null): array
     {

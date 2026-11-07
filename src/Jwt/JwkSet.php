@@ -12,12 +12,12 @@ use InvalidArgumentException;
 class JwkSet
 {
     /**
-     * @var array
+     * @var array<array<string, mixed>>
      */
     private $keys = [];
 
     /**
-     * @param array $jwkSet
+     * @param array<string, mixed> $jwkSet
      */
     public function __construct(array $jwkSet = [])
     {
@@ -25,7 +25,7 @@ class JwkSet
     }
 
     /**
-     * @param array $jwkSet
+     * @param array<string, mixed> $jwkSet
      * @return JwkSet
      */
     public function init(array $jwkSet): JwkSet
@@ -40,7 +40,7 @@ class JwkSet
     }
 
     /**
-     * @param array $jwk
+     * @param array<string, mixed> $jwk
      * @return JwkSet
      */
     public function add(array $jwk): JwkSet
@@ -65,7 +65,7 @@ class JwkSet
 
     /**
      * @param int|string $index
-     * @return array<mixed>
+     * @return array<string, mixed>
      */
     public function get($index): array
     {
@@ -77,7 +77,7 @@ class JwkSet
     }
 
     /**
-     * @return array
+     * @return array{keys: list<array<string, mixed>>}
      */
     public function jsonSerialize(): array
     {
@@ -87,7 +87,7 @@ class JwkSet
     /**
      * Transfer to array
      *
-     * @return array
+     * @return array{keys: list<array<string, mixed>>}
      */
     public function toArray(): array
     {

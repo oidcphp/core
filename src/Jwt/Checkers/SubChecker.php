@@ -8,7 +8,7 @@ use Jose\Component\Checker\ClaimChecker;
 
 class SubChecker implements ClaimChecker
 {
-    public function checkClaim($value): void
+    public function checkClaim(mixed $value): void
     {
         // @TODO
     }
