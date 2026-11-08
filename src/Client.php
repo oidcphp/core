@@ -62,7 +62,7 @@ class Client
     /**
      * Create PSR-7 response with form post
      *
-     * @param array $parameters
+     * @param array<string, mixed> $parameters
      * @return ResponseInterface
      */
     public function createAuthorizeFormPostResponse(array $parameters = []): ResponseInterface
@@ -74,7 +74,7 @@ class Client
     /**
      * Create PSR-7 redirect response
      *
-     * @param array $parameters
+     * @param array<string, mixed> $parameters
      * @return ResponseInterface
      */
     public function createAuthorizeRedirectResponse(array $parameters = []): ResponseInterface
@@ -86,7 +86,7 @@ class Client
     /**
      * Create PSR-7 redirect response
      *
-     * @param array $parameters
+     * @param array<string, mixed> $parameters
      * @return ResponseInterface
      */
     public function initiateLogoutFormPostResponse(array $parameters = []): ResponseInterface
@@ -98,7 +98,7 @@ class Client
     /**
      * Create PSR-7 redirect response
      *
-     * @param array $parameters
+     * @param array<string, mixed> $parameters
      * @return ResponseInterface
      */
     public function initiateLogoutRedirectResponse(array $parameters = []): ResponseInterface
@@ -124,8 +124,8 @@ class Client
     }
 
     /**
-     * @param array $parameters
-     * @param array $checks
+     * @param array<string, mixed> $parameters
+     * @param array<string, mixed> $checks
      * @return TokenSet
      */
     public function handleCallback(array $parameters, array $checks = []): TokenSet
@@ -187,12 +187,12 @@ class Client
     /**
      * Generate the random string
      *
-     * @param int $length
+     * @param int<2, max> $length
      * @return string
      */
     protected function generateRandomString(int $length = 32): string
     {
-        return bin2hex(random_bytes($length / 2));
+        return bin2hex(random_bytes($length >> 1));
     }
 
     /**
@@ -231,7 +231,7 @@ class Client
      * Parse response
      *
      * @param ResponseInterface $response
-     * @return array
+     * @return array<string, mixed>
      */
     private function parseResponse(ResponseInterface $response): array
     {

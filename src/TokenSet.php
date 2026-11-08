@@ -17,13 +17,8 @@ class TokenSet implements JsonSerializable
     use ParameterTrait;
 
     /**
-     * @var Claims
-     */
-    private $claims;
-
-    /**
      * @param Config $config
-     * @param array $parameters An array from token endpoint response body
+     * @param array<string, mixed> $parameters An array from token endpoint response body
      * @param int $clockTolerance
      */
     public function __construct(Config $config, array $parameters, $clockTolerance = 10)
@@ -50,7 +45,7 @@ class TokenSet implements JsonSerializable
 
     public function idTokenClaims(): Claims
     {
-        return Claims::createFromJwsString($this->idToken());
+        return Claims::createFromJwsString($this->require('id_token'));
     }
 
     public function refreshToken(): ?string
@@ -58,6 +53,9 @@ class TokenSet implements JsonSerializable
         return $this->get('refresh_token');
     }
 
+    /**
+     * @return array<string>|null
+     */
     public function scope(): ?array
     {
         if (!$this->has('scope')) {

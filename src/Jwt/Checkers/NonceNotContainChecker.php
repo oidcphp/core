@@ -12,7 +12,7 @@ use OpenIDConnect\Exceptions\OpenIDProviderException;
  */
 class NonceNotContainChecker implements ClaimChecker
 {
-    public function checkClaim($value): void
+    public function checkClaim(mixed $value): void
     {
         throw new OpenIDProviderException("Should not contain 'nonce' claim");
     }

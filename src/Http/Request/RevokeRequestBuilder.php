@@ -34,7 +34,7 @@ class RevokeRequestBuilder
     }
 
     /**
-     * @param array $parameters
+     * @param array<string, mixed> $parameters
      * @return PendingRequest
      */
     public function build(array $parameters): PendingRequest

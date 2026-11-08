@@ -18,16 +18,26 @@ trait ProviderMetadataAwareTrait
         return $this->providerMetadata;
     }
 
+    /**
+     * @param mixed $default
+     * @return mixed
+     */
     public function getProviderMetadata(string $name, $default = null)
     {
         return $this->providerMetadata->get($name, $default);
     }
 
+    /**
+     * @return mixed
+     */
     public function requireProviderMetadata(string $name)
     {
         return $this->providerMetadata->require($name);
     }
 
+    /**
+     * @return static
+     */
     public function setProviderMetadata(ProviderMetadata $providerMetadata)
     {
         $this->providerMetadata = $providerMetadata;

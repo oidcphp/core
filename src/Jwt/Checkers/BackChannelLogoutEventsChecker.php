@@ -14,7 +14,7 @@ class BackChannelLogoutEventsChecker implements ClaimChecker
 {
     private const CLAIM_NAME = 'events';
 
-    public function checkClaim($value): void
+    public function checkClaim(mixed $value): void
     {
         if (!array_key_exists('http://schemas.openid.net/event/backchannel-logout', $value)) {
             throw new RuntimeException('Bad events, http://schemas.openid.net/event/backchannel-logout not found.');

@@ -15,22 +15,22 @@ use OpenIDConnect\Traits\ParameterTrait;
  * @method string|null authorizationEndpoint()
  * @method string|null jwksUri()
  * @method string|null registrationEndpoint()
- * @method array|null scopesSupported()
- * @method array|null responseTypesSupported()
- * @method array|null responseModesSupported()
- * @method array|null grantTypesSupported()
+ * @method array<string>|null scopesSupported()
+ * @method array<string>|null responseTypesSupported()
+ * @method array<string>|null responseModesSupported()
+ * @method array<string>|null grantTypesSupported()
  * @method string|null tokenEndpoint()
- * @method array|null tokenEndpointAuthMethodsSupported()
- * @method array|null tokenEndpointAuthSigningAlgValuesSupported()
+ * @method array<string>|null tokenEndpointAuthMethodsSupported()
+ * @method array<string>|null tokenEndpointAuthSigningAlgValuesSupported()
  * @method string|null revocationEndpoint()
- * @method array|null revocationEndpointAuthMethodsSupported()
- * @method array|null revocationEndpointAuthSigningAlgValuesSupported()
+ * @method array<string>|null revocationEndpointAuthMethodsSupported()
+ * @method array<string>|null revocationEndpointAuthSigningAlgValuesSupported()
  * @method string|null introspectionEndpoint()
- * @method array|null introspectionEndpointAuthMethodsSupported()
- * @method array|null introspectionEndpointAuthSigningAlgValuesSupported()
- * @method array|null codeChallengeMethodsSupported() PKCE [RFC7636] code challenge methods supported
+ * @method array<string>|null introspectionEndpointAuthMethodsSupported()
+ * @method array<string>|null introspectionEndpointAuthSigningAlgValuesSupported()
+ * @method array<string>|null codeChallengeMethodsSupported() PKCE [RFC7636] code challenge methods supported
  * @method string|null serviceDocumentation() URL of a page containing human-readable information for developer
- * @method array|null uiLocalesSupported() Languages and scripts supported for the user interface
+ * @method array<string>|null uiLocalesSupported() Languages and scripts supported for the user interface
  * @method string|null opPolicyUri() URL that how the client can use the data provided
  * @method string|null opTosUri() URL that about the authorization server's terms of service
  *
@@ -46,8 +46,8 @@ class ProviderMetadata implements JsonSerializable
     private JwkSet $jwkSet;
 
     /**
-     * @param array $metadata
-     * @param array $jwkSet
+     * @param array<string, mixed> $metadata
+     * @param array<string, mixed> $jwkSet
      */
     public function __construct(array $metadata, array $jwkSet = [])
     {
@@ -56,7 +56,7 @@ class ProviderMetadata implements JsonSerializable
     }
 
     /**
-     * @param array $jwk JWK array
+     * @param array<string, mixed> $jwk JWK array
      * @return ProviderMetadata
      */
     public function addJwk(array $jwk): ProviderMetadata

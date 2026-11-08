@@ -13,8 +13,8 @@ interface JwtVerifier
 {
     /**
      * @param string $token
-     * @param array $extraMandatoryClaims
-     * @param array $check
+     * @param array<string> $extraMandatoryClaims
+     * @param array<string, mixed> $check
      * @return Claims
      */
     public function verify(string $token, $extraMandatoryClaims = [], $check = []): Claims;
