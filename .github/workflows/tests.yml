@@ -36,6 +36,10 @@ jobs:
           max_attempts: 5
           command: composer update --${{ matrix.stability }} --prefer-dist --no-interaction --no-progress
 
+      - name: Audit dependencies
+        if: matrix.stability == 'prefer-stable'
+        run: composer audit
+
       - name: Execute phpcs
         run: php vendor/bin/phpcs
 
