@@ -19,7 +19,6 @@ use OpenIDConnect\Http\Response\InitiateLogoutRedirectResponseBuilder;
 use OpenIDConnect\Jwt\Verifiers\IdTokenVerifier;
 use OpenIDConnect\Traits\ClockTolerance;
 use OpenIDConnect\Traits\ConfigAwareTrait;
-use ParagonIE\ConstantTime\Base64UrlSafe;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UriInterface;
@@ -136,18 +135,15 @@ class Client
      *
      * @param string $redirectUri
      * @param bool $pkce Create a random `codeVerifier` when `$codeVerifier` is not given
-     * @param string|null $codeVerifier Used as it is, so it MUST follow RFC 7636 section 4.1
+     * @param PkceCodeVerifier|null $codeVerifier Used as it is, instead of a random one
      * @return AuthenticationRequestContext
-     * @link https://www.rfc-editor.org/rfc/rfc7636.html#section-4.1
      */
     public function createAuthenticationRequestContext(
         string $redirectUri,
         bool $pkce = true,
-        ?string $codeVerifier = null
+        ?PkceCodeVerifier $codeVerifier = null
     ): AuthenticationRequestContext {
-        // It is RECOMMENDED that the output of a suitable random number generator be used to create a
-        // 32-octet sequence. The octet sequence is then base64url-encoded to produce a 43-octet URL safe string.
-        $codeVerifier ??= $pkce ? Base64UrlSafe::encodeUnpadded(random_bytes(32)) : null;
+        $codeVerifier ??= $pkce ? PkceCodeVerifier::generate() : null;
 
         return new AuthenticationRequestContext(
             $redirectUri,
@@ -204,7 +200,7 @@ class Client
         $parsed = $this->token(array_filter([
             'code' => $parameters['code'],
             'redirect_uri' => $context->redirectUri,
-            'code_verifier' => $context->codeVerifier,
+            'code_verifier' => $context->codeVerifier?->value(),
         ], static fn ($value) => null !== $value));
 
         $tokenSet = new TokenSet($this->config, $parsed, $this->clockTolerance());
@@ -316,13 +312,11 @@ class Client
         // The `code_verifier` is never sent in the Authentication Request. A `code_challenge` given by the caller is
         // kept, so the caller is able to handle PKCE by itself.
         if (null !== $context->codeVerifier && !isset($parameters['code_challenge'])) {
-            // code_challenge = BASE64URL-ENCODE(SHA256(ASCII(code_verifier)))
-            //
             // If the client is capable of using "S256", it MUST use "S256", as "S256" is Mandatory To Implement (MTI)
             // on the server.
             //
             // The `code_challenge_method` defaults to "plain" if it is not present, so "S256" is always given.
-            $parameters['code_challenge'] = Base64UrlSafe::encodeUnpadded(hash('sha256', $context->codeVerifier, true));
+            $parameters['code_challenge'] = $context->codeVerifier->challenge();
             $parameters['code_challenge_method'] = 'S256';
         }
 

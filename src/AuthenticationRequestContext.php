@@ -15,7 +15,8 @@ namespace OpenIDConnect;
  * - `nonce`: used to validate the ID Token, it is not a parameter of the Token Request.
  * - `redirectUri`: it MUST be sent to the Token Endpoint with the same value as in the Authentication Request.
  * - `codeVerifier`: only when PKCE is used. It is sent to the Token Endpoint as `code_verifier`, and the
- *   `code_challenge` of the Authentication Request is derived from it.
+ *   `code_challenge` of the Authentication Request is derived from it. Keep its string value in the session, and
+ *   create it again with `new PkceCodeVerifier($value)`.
  *
  * Use {@see \OpenIDConnect\Client::createAuthenticationRequestContext()} to get random `state` and `nonce`. Keep
  * the values in the user's session, and remove them once the callback is handled, so a `state` cannot be used twice.
@@ -33,7 +34,7 @@ final class AuthenticationRequestContext
         public readonly string $redirectUri,
         public readonly string $state,
         public readonly string $nonce,
-        public readonly ?string $codeVerifier = null
+        public readonly ?PkceCodeVerifier $codeVerifier = null
     ) {
     }
 }

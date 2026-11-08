@@ -6,6 +6,7 @@ use Laminas\Diactoros\Request;
 use MilesChou\Psr\Http\Client\Testing\MockClient;
 use OpenIDConnect\AuthenticationRequestContext;
 use OpenIDConnect\Client;
+use OpenIDConnect\PkceCodeVerifier;
 use OpenIDConnect\Exceptions\OAuth2ServerException;
 use PHPUnit\Framework\Attributes\Test;
 use Psr\Http\Client\NetworkExceptionInterface;
@@ -247,8 +248,9 @@ class ClientTest extends TestCase
         $a = $this->target->createAuthenticationRequestContext('https://someredirect');
         $b = $this->target->createAuthenticationRequestContext('https://someredirect');
 
-        $this->assertMatchesRegularExpression('/^[A-Za-z0-9\-._~]{43}$/', $a->codeVerifier);
-        $this->assertNotSame($a->codeVerifier, $b->codeVerifier);
+        $this->assertInstanceOf(PkceCodeVerifier::class, $a->codeVerifier);
+        $this->assertSame(43, strlen($a->codeVerifier->value()));
+        $this->assertNotSame($a->codeVerifier->value(), $b->codeVerifier->value());
     }
 
     #[Test]
@@ -266,9 +268,11 @@ class ClientTest extends TestCase
     #[Test]
     public function shouldUseGivenCodeVerifierWhenCreateContext(): void
     {
-        $actual = $this->target->createAuthenticationRequestContext('https://someredirect', true, 'my-own-verifier');
+        $verifier = new PkceCodeVerifier('dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk');
 
-        $this->assertSame('my-own-verifier', $actual->codeVerifier);
+        $actual = $this->target->createAuthenticationRequestContext('https://someredirect', true, $verifier);
+
+        $this->assertSame($verifier, $actual->codeVerifier);
     }
 
     #[Test]
@@ -279,7 +283,7 @@ class ClientTest extends TestCase
             'https://someredirect',
             'some-state',
             'some-nonce',
-            'dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk'
+            new PkceCodeVerifier('dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk')
         );
 
         $location = $this->target->createAuthorizeRedirectResponse([], $context)->getHeaderLine('Location');
