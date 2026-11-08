@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace OpenIDConnect;
 
+use OpenIDConnect\Contracts\PkceCodeVerifierInterface;
+use OpenIDConnect\Traits\PkceCodeVerifierTrait;
 use ParagonIE\ConstantTime\Base64UrlSafe;
 
 /**
@@ -14,8 +16,10 @@ use ParagonIE\ConstantTime\Base64UrlSafe;
  *
  * @link https://www.rfc-editor.org/rfc/rfc7636.html#section-4.2
  */
-final class S256PkceCodeVerifier extends AbstractPkceCodeVerifier
+final class S256PkceCodeVerifier implements PkceCodeVerifierInterface
 {
+    use PkceCodeVerifierTrait;
+
     public const METHOD = 'S256';
 
     /**

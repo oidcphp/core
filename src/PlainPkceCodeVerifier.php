@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace OpenIDConnect;
 
+use OpenIDConnect\Contracts\PkceCodeVerifierInterface;
+use OpenIDConnect\Traits\PkceCodeVerifierTrait;
+
 /**
  * The `code_verifier` with the "plain" method.
  *
@@ -12,8 +15,10 @@ namespace OpenIDConnect;
  *
  * @link https://www.rfc-editor.org/rfc/rfc7636.html#section-4.2
  */
-final class PlainPkceCodeVerifier extends AbstractPkceCodeVerifier
+final class PlainPkceCodeVerifier implements PkceCodeVerifierInterface
 {
+    use PkceCodeVerifierTrait;
+
     public const METHOD = 'plain';
 
     /**

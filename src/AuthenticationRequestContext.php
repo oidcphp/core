@@ -19,7 +19,8 @@ use OpenIDConnect\Contracts\PkceCodeVerifierInterface;
  * - `redirectUri`: it MUST be sent to the Token Endpoint with the same value as in the Authentication Request.
  * - `codeVerifier`: only when PKCE is used. It is sent to the Token Endpoint as `code_verifier`, and the
  *   `code_challenge` of the Authentication Request is derived from it. Keep its `challengeMethod()` and string value in
- *   the session, and create it again with `AbstractPkceCodeVerifier::fromMethod()`.
+ *   the session, and create the same class again with `new S256PkceCodeVerifier($value)` or
+ *   `new PlainPkceCodeVerifier($value)`.
  *
  * `state` and `nonce` are always present, and always validated. For the flows which do not send them, use
  * {@see UnsafeAuthenticationRequestContext}.
