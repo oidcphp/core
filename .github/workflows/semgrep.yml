@@ -1,0 +1,23 @@
+name: semgrep
+
+on:
+  pull_request:
+  push:
+    branches:
+      - 0.x
+
+jobs:
+  semgrep:
+    runs-on: ubuntu-latest
+
+    container:
+      image: semgrep/semgrep
+
+    name: Semgrep CE
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Execute semgrep
+        run: semgrep scan --config p/php --metrics off --error --exclude tests
