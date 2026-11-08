@@ -154,7 +154,14 @@ class Client
         // Verify ID Token when exist
         if ($tokenSet->idToken()) {
             $idTokenVerifier = new IdTokenVerifier($this->config, $this->clockTolerance());
-            $idTokenVerifier->verify($tokenSet->idToken());
+
+            // The ID Token is received directly from the Token Endpoint here, so an unsigned ID Token
+            // is acceptable when the client registered `id_token_signed_response_alg` as `none`.
+            if ('none' === $this->config->getClientMetadata('id_token_signed_response_alg')) {
+                $idTokenVerifier->verifyUnsigned($tokenSet->idToken());
+            } else {
+                $idTokenVerifier->verify($tokenSet->idToken());
+            }
         }
 
         return $tokenSet;
