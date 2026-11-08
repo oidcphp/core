@@ -13,7 +13,7 @@ use OpenIDConnect\Exceptions\OAuth2ServerException;
 use OpenIDConnect\Exceptions\RelyingPartyException;
 use OpenIDConnect\Http\Query;
 use OpenIDConnect\Jwt\Factory as JwtFactory;
-use OpenIDConnect\PkceCodeVerifier;
+use OpenIDConnect\S256PkceCodeVerifier;
 use OpenIDConnect\UnsafeAuthenticationRequestContext;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
@@ -103,7 +103,7 @@ class ClientHandleOpenIDConnectCallbackTest extends TestCase
             'https://someredirect',
             'expected-state',
             'expected-nonce',
-            new PkceCodeVerifier('dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk')
+            new S256PkceCodeVerifier('dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk')
         ));
 
         $mockClient->testRequest()->assertBodyContains('code_verifier=dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk');

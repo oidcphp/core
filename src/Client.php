@@ -9,6 +9,7 @@ use MilesChou\Psr\Http\Client\HttpClientAwareTrait;
 use MilesChou\Psr\Http\Client\HttpClientInterface;
 use MilesChou\Psr\Http\Message\HttpFactoryAwareTrait;
 use OpenIDConnect\Contracts\AuthenticationRequestContextInterface;
+use OpenIDConnect\Contracts\PkceCodeVerifierInterface;
 use OpenIDConnect\Exceptions\OAuth2ClientException;
 use OpenIDConnect\Exceptions\OAuth2ServerException;
 use OpenIDConnect\Http\Authentication\ClientAuthenticationAwareTrait;
@@ -136,15 +137,15 @@ class Client
      *
      * @param string $redirectUri
      * @param bool $pkce Create a random `codeVerifier` when `$codeVerifier` is not given
-     * @param PkceCodeVerifier|null $codeVerifier Used as it is, instead of a random one
+     * @param PkceCodeVerifierInterface|null $codeVerifier Used as it is, instead of a random "S256" one
      * @return AuthenticationRequestContext
      */
     public function createAuthenticationRequestContext(
         string $redirectUri,
         bool $pkce = true,
-        ?PkceCodeVerifier $codeVerifier = null
+        ?PkceCodeVerifierInterface $codeVerifier = null
     ): AuthenticationRequestContext {
-        $codeVerifier ??= $pkce ? PkceCodeVerifier::generate() : null;
+        $codeVerifier ??= $pkce ? S256PkceCodeVerifier::generate() : null;
 
         return new AuthenticationRequestContext(
             $redirectUri,
@@ -323,17 +324,14 @@ class Client
             'nonce' => $context->nonce(),
         ], static fn ($value) => null !== $value));
 
-        // The `code_verifier` is never sent in the Authentication Request. A `code_challenge` given by the caller is
-        // kept, so the caller is able to handle PKCE by itself.
+        // Only the `code_challenge` is sent, which is the `code_verifier` itself with the "plain" method.
+        // A `code_challenge` given by the caller is kept, so the caller is able to handle PKCE by itself.
         $codeVerifier = $context->codeVerifier();
 
         if (null !== $codeVerifier && !isset($parameters['code_challenge'])) {
-            // If the client is capable of using "S256", it MUST use "S256", as "S256" is Mandatory To Implement (MTI)
-            // on the server.
-            //
-            // The `code_challenge_method` defaults to "plain" if it is not present, so "S256" is always given.
+            // The `code_challenge_method` defaults to "plain" if it is not present, so it is always given.
             $parameters['code_challenge'] = $codeVerifier->challenge();
-            $parameters['code_challenge_method'] = 'S256';
+            $parameters['code_challenge_method'] = $codeVerifier->challengeMethod();
         }
 
         return $parameters;

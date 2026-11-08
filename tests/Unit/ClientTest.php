@@ -6,9 +6,11 @@ use Laminas\Diactoros\Request;
 use MilesChou\Psr\Http\Client\Testing\MockClient;
 use OpenIDConnect\AuthenticationRequestContext;
 use OpenIDConnect\Client;
-use OpenIDConnect\PkceCodeVerifier;
-use OpenIDConnect\UnsafeAuthenticationRequestContext;
+use OpenIDConnect\Contracts\PkceCodeVerifierInterface;
 use OpenIDConnect\Exceptions\OAuth2ServerException;
+use OpenIDConnect\PlainPkceCodeVerifier;
+use OpenIDConnect\S256PkceCodeVerifier;
+use OpenIDConnect\UnsafeAuthenticationRequestContext;
 use PHPUnit\Framework\Attributes\Test;
 use Psr\Http\Client\NetworkExceptionInterface;
 use Psr\Http\Message\RequestInterface;
@@ -249,7 +251,7 @@ class ClientTest extends TestCase
         $a = $this->target->createAuthenticationRequestContext('https://someredirect');
         $b = $this->target->createAuthenticationRequestContext('https://someredirect');
 
-        $this->assertInstanceOf(PkceCodeVerifier::class, $a->codeVerifier);
+        $this->assertInstanceOf(PkceCodeVerifierInterface::class, $a->codeVerifier);
         $this->assertSame(43, strlen($a->codeVerifier->value()));
         $this->assertNotSame($a->codeVerifier->value(), $b->codeVerifier->value());
     }
@@ -269,7 +271,7 @@ class ClientTest extends TestCase
     #[Test]
     public function shouldUseGivenCodeVerifierWhenCreateContext(): void
     {
-        $verifier = new PkceCodeVerifier('dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk');
+        $verifier = new S256PkceCodeVerifier('dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk');
 
         $actual = $this->target->createAuthenticationRequestContext('https://someredirect', true, $verifier);
 
@@ -284,7 +286,7 @@ class ClientTest extends TestCase
             'https://someredirect',
             'some-state',
             'some-nonce',
-            new PkceCodeVerifier('dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk')
+            new S256PkceCodeVerifier('dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk')
         );
 
         $location = $this->target->createAuthorizeRedirectResponse([], $context)->getHeaderLine('Location');
@@ -293,6 +295,22 @@ class ClientTest extends TestCase
         $this->assertStringContainsString('code_challenge_method=S256', $location);
         $this->assertStringNotContainsString('code_verifier', $location);
         $this->assertStringNotContainsString('dBjftJeZ4CVP', $location);
+    }
+
+    #[Test]
+    public function shouldAddPlainCodeChallengeWhenContextHasPlainCodeVerifier(): void
+    {
+        $context = new AuthenticationRequestContext(
+            'https://someredirect',
+            'some-state',
+            'some-nonce',
+            new PlainPkceCodeVerifier('dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk')
+        );
+
+        $location = $this->target->createAuthorizeRedirectResponse([], $context)->getHeaderLine('Location');
+
+        $this->assertStringContainsString('code_challenge=dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk', $location);
+        $this->assertStringContainsString('code_challenge_method=plain', $location);
     }
 
     #[Test]

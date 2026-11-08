@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OpenIDConnect;
 
 use OpenIDConnect\Contracts\AuthenticationRequestContextInterface;
+use OpenIDConnect\Contracts\PkceCodeVerifierInterface;
 
 /**
  * An {@see AuthenticationRequestContext} whose `state` and `nonce` are optional.
@@ -27,7 +28,7 @@ final class UnsafeAuthenticationRequestContext implements AuthenticationRequestC
         public readonly string $redirectUri,
         public readonly ?string $state = null,
         public readonly ?string $nonce = null,
-        public readonly ?PkceCodeVerifier $codeVerifier = null
+        public readonly ?PkceCodeVerifierInterface $codeVerifier = null
     ) {
     }
 
@@ -58,7 +59,7 @@ final class UnsafeAuthenticationRequestContext implements AuthenticationRequestC
     /**
      * {@inheritDoc}
      */
-    public function codeVerifier(): ?PkceCodeVerifier
+    public function codeVerifier(): ?PkceCodeVerifierInterface
     {
         return $this->codeVerifier;
     }

@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace OpenIDConnect\Contracts;
 
-use OpenIDConnect\PkceCodeVerifier;
-
 /**
  * The values which the Relying Party binds to one Authentication Request, and needs again to handle the response.
  *
@@ -34,5 +32,5 @@ interface AuthenticationRequestContextInterface
     /**
      * The `code_verifier` of PKCE, or `null` when PKCE is not used.
      */
-    public function codeVerifier(): ?PkceCodeVerifier;
+    public function codeVerifier(): ?PkceCodeVerifierInterface;
 }

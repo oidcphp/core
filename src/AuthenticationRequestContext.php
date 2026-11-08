@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OpenIDConnect;
 
 use OpenIDConnect\Contracts\AuthenticationRequestContextInterface;
+use OpenIDConnect\Contracts\PkceCodeVerifierInterface;
 
 /**
  * The values the Relying Party binds to one Authentication Request, and needs again when the response comes back.
@@ -17,8 +18,8 @@ use OpenIDConnect\Contracts\AuthenticationRequestContextInterface;
  * - `nonce`: used to validate the ID Token, it is not a parameter of the Token Request.
  * - `redirectUri`: it MUST be sent to the Token Endpoint with the same value as in the Authentication Request.
  * - `codeVerifier`: only when PKCE is used. It is sent to the Token Endpoint as `code_verifier`, and the
- *   `code_challenge` of the Authentication Request is derived from it. Keep its string value in the session, and
- *   create it again with `new PkceCodeVerifier($value)`.
+ *   `code_challenge` of the Authentication Request is derived from it. Keep its `challengeMethod()` and string value in
+ *   the session, and create it again with `AbstractPkceCodeVerifier::fromMethod()`.
  *
  * `state` and `nonce` are always present, and always validated. For the flows which do not send them, use
  * {@see UnsafeAuthenticationRequestContext}.
@@ -39,7 +40,7 @@ final class AuthenticationRequestContext implements AuthenticationRequestContext
         public readonly string $redirectUri,
         public readonly string $state,
         public readonly string $nonce,
-        public readonly ?PkceCodeVerifier $codeVerifier = null
+        public readonly ?PkceCodeVerifierInterface $codeVerifier = null
     ) {
     }
 
@@ -70,7 +71,7 @@ final class AuthenticationRequestContext implements AuthenticationRequestContext
     /**
      * {@inheritDoc}
      */
-    public function codeVerifier(): ?PkceCodeVerifier
+    public function codeVerifier(): ?PkceCodeVerifierInterface
     {
         return $this->codeVerifier;
     }
