@@ -42,6 +42,15 @@ The goal for the 1.x release is that `require` in `composer.json` SHOULD only de
 - Packages in `require-dev` MAY be non-PSR, since integration and testing sometimes need them.
 - The current non-PSR packages in `require` are `mileschou/psr`, `paragonie/constant_time_encoding` and `web-token/jwt-library`. Before the 1.x release, each of them MUST either have a recorded reason or be removed.
 
+## Documentation
+
+The user documentation lives in [oidcphp/docs](https://github.com/oidcphp/docs) and MUST describe the behavior of the latest release line of this library.
+
+- A pull request that changes the public API or user-visible behavior, such as a method signature, a default value, a validation step, a thrown exception, or a new feature, MUST be accompanied by a pull request to `oidcphp/docs` that updates the affected pages.
+- The pull request in this repository SHOULD link the pull request in `oidcphp/docs`. The docs pull request SHOULD NOT be merged before this one.
+- Internal refactoring without user-visible changes, tests, and CI changes do not need a docs update.
+- The documentation MUST only describe the public API. Classes and methods marked `@internal` MUST NOT be documented as something users can depend on.
+
 ## Writing
 
 - Everything in the repository and on GitHub MUST be written in English, including files, commit messages, issues, pull requests, releases, and reports.
