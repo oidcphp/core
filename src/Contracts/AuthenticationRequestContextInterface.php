@@ -16,11 +16,23 @@ use OpenIDConnect\PkceCodeVerifier;
  */
 interface AuthenticationRequestContextInterface
 {
+    /**
+     * The `redirect_uri` of the Authentication Request. The Token Request MUST send the same value.
+     */
     public function redirectUri(): string;
 
+    /**
+     * The `state` of the Authentication Request, or `null` when it was not sent.
+     */
     public function state(): ?string;
 
+    /**
+     * The `nonce` of the Authentication Request, or `null` when it was not sent.
+     */
     public function nonce(): ?string;
 
+    /**
+     * The `code_verifier` of PKCE, or `null` when PKCE is not used.
+     */
     public function codeVerifier(): ?PkceCodeVerifier;
 }

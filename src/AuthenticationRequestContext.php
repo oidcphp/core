@@ -43,21 +43,33 @@ final class AuthenticationRequestContext implements AuthenticationRequestContext
     ) {
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function redirectUri(): string
     {
         return $this->redirectUri;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function state(): string
     {
         return $this->state;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function nonce(): string
     {
         return $this->nonce;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function codeVerifier(): ?PkceCodeVerifier
     {
         return $this->codeVerifier;
