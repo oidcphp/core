@@ -7,6 +7,7 @@ use MilesChou\Psr\Http\Client\Testing\MockClient;
 use OpenIDConnect\AuthenticationRequestContext;
 use OpenIDConnect\Client;
 use OpenIDConnect\PkceCodeVerifier;
+use OpenIDConnect\UnsafeAuthenticationRequestContext;
 use OpenIDConnect\Exceptions\OAuth2ServerException;
 use PHPUnit\Framework\Attributes\Test;
 use Psr\Http\Client\NetworkExceptionInterface;
@@ -306,6 +307,17 @@ class ClientTest extends TestCase
 
         $this->assertStringContainsString('code_challenge=caller-challenge', $location);
         $this->assertSame(1, substr_count($location, 'code_challenge='));
+    }
+
+    #[Test]
+    public function shouldNotSendNonceWhenUnsafeContextHasNoNonce(): void
+    {
+        $context = new UnsafeAuthenticationRequestContext('https://context-redirect', 'context-state');
+
+        $location = $this->target->createAuthorizeRedirectResponse([], $context)->getHeaderLine('Location');
+
+        $this->assertStringContainsString('state=context-state', $location);
+        $this->assertStringNotContainsString('nonce=', $location);
     }
 
     #[Test]

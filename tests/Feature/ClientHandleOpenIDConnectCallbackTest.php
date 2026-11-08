@@ -14,6 +14,7 @@ use OpenIDConnect\Exceptions\RelyingPartyException;
 use OpenIDConnect\Http\Query;
 use OpenIDConnect\Jwt\Factory as JwtFactory;
 use OpenIDConnect\PkceCodeVerifier;
+use OpenIDConnect\UnsafeAuthenticationRequestContext;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -194,5 +195,57 @@ class ClientHandleOpenIDConnectCallbackTest extends TestCase
         [$target] = $this->createClient();
 
         $target->handleCallback($this->callbackUri(['error' => 'access_denied', 'state' => 'other']), $this->context());
+    }
+
+    #[Test]
+    public function shouldSkipStateCheckWhenUnsafeContextHasNoState(): void
+    {
+        [$target] = $this->createClient();
+
+        $actual = $target->handleCallback(
+            $this->callbackUri(['code' => 'some-code']),
+            new UnsafeAuthenticationRequestContext('https://someredirect', null, 'expected-nonce')
+        );
+
+        $this->assertSame('some-sub', $actual->idTokenClaims()->sub());
+    }
+
+    #[Test]
+    public function shouldStillCheckStateWhenUnsafeContextHasState(): void
+    {
+        $this->expectException(OAuth2ClientException::class);
+
+        [$target] = $this->createClient();
+
+        $target->handleCallback(
+            $this->callbackUri(['code' => 'some-code', 'state' => 'other']),
+            new UnsafeAuthenticationRequestContext('https://someredirect', 'expected-state')
+        );
+    }
+
+    #[Test]
+    public function shouldSkipNonceCheckWhenUnsafeContextHasNoNonce(): void
+    {
+        [$target] = $this->createClient(['nonce' => null]);
+
+        $actual = $target->handleCallback(
+            $this->callbackUri(),
+            new UnsafeAuthenticationRequestContext('https://someredirect', 'expected-state')
+        );
+
+        $this->assertSame('some-sub', $actual->idTokenClaims()->sub());
+    }
+
+    #[Test]
+    public function shouldStillCheckNonceWhenUnsafeContextHasNonce(): void
+    {
+        $this->expectException(RelyingPartyException::class);
+
+        [$target] = $this->createClient(['nonce' => 'not-the-nonce-you-sent']);
+
+        $target->handleCallback(
+            $this->callbackUri(),
+            new UnsafeAuthenticationRequestContext('https://someredirect', 'expected-state', 'expected-nonce')
+        );
     }
 }

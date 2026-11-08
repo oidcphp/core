@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace OpenIDConnect;
 
+use OpenIDConnect\Contracts\AuthenticationRequestContextInterface;
+
 /**
  * The values the Relying Party binds to one Authentication Request, and needs again when the response comes back.
  *
@@ -18,6 +20,9 @@ namespace OpenIDConnect;
  *   `code_challenge` of the Authentication Request is derived from it. Keep its string value in the session, and
  *   create it again with `new PkceCodeVerifier($value)`.
  *
+ * `state` and `nonce` are always present, and always validated. For the flows which do not send them, use
+ * {@see UnsafeAuthenticationRequestContext}.
+ *
  * Use {@see \OpenIDConnect\Client::createAuthenticationRequestContext()} to get random `state` and `nonce`. Keep
  * the values in the user's session, and remove them once the callback is handled, so a `state` cannot be used twice.
  *
@@ -28,7 +33,7 @@ namespace OpenIDConnect;
  * @link https://www.rfc-editor.org/rfc/rfc6749.html#section-10.12
  * @link https://www.rfc-editor.org/rfc/rfc7636.html#section-4.5
  */
-final class AuthenticationRequestContext
+final class AuthenticationRequestContext implements AuthenticationRequestContextInterface
 {
     public function __construct(
         public readonly string $redirectUri,
@@ -36,5 +41,25 @@ final class AuthenticationRequestContext
         public readonly string $nonce,
         public readonly ?PkceCodeVerifier $codeVerifier = null
     ) {
+    }
+
+    public function redirectUri(): string
+    {
+        return $this->redirectUri;
+    }
+
+    public function state(): string
+    {
+        return $this->state;
+    }
+
+    public function nonce(): string
+    {
+        return $this->nonce;
+    }
+
+    public function codeVerifier(): ?PkceCodeVerifier
+    {
+        return $this->codeVerifier;
     }
 }
