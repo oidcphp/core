@@ -339,6 +339,19 @@ class ClientTest extends TestCase
     }
 
     #[Test]
+    public function shouldNotSendStateWhenUnsafeContextHasNoState(): void
+    {
+        $context = new UnsafeAuthenticationRequestContext('https://context-redirect', null, 'context-nonce');
+
+        $location = $this->target->createAuthorizeRedirectResponse([], $context)->getHeaderLine('Location');
+
+        $this->assertStringNotContainsString('state=', $location);
+        $this->assertStringContainsString('nonce=context-nonce', $location);
+        $this->assertNull($this->target->getState());
+        $this->assertSame('context-nonce', $this->target->getNonce());
+    }
+
+    #[Test]
     public function shouldReturnAuthorizationUrlWhenCallCreateAuthorizeRedirectResponse(): void
     {
         $actual = $this->target->createAuthorizeRedirectResponse([

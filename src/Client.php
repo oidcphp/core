@@ -46,7 +46,7 @@ class Client
     /**
      * The values of the latest Authentication Request. `getState()` and `getNonce()` read from it.
      */
-    private ?AuthenticationRequestContext $authenticationRequestContext = null;
+    private ?AuthenticationRequestContextInterface $authenticationRequestContext = null;
 
     /**
      * @param Config $config
@@ -70,7 +70,7 @@ class Client
         ?AuthenticationRequestContextInterface $context = null
     ): ResponseInterface {
         return (new AuthorizationFormPostResponseBuilder($this->config, $this->httpClient))
-            ->build($this->generateAuthorizationParameters($this->applyContext($parameters, $context)));
+            ->build($this->generateAuthorizationParameters($this->applyContext($parameters, $context), $context));
     }
 
     /**
@@ -85,7 +85,7 @@ class Client
         ?AuthenticationRequestContextInterface $context = null
     ): ResponseInterface {
         return (new AuthorizationRedirectResponseBuilder($this->config, $this->httpClient))
-            ->build($this->generateAuthorizationParameters($this->applyContext($parameters, $context)));
+            ->build($this->generateAuthorizationParameters($this->applyContext($parameters, $context), $context));
     }
 
     /**
@@ -117,7 +117,7 @@ class Client
      */
     public function getNonce(): ?string
     {
-        return $this->authenticationRequestContext?->nonce;
+        return $this->authenticationRequestContext?->nonce();
     }
 
     /**
@@ -125,7 +125,7 @@ class Client
      */
     public function getState(): ?string
     {
-        return $this->authenticationRequestContext?->state;
+        return $this->authenticationRequestContext?->state();
     }
 
     /**
@@ -247,9 +247,9 @@ class Client
         $current = $this->authenticationRequestContext;
 
         return $this->authenticationRequestContext = new AuthenticationRequestContext(
-            $options['redirect_uri'] ?? $current->redirectUri ?? '',
-            !empty($options['state']) ? $options['state'] : $current->state ?? $this->generateRandomString(),
-            !empty($options['nonce']) ? $options['nonce'] : $current->nonce ?? $this->generateRandomString()
+            $options['redirect_uri'] ?? $current?->redirectUri() ?? '',
+            !empty($options['state']) ? $options['state'] : $current?->state() ?? $this->generateRandomString(),
+            !empty($options['nonce']) ? $options['nonce'] : $current?->nonce() ?? $this->generateRandomString()
         );
     }
 
@@ -277,12 +277,20 @@ class Client
 
     /**
      * @param array<mixed> $parameters
+     * @param AuthenticationRequestContextInterface|null $context
      *
      * @return array<mixed>
      */
-    private function generateAuthorizationParameters(array $parameters): array
-    {
-        $parameters['state'] = $this->initAuthenticationRequestContext($parameters)->state;
+    private function generateAuthorizationParameters(
+        array $parameters,
+        ?AuthenticationRequestContextInterface $context = null
+    ): array {
+        if (null === $context) {
+            $parameters['state'] = $this->initAuthenticationRequestContext($parameters)->state;
+        } else {
+            // The `state` is RECOMMENDED, so a context without it does not send it.
+            $this->authenticationRequestContext = $context;
+        }
 
         if (empty($parameters['scope'])) {
             $parameters['scope'] = ['openid'];
