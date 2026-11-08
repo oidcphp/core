@@ -27,7 +27,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Execute semgrep
         run: semgrep scan --config p/php --metrics off --error --exclude tests
