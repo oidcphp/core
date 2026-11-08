@@ -171,8 +171,7 @@ class Client
     public function handleCallback(
         UriInterface $callbackUri,
         AuthenticationRequestContextInterface $context
-    ): TokenSet
-    {
+    ): TokenSet {
         $parameters = Query::parse($callbackUri->getQuery());
 
         // The `state` was sent in the Authentication Request, so the response MUST give it back unchanged.
