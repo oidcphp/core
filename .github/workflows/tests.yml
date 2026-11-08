@@ -59,4 +59,4 @@ jobs:
         run: php -d xdebug.mode=coverage vendor/bin/phpunit
 
       - name: Code coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v7
