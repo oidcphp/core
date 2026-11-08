@@ -11,6 +11,7 @@ use MilesChou\Psr\Http\Message\HttpFactoryAwareTrait;
 use OpenIDConnect\Exceptions\OAuth2ClientException;
 use OpenIDConnect\Exceptions\OAuth2ServerException;
 use OpenIDConnect\Http\Authentication\ClientAuthenticationAwareTrait;
+use OpenIDConnect\Http\Query;
 use OpenIDConnect\Http\Response\AuthorizationFormPostResponseBuilder;
 use OpenIDConnect\Http\Response\AuthorizationRedirectResponseBuilder;
 use OpenIDConnect\Http\Response\InitiateLogoutFormPostResponseBuilder;
@@ -18,8 +19,10 @@ use OpenIDConnect\Http\Response\InitiateLogoutRedirectResponseBuilder;
 use OpenIDConnect\Jwt\Verifiers\IdTokenVerifier;
 use OpenIDConnect\Traits\ClockTolerance;
 use OpenIDConnect\Traits\ConfigAwareTrait;
+use ParagonIE\ConstantTime\Base64UrlSafe;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\UriInterface;
 
 /**
  * OAuth 2.0 / OpenID Connect Client
@@ -40,14 +43,9 @@ class Client
     protected $container;
 
     /**
-     * @var null|string
+     * The values of the latest Authentication Request. `getState()` and `getNonce()` read from it.
      */
-    private $nonce;
-
-    /**
-     * @var null|string
-     */
-    private $state;
+    private ?AuthenticationRequestContext $authenticationRequestContext = null;
 
     /**
      * @param Config $config
@@ -63,24 +61,30 @@ class Client
      * Create PSR-7 response with form post
      *
      * @param array<string, mixed> $parameters
+     * @param AuthenticationRequestContext|null $context Given `state`, `nonce` and `redirect_uri` are used
      * @return ResponseInterface
      */
-    public function createAuthorizeFormPostResponse(array $parameters = []): ResponseInterface
-    {
+    public function createAuthorizeFormPostResponse(
+        array $parameters = [],
+        ?AuthenticationRequestContext $context = null
+    ): ResponseInterface {
         return (new AuthorizationFormPostResponseBuilder($this->config, $this->httpClient))
-            ->build($this->generateAuthorizationParameters($parameters));
+            ->build($this->generateAuthorizationParameters($this->applyContext($parameters, $context)));
     }
 
     /**
      * Create PSR-7 redirect response
      *
      * @param array<string, mixed> $parameters
+     * @param AuthenticationRequestContext|null $context Given `state`, `nonce` and `redirect_uri` are used
      * @return ResponseInterface
      */
-    public function createAuthorizeRedirectResponse(array $parameters = []): ResponseInterface
-    {
+    public function createAuthorizeRedirectResponse(
+        array $parameters = [],
+        ?AuthenticationRequestContext $context = null
+    ): ResponseInterface {
         return (new AuthorizationRedirectResponseBuilder($this->config, $this->httpClient))
-            ->build($this->generateAuthorizationParameters($parameters));
+            ->build($this->generateAuthorizationParameters($this->applyContext($parameters, $context)));
     }
 
     /**
@@ -112,7 +116,7 @@ class Client
      */
     public function getNonce(): ?string
     {
-        return $this->nonce;
+        return $this->authenticationRequestContext?->nonce;
     }
 
     /**
@@ -120,79 +124,133 @@ class Client
      */
     public function getState(): ?string
     {
-        return $this->state;
+        return $this->authenticationRequestContext?->state;
     }
 
     /**
-     * @param array<string, mixed> $parameters
-     * @param array<string, mixed> $checks
-     * @return TokenSet
-     * @link https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation
+     * Create a context for a new Authentication Request, with random `state` and `nonce`.
+     *
+     * PKCE is used by default, so the context has a random `codeVerifier`, and `createAuthorize*Response()` adds the
+     * `code_challenge` of it. To handle PKCE by yourself, give your own `$codeVerifier`, or turn `$pkce` off and
+     * give `code_challenge` and `code_challenge_method` as parameters of `createAuthorize*Response()`.
+     *
+     * @param string $redirectUri
+     * @param bool $pkce Create a random `codeVerifier` when `$codeVerifier` is not given
+     * @param string|null $codeVerifier Used as it is, so it MUST follow RFC 7636 section 4.1
+     * @return AuthenticationRequestContext
+     * @link https://www.rfc-editor.org/rfc/rfc7636.html#section-4.1
      */
-    public function handleCallback(array $parameters, array $checks = []): TokenSet
+    public function createAuthenticationRequestContext(
+        string $redirectUri,
+        bool $pkce = true,
+        ?string $codeVerifier = null
+    ): AuthenticationRequestContext {
+        // It is RECOMMENDED that the output of a suitable random number generator be used to create a
+        // 32-octet sequence. The octet sequence is then base64url-encoded to produce a 43-octet URL safe string.
+        $codeVerifier ??= $pkce ? Base64UrlSafe::encodeUnpadded(random_bytes(32)) : null;
+
+        return new AuthenticationRequestContext(
+            $redirectUri,
+            $this->generateRandomString(),
+            $this->generateRandomString(),
+            $codeVerifier
+        );
+    }
+
+    /**
+     * Handle the Authentication Response, and exchange the code for tokens at the Token Endpoint.
+     *
+     * The context MUST be the one which was created before redirecting the user to the OpenID Provider.
+     *
+     * @param UriInterface $callbackUri The full URI which the OpenID Provider redirected the user to
+     * @param AuthenticationRequestContext $context
+     * @return TokenSet
+     * @link https://openid.net/specs/openid-connect-core-1_0.html#AuthResponse
+     * @link https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation
+     * @link https://www.rfc-editor.org/rfc/rfc6749.html#section-4.1.2
+     * @link https://www.rfc-editor.org/rfc/rfc6749.html#section-4.1.3
+     * @link https://www.rfc-editor.org/rfc/rfc7636.html#section-4.5
+     */
+    public function handleCallback(UriInterface $callbackUri, AuthenticationRequestContext $context): TokenSet
     {
-        if (!isset($parameters['code'])) {
-            throw new InvalidArgumentException("'code' missing from the response");
-        }
+        $parameters = Query::parse($callbackUri->getQuery());
 
-        if (isset($parameters['state']) && !isset($checks['state'])) {
-            throw new InvalidArgumentException("'state' argument is missing");
-        }
-
-        if (!isset($parameters['state']) && isset($checks['state'])) {
+        // The `state` was sent in the Authentication Request, so the response MUST give it back unchanged.
+        // It is compared in constant time.
+        if (!isset($parameters['state']) || !is_string($parameters['state'])) {
             throw new OAuth2ClientException("'state' missing from the response");
         }
 
-        if (isset($parameters['state'], $checks['state']) && ($checks['state'] !== $parameters['state'])) {
-            $msg = "State mismatch, expected {$checks['state']}, got: {$parameters['state']}";
-            throw new OAuth2ClientException($msg);
+        if (!hash_equals($context->state, $parameters['state'])) {
+            throw new OAuth2ClientException('State mismatch');
         }
 
-        // The nonce is only used to validate the ID Token, it is not a parameter of the token request.
-        $parsed = $this->token($parameters, array_diff_key($checks, ['nonce' => true]));
+        // An error response is only trusted after its `state` is validated.
+        if (isset($parameters['error'])) {
+            $error = is_string($parameters['error']) ? $parameters['error'] : 'invalid_response';
+            $description = isset($parameters['error_description']) && is_string($parameters['error_description'])
+                ? ': ' . $parameters['error_description']
+                : '';
 
-        $tokenSet = new TokenSet($this->config, array_merge($checks, $parsed), $this->clockTolerance());
+            throw new OAuth2ServerException($error . $description);
+        }
+
+        if (!isset($parameters['code']) || !is_string($parameters['code'])) {
+            throw new InvalidArgumentException("'code' missing from the response");
+        }
+
+        // Only the parameters of the Token Request are sent. The `state` and `nonce` are for validation only.
+        // The `code_verifier` is a parameter of the Token Request when PKCE is used.
+        $parsed = $this->token(array_filter([
+            'code' => $parameters['code'],
+            'redirect_uri' => $context->redirectUri,
+            'code_verifier' => $context->codeVerifier,
+        ], static fn ($value) => null !== $value));
+
+        $tokenSet = new TokenSet($this->config, $parsed, $this->clockTolerance());
 
         // Verify ID Token when exist
         if ($tokenSet->idToken()) {
             $idTokenVerifier = new IdTokenVerifier($this->config, $this->clockTolerance());
 
-            // If a nonce value was sent in the Authentication Request, the nonce Claim MUST be present
-            // and its value MUST be the same as the one that was sent.
-            $hasNonce = isset($checks['nonce']);
-
-            $idTokenVerifier->verify(
-                $tokenSet->idToken(),
-                $hasNonce ? ['nonce'] : [],
-                $hasNonce ? ['nonce' => $checks['nonce']] : []
-            );
+            // 11. If a nonce value was sent in the Authentication Request, a nonce Claim MUST be present and its
+            //     value checked to verify that it is the same value as the one that was sent in the
+            //     Authentication Request.
+            //
+            // The context always has a nonce, so a nonce Claim is always required.
+            $idTokenVerifier->verify($tokenSet->idToken(), ['nonce'], ['nonce' => $context->nonce]);
         }
 
         return $tokenSet;
     }
 
     /**
-     * Initial the authorization parameters
+     * Initial the context of the Authentication Request, which `getState()` and `getNonce()` read from.
+     *
+     * The `state` and `nonce` are random unless they are given, or already initialized.
      *
      * @param array<mixed> $options
      */
+    public function initAuthenticationRequestContext(array $options = []): AuthenticationRequestContext
+    {
+        $current = $this->authenticationRequestContext;
+
+        return $this->authenticationRequestContext = new AuthenticationRequestContext(
+            $options['redirect_uri'] ?? $current->redirectUri ?? '',
+            !empty($options['state']) ? $options['state'] : $current->state ?? $this->generateRandomString(),
+            !empty($options['nonce']) ? $options['nonce'] : $current->nonce ?? $this->generateRandomString()
+        );
+    }
+
+    /**
+     * Initial the authorization parameters
+     *
+     * @param array<mixed> $options
+     * @deprecated Use {@see Client::initAuthenticationRequestContext()} instead.
+     */
     public function initAuthorizationParameters(array $options = []): void
     {
-        if (!empty($options['state'])) {
-            $this->state = $options['state'];
-        }
-
-        if (null === $this->state) {
-            $this->state = $this->generateRandomString();
-        }
-
-        if (!empty($options['nonce'])) {
-            $this->nonce = $options['nonce'];
-        }
-
-        if (null === $this->nonce) {
-            $this->nonce = $this->generateRandomString();
-        }
+        $this->initAuthenticationRequestContext($options);
     }
 
     /**
@@ -213,9 +271,7 @@ class Client
      */
     private function generateAuthorizationParameters(array $parameters): array
     {
-        $this->initAuthorizationParameters($parameters);
-
-        $parameters['state'] = $this->state;
+        $parameters['state'] = $this->initAuthenticationRequestContext($parameters)->state;
 
         if (empty($parameters['scope'])) {
             $parameters['scope'] = ['openid'];
@@ -234,6 +290,41 @@ class Client
         }
 
         $parameters['client_id'] = $this->config->requireClientMetadata('client_id');
+
+        return $parameters;
+    }
+
+    /**
+     * The values in the context win, so the Authentication Request and the later callback use the same values.
+     *
+     * @param array<mixed> $parameters
+     * @param AuthenticationRequestContext|null $context
+     * @return array<mixed>
+     */
+    private function applyContext(array $parameters, ?AuthenticationRequestContext $context): array
+    {
+        if (null === $context) {
+            return $parameters;
+        }
+
+        $parameters = array_merge($parameters, [
+            'redirect_uri' => $context->redirectUri,
+            'state' => $context->state,
+            'nonce' => $context->nonce,
+        ]);
+
+        // The `code_verifier` is never sent in the Authentication Request. A `code_challenge` given by the caller is
+        // kept, so the caller is able to handle PKCE by itself.
+        if (null !== $context->codeVerifier && !isset($parameters['code_challenge'])) {
+            // code_challenge = BASE64URL-ENCODE(SHA256(ASCII(code_verifier)))
+            //
+            // If the client is capable of using "S256", it MUST use "S256", as "S256" is Mandatory To Implement (MTI)
+            // on the server.
+            //
+            // The `code_challenge_method` defaults to "plain" if it is not present, so "S256" is always given.
+            $parameters['code_challenge'] = Base64UrlSafe::encodeUnpadded(hash('sha256', $context->codeVerifier, true));
+            $parameters['code_challenge_method'] = 'S256';
+        }
 
         return $parameters;
     }
