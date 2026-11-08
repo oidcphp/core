@@ -1,3 +1,12 @@
+# Semgrep CE: static analysis (SAST) with the community PHP ruleset.
+# - Run inside the official container image, see the "Default" GitHub Actions sample:
+#   https://docs.semgrep.dev/semgrep-ci/sample-ci-configs
+# - `--config p/php` is the PHP ruleset from the Semgrep Registry:
+#   https://semgrep.dev/p/php
+# - `--error` exits non-zero on findings, `--exclude` skips paths, `--metrics off`
+#   disables telemetry, see the CLI reference:
+#   https://docs.semgrep.dev/cli-reference
+#   https://docs.semgrep.dev/metrics
 name: semgrep
 
 on:
@@ -5,6 +14,7 @@ on:
   push:
     branches:
       - 0.x
+      - 1.x
 
 jobs:
   semgrep:
