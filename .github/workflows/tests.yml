@@ -41,7 +41,7 @@ jobs:
         run: composer audit
 
       - name: Cache static analysis results
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: .cache
           key: static-analysis-php${{ matrix.php }}-${{ matrix.stability }}-${{ hashFiles('composer.json') }}-${{ github.sha }}
