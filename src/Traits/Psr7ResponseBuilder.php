@@ -14,24 +14,61 @@ trait Psr7ResponseBuilder
     /**
      * Using form post
      *
+     * The browser submits the hidden inputs as an application/x-www-form-urlencoded body, so the
+     * inputs are built from the same name and value pairs as the query of the redirect. The names,
+     * the values and the action URI are escaped, since they can come from the application or from
+     * the provider metadata.
+     *
+     * @link https://openid.net/specs/openid-connect-core-1_0.html#FormSerialization
+     *
      * @param string $uri
      * @param array<string, mixed> $parameters
      * @return string
      */
     protected function generateFormPostHtml(string $uri, array $parameters = []): string
     {
-        $formInput = implode('', array_map(function ($value, $key) {
-            return "<input type=\"hidden\" name=\"{$key}\" value=\"{$value}\"/>";
-        }, $parameters, array_keys($parameters)));
+        $formInput = implode('', array_map(function (array $field) {
+            return '<input type="hidden" name="' . $this->escapeHtml($field[0])
+                . '" value="' . $this->escapeHtml($field[1]) . '"/>';
+        }, $this->formFields($parameters)));
+
+        $action = $this->escapeHtml($uri);
 
         return <<< HTML
 <!DOCTYPE html>
+<html>
 <head><title>Requesting Authorization</title></head>
 <body onload="javascript:document.forms[0].submit()">
-<form method="post" action="{$uri}">{$formInput}</form>
+<form method="post" action="{$action}">{$formInput}</form>
 </body>
 </html>
 HTML;
+    }
+
+    /**
+     * Name and value pairs of the parameters, flattened in the same way as the query of the redirect
+     *
+     * @param array<string, mixed> $parameters
+     * @return array<array{string, string}>
+     */
+    private function formFields(array $parameters): array
+    {
+        $query = Query::build($parameters);
+
+        if ($query === '') {
+            return [];
+        }
+
+        return array_map(static function (string $pair): array {
+            [$name, $value] = array_pad(explode('=', $pair, 2), 2, '');
+
+            return [rawurldecode($name), rawurldecode($value)];
+        }, explode('&', $query));
+    }
+
+    private function escapeHtml(string $value): string
+    {
+        return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, 'UTF-8');
     }
 
     /**
