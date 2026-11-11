@@ -5,11 +5,8 @@ declare(strict_types=1);
 namespace OpenIDConnect\Http;
 
 use function array_map;
-use function array_pad;
-use function explode;
 use function htmlspecialchars;
 use function implode;
-use function rawurldecode;
 
 use const ENT_HTML5;
 use const ENT_QUOTES;
@@ -54,7 +51,7 @@ final class Html
         $formInput = implode('', array_map(static function (array $field): string {
             return '<input type="hidden" name="' . self::escape($field[0])
                 . '" value="' . self::escape($field[1]) . '"/>';
-        }, self::formFields($parameters)));
+        }, Query::buildPairs($parameters)));
 
         $action = self::escape($action);
 
@@ -67,27 +64,5 @@ final class Html
 </body>
 </html>
 HTML;
-    }
-
-    /**
-     * Name and value pairs of the parameters, flattened in the same way as the query of the redirect
-     *
-     * @param array<string, mixed> $parameters
-     * @return array<array{string, string}>
-     */
-    private static function formFields(array $parameters): array
-    {
-        // buildUriQuery() encodes per RFC 3986, which rawurldecode() reverses
-        $query = Query::buildUriQuery($parameters);
-
-        if ($query === '') {
-            return [];
-        }
-
-        return array_map(static function (string $pair): array {
-            [$name, $value] = array_pad(explode('=', $pair, 2), 2, '');
-
-            return [rawurldecode($name), rawurldecode($value)];
-        }, explode('&', $query));
     }
 }
