@@ -79,6 +79,19 @@ class LogoutTokenVerifierTest extends TestCase
                 ],
             ],
         ];
+
+        // iat a few seconds in the future, within the default clock tolerance
+        yield [
+            [
+                'iss' => 'some-iss',
+                'aud' => 'some-aud',
+                'iat' => time() + 5,
+                'sub' => 'some-sub',
+                'events' => [
+                    'http://schemas.openid.net/event/backchannel-logout' => new stdClass(),
+                ],
+            ],
+        ];
     }
 
     #[Test]
@@ -117,6 +130,20 @@ class LogoutTokenVerifierTest extends TestCase
                 'iss' => 'some-iss',
                 'aud' => 'invalid-aud',
                 'iat' => time(),
+                'sub' => 'some-sub',
+                'events' => [
+                    'http://schemas.openid.net/event/backchannel-logout' => new stdClass(),
+                ],
+            ],
+        ];
+
+        // iat in the future
+        yield [
+            RelyingPartyException::class,
+            [
+                'iss' => 'some-iss',
+                'aud' => 'some-aud',
+                'iat' => time() + 3600,
                 'sub' => 'some-sub',
                 'events' => [
                     'http://schemas.openid.net/event/backchannel-logout' => new stdClass(),

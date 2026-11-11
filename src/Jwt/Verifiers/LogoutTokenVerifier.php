@@ -18,6 +18,7 @@ use OpenIDConnect\Jwt\Checkers\NonceNotContainChecker;
 use OpenIDConnect\Jwt\ClaimCheckerManagerBuilder;
 use OpenIDConnect\Jwt\Claims;
 use OpenIDConnect\Jwt\Factory as JwtFactory;
+use OpenIDConnect\Jwt\SystemClock;
 use OpenIDConnect\Traits\ClockTolerance;
 use OpenIDConnect\Traits\ConfigAwareTrait;
 use UnexpectedValueException;
@@ -102,7 +103,7 @@ class LogoutTokenVerifier implements JwtVerifier
         //     validated in ID Tokens.
         $builder->add(AudienceChecker::class, $this->config->requireClientMetadata('client_id'))
             ->add(IssuerChecker::class, [$this->config->requireProviderMetadata('issuer')])
-            ->add(IssuedAtChecker::class, $this->clockTolerance());
+            ->add(IssuedAtChecker::class, clock: new SystemClock(), allowedTimeDrift: $this->clockTolerance());
 
         // 5.  Verify that the Logout Token contains an events Claim whose
         //     value is JSON object containing the member name
