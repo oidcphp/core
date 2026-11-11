@@ -61,5 +61,9 @@ jobs:
       - name: Execute tests
         run: php -d xdebug.mode=coverage vendor/bin/phpunit
 
+      # CODECOV_TOKEN is the global upload token of the oidcphp organization on Codecov, stored as an
+      # organization secret. Pull requests from forks get no secrets and upload without a token.
       - name: Code coverage
         uses: codecov/codecov-action@v7
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
