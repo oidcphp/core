@@ -61,11 +61,14 @@ Thanks to @KazeNoYumeX for the first contribution in #46.
 ## 5. Create the draft
 
 1. Show the notes to the user, together with the pull requests that were left out and why, and the results of step 3. Wait for the user to confirm or edit.
-2. Write the confirmed notes to a temporary file outside the repository, and create the draft:
+2. Create the draft with the confirmed notes on stdin (`--notes-file -`), in a quoted heredoc so that the shell does not expand the backticks and `$` in the notes. No temporary file is needed, so the release cannot be created from a file that failed to be written:
 
    ```sh
-   gh release create v<version> --draft --target 0.x --title v<version> --notes-file <file>
+   gh release create v<version> --draft --target 0.x --title v<version> --notes-file - <<'EOF'
+   <notes>
+   EOF
    ```
 
-   To update an existing draft instead: `gh release edit v<version> --notes-file <file>`.
-3. Report the URL of the draft. Do not run `gh release edit --draft=false` or publish the release in any other way.
+   To update an existing draft instead: `gh release edit v<version> --notes-file - <<'EOF'`, with the same heredoc.
+3. Read the draft back and compare it with the confirmed notes: `gh release view v<version> --json isDraft,body`. It must be a draft, and the body must not be empty.
+4. Report the URL of the draft. Do not run `gh release edit --draft=false` or publish the release in any other way.
