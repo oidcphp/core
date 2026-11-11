@@ -48,7 +48,10 @@ class ConfigurableResponseBuilder implements ResponseBuilder
                         (string)$this->generateRedirectUriWithProviderConfig($this->key, $parameters)
                     );
             case self::METHOD_FORM:
+                // The form carries values such as state and nonce, so it must not be cached.
                 return $this->httpClient->createResponse()
+                    ->withHeader('Content-Type', 'text/html; charset=utf-8')
+                    ->withHeader('Cache-Control', 'no-store')
                     ->withBody($this->httpClient->createStream(
                         $this->generateFormPostHtmlWithProviderConfig($this->key, $parameters)
                     ));

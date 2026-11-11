@@ -3,6 +3,7 @@
 namespace OpenIDConnect\Traits;
 
 use MilesChou\Psr\Http\Client\HttpClientAwareTrait;
+use OpenIDConnect\Http\Html;
 use OpenIDConnect\Http\Query;
 use Psr\Http\Message\UriInterface;
 
@@ -14,24 +15,15 @@ trait Psr7ResponseBuilder
     /**
      * Using form post
      *
+     * @see \OpenIDConnect\Http\Html::formPost()
+     *
      * @param string $uri
      * @param array<string, mixed> $parameters
      * @return string
      */
     protected function generateFormPostHtml(string $uri, array $parameters = []): string
     {
-        $formInput = implode('', array_map(function ($value, $key) {
-            return "<input type=\"hidden\" name=\"{$key}\" value=\"{$value}\"/>";
-        }, $parameters, array_keys($parameters)));
-
-        return <<< HTML
-<!DOCTYPE html>
-<head><title>Requesting Authorization</title></head>
-<body onload="javascript:document.forms[0].submit()">
-<form method="post" action="{$uri}">{$formInput}</form>
-</body>
-</html>
-HTML;
+        return Html::formPost($uri, $parameters);
     }
 
     /**

@@ -42,6 +42,33 @@ class Query
     }
 
     /**
+     * Flatten the parameters to name and value pairs, such as the hidden inputs of a form post
+     *
+     * The pairs follow the same rules as the builders: an array is flattened to `scope[0]`,
+     * `scope[1]`, ..., `null` is skipped, and `true` and `false` become `1` and `0`. The names and
+     * the values are not encoded.
+     *
+     * @param array<mixed> $params
+     * @return array<array{string, string}>
+     */
+    public static function buildPairs(array $params): array
+    {
+        // PHP has no function to flatten the parameters without encoding them, so the RFC 3986
+        // query is split and decoded with rawurldecode(), which reverses that encoding exactly.
+        $query = self::buildUriQuery($params);
+
+        if ($query === '') {
+            return [];
+        }
+
+        return array_map(static function (string $pair): array {
+            [$name, $value] = explode('=', $pair, 2);
+
+            return [rawurldecode($name), rawurldecode($value)];
+        }, explode('&', $query));
+    }
+
+    /**
      * Parse a URI query or an application/x-www-form-urlencoded body to PHP array
      *
      * Both `+` and `%20` are decoded to a space, so it parses the output of both builders.

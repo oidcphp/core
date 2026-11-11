@@ -34,4 +34,33 @@ class QueryTest extends TestCase
         $this->assertSame($params, Query::parse(Query::buildUriQuery($params)));
         $this->assertSame($params, Query::parse(Query::buildFormBody($params)));
     }
+
+    #[Test]
+    public function shouldBuildPairsWithTheRulesOfTheBuilders(): void
+    {
+        $this->assertSame([
+            ['scope[0]', 'openid'],
+            ['scope[1]', 'profile'],
+            ['prompt', '0'],
+            ['claims[id_token][acr]', 'x'],
+        ], Query::buildPairs([
+            'scope' => ['openid', 'profile'],
+            'nonce' => null,
+            'prompt' => false,
+            'claims' => ['id_token' => ['acr' => 'x']],
+        ]));
+    }
+
+    #[Test]
+    public function shouldBuildPairsWithoutEncoding(): void
+    {
+        $this->assertSame([['"a b"', " %&+=\u{00A3}"]], Query::buildPairs(['"a b"' => " %&+=\u{00A3}"]));
+    }
+
+    #[Test]
+    public function shouldBuildNoPairsWithoutParameters(): void
+    {
+        $this->assertSame([], Query::buildPairs([]));
+        $this->assertSame([], Query::buildPairs(['nonce' => null]));
+    }
 }
