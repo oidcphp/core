@@ -51,6 +51,17 @@ The user documentation lives in [oidcphp/docs](https://github.com/oidcphp/docs) 
 - Internal refactoring without user-visible changes, tests, and CI changes do not need a docs update.
 - The documentation MUST only describe the public API. Classes and methods marked `@internal` MUST NOT be documented as something users can depend on.
 
+## Releases
+
+Release notes are written for the users who upgrade, and follow the style of [Guzzle](https://github.com/guzzle/guzzle/releases).
+
+- Changes MUST be grouped under these headings, in this order, and empty headings MUST be left out: `### Security`, `### Added`, `### Changed`, `### Deprecated`, `### Removed`, `### Fixed`.
+- Each entry SHOULD be one short sentence about what changes for the user, followed by the links to the pull requests. A related issue MAY be linked as well, such as `(#43)`.
+- A security fix MUST be listed under `### Security`. When a GitHub security advisory exists, its GHSA ID MUST be added to the entry.
+- A change that can break existing code, including a removed or newly `@internal` API, SHOULD be noted in an indented line under its entry.
+- Changes without an effect on users, such as CI, tests, and internal refactoring, SHOULD NOT be listed.
+- First-time contributors SHOULD be thanked, and the notes MUST end with the `**Full Changelog**` compare link.
+
 ## Writing
 
 - Everything in the repository and on GitHub MUST be written in English, including files, commit messages, issues, pull requests, releases, and reports.
