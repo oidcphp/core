@@ -19,4 +19,14 @@ class ClientSecretPostTest extends TestCase
         $this->assertStringContainsString('client_id=c', (string)$actual->getBody());
         $this->assertStringContainsString('client_secret=s', (string)$actual->getBody());
     }
+
+    #[Test]
+    public function shouldEncodeSpaceAsPlusSignInBody(): void
+    {
+        $target = new ClientSecretPost('c', 's t');
+
+        $actual = $target->processRequest((new RequestFactory())->createRequest('GET', 'whatever'));
+
+        $this->assertStringContainsString('client_secret=s+t', (string)$actual->getBody());
+    }
 }
