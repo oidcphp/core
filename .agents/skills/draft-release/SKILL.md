@@ -61,7 +61,7 @@ Thanks to @KazeNoYumeX for the first contribution in #46.
 ## 5. Create the draft
 
 1. Show the notes to the user, together with the pull requests that were left out and why, and the results of step 3. Wait for the user to confirm or edit.
-2. Write the confirmed notes to a file in the scratchpad directory, and create the draft:
+2. Write the confirmed notes to a temporary file outside the repository, and create the draft:
 
    ```sh
    gh release create v<version> --draft --target 0.x --title v<version> --notes-file <file>
