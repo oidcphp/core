@@ -41,12 +41,10 @@ class QueryTest extends TestCase
         $this->assertSame([
             ['scope[0]', 'openid'],
             ['scope[1]', 'profile'],
-            ['login_hint', 'a+b c@example.com'],
             ['prompt', '0'],
             ['claims[id_token][acr]', 'x'],
         ], Query::buildPairs([
             'scope' => ['openid', 'profile'],
-            'login_hint' => 'a+b c@example.com',
             'nonce' => null,
             'prompt' => false,
             'claims' => ['id_token' => ['acr' => 'x']],

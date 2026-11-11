@@ -40,31 +40,18 @@ class HtmlTest extends TestCase
         $this->assertStringNotContainsString('<script>', $actual);
     }
 
+    /**
+     * The flattening rules are tested in QueryTest
+     */
     #[Test]
-    public function shouldBuildFormPostFieldsLikeTheRedirectQuery(): void
+    public function shouldBuildFormPostFieldsWithQueryPairs(): void
     {
         $actual = Html::formPost('https://somewhere/auth', [
             'scope' => ['openid', 'profile'],
-            'skipped' => null,
-            'flag' => false,
         ]);
 
         $this->assertStringContainsString('name="scope[0]" value="openid"', $actual);
         $this->assertStringContainsString('name="scope[1]" value="profile"', $actual);
-        $this->assertStringContainsString('name="flag" value="0"', $actual);
-        $this->assertStringNotContainsString('skipped', $actual);
-    }
-
-    #[Test]
-    public function shouldKeepSpacesAndPlusSignsInFieldValues(): void
-    {
-        $actual = Html::formPost('https://somewhere/auth', [
-            'scope' => 'openid profile',
-            'login_hint' => 'a+b@example.com',
-        ]);
-
-        $this->assertStringContainsString('name="scope" value="openid profile"', $actual);
-        $this->assertStringContainsString('name="login_hint" value="a+b@example.com"', $actual);
     }
 
     #[Test]

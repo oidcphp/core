@@ -62,7 +62,7 @@ class Query
         }
 
         return array_map(static function (string $pair): array {
-            [$name, $value] = array_pad(explode('=', $pair, 2), 2, '');
+            [$name, $value] = explode('=', $pair, 2);
 
             return [rawurldecode($name), rawurldecode($value)];
         }, explode('&', $query));
