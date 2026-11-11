@@ -25,4 +25,17 @@ class AuthorizationRedirectResponseBuilderTest extends TestCase
             ->assertRedirect('foo=a')
             ->assertRedirect('bar=b');
     }
+
+    #[Test]
+    public function shouldEncodeSpaceAsPercentTwentyInQuery(): void
+    {
+        $target = new AuthorizationRedirectResponseBuilder($this->createConfig(), new MockClient());
+
+        $actual = $target->build([
+            'scope' => 'openid profile',
+        ]);
+
+        TestResponse::fromBaseResponse($actual)
+            ->assertRedirect('scope=openid%20profile');
+    }
 }

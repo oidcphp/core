@@ -52,7 +52,7 @@ HTML;
     protected function generateRedirectUri(string $uri, array $parameters = []): UriInterface
     {
         return $this->httpClient->createUri($uri)
-            ->withQuery(Query::build($parameters));
+            ->withQuery(Query::buildUriQuery($parameters));
     }
 
     /**

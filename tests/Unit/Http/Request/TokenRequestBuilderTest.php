@@ -32,4 +32,18 @@ class TokenRequestBuilderTest extends TestCase
             ->assertBasicAuthentication('some_id', 'some_secret')
             ->assertHeader('content-type', 'application/x-www-form-urlencoded');
     }
+
+    #[Test]
+    public function shouldEncodeSpaceAsPlusSignInBody(): void
+    {
+        $target = new TokenRequestBuilder($this->createConfig(), new MockClient());
+
+        $actual = $target->build([
+            'code' => 'some code',
+            'redirect_uri' => 'some-redirect-uri',
+        ], new AuthorizationCode());
+
+        TestRequest::fromBaseRequest($actual)
+            ->assertBodyContains('code=some+code');
+    }
 }

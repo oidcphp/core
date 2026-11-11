@@ -52,7 +52,7 @@ class TokenRequestBuilder
 
         $request = $this->httpClient->createRequest('POST', $uri)
             ->withHeader('content-type', 'application/x-www-form-urlencoded')
-            ->withBody($this->httpClient->createStream(Query::build($parameters)));
+            ->withBody($this->httpClient->createStream(Query::buildFormBody($parameters)));
 
         $request = $clientAuthentication->processRequest($request);
 

@@ -45,7 +45,7 @@ class ClientSecretPost implements ClientAuthentication
         $parsedBody['client_secret'] = $this->secret;
 
         $body->rewind();
-        $body->write(Query::build($parsedBody) . "\0");
+        $body->write(Query::buildFormBody($parsedBody) . "\0");
 
         return $request->withBody($body);
     }
