@@ -67,3 +67,13 @@ jobs:
         uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+
+      # Test Analytics of Codecov. The JUnit XML is written by the logging section of phpunit.xml.dist.
+      # Uploaded even when the tests fail, so that failed and flaky tests are reported.
+      - name: Test results
+        if: ${{ !cancelled() }}
+        uses: codecov/codecov-action@v7
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          report_type: test_results
+          files: build/phpunit/phpunit.xml
