@@ -2,11 +2,17 @@
 
 namespace Tests\Unit\Jwt;
 
+use Jose\Component\Core\Algorithm;
+use Jose\Component\Encryption\Algorithm\KeyEncryption\Dir;
+use Jose\Component\Signature\Algorithm\EdDSA;
 use Jose\Component\Signature\Algorithm\ES256;
 use Jose\Component\Signature\Algorithm\RS256;
 use OpenIDConnect\Jwt\Concerns\AlgorithmFactory;
+use OutOfRangeException;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use ReflectionMethod;
 
 class AlgorithmFactoryTraitTest extends TestCase
 {
@@ -41,5 +47,105 @@ class AlgorithmFactoryTraitTest extends TestCase
 
         $this->assertInstanceOf(ES256::class, $actual[0]);
         $this->assertInstanceOf(RS256::class, $actual[1]);
+    }
+
+    #[Test]
+    public function shouldThrowExceptionWhenAliasIsUnknown(): void
+    {
+        $this->expectException(OutOfRangeException::class);
+
+        $this->target->createAlgorithm('Whatever');
+    }
+
+    #[Test]
+    public function shouldReturnInstanceWhenAliasIsEdDSA(): void
+    {
+        if (!extension_loaded('sodium')) {
+            $this->markTestSkipped('ext-sodium is not loaded');
+        }
+
+        $this->assertInstanceOf(EdDSA::class, $this->target->createAlgorithm('EdDSA'));
+        $this->assertSame('EdDSA', $this->target->createAlgorithm('EdDSA')->name());
+    }
+
+    #[Test]
+    public function shouldReturnInstanceWhenAliasIsDir(): void
+    {
+        $this->assertInstanceOf(Dir::class, $this->target->createAlgorithm('dir'));
+    }
+
+    #[Test]
+    #[DataProvider('experimentalAlgorithms')]
+    public function shouldReturnInstanceWhenAliasIsExperimentalAlgorithm(string $alias): void
+    {
+        if (!class_exists('Jose\\Experimental\\KeyEncryption\\RSAOAEP384')) {
+            $this->markTestSkipped('web-token/jwt-experimental is not installed');
+        }
+
+        $this->assertTrue($this->target->hasAlgorithm($alias));
+        $this->assertSame($alias, $this->target->createAlgorithm($alias)->name());
+    }
+
+    public static function experimentalAlgorithms(): iterable
+    {
+        yield ['RSA-OAEP-384'];
+        yield ['RSA-OAEP-512'];
+        yield ['ES256K'];
+        yield ['HS1'];
+        yield ['HS256/64'];
+        yield ['RS1'];
+    }
+
+    #[Test]
+    public function shouldReturnFalseWhenAlgorithmCannotBeCreated(): void
+    {
+        $this->assertTrue($this->target->hasAlgorithm('RS256'));
+        $this->assertFalse($this->target->hasAlgorithm('Whatever'));
+    }
+
+    #[Test]
+    public function shouldReturnRegisteredInstanceWhenCallWithAlgorithm(): void
+    {
+        $custom = $this->createAlgorithmStub('CUSTOM');
+        $override = $this->createAlgorithmStub('RS256');
+
+        $this->assertFalse($this->target->hasAlgorithm('CUSTOM'));
+
+        $this->target->withAlgorithm($custom)->withAlgorithm([$override]);
+
+        $this->assertTrue($this->target->hasAlgorithm('CUSTOM'));
+        $this->assertSame($custom, $this->target->createAlgorithm('CUSTOM'));
+        $this->assertSame($override, $this->target->createAlgorithm('RS256'));
+    }
+
+    /**
+     * hasAlgorithm() hides the broken alias, so make sure every alias is still creatable
+     */
+    #[Test]
+    public function shouldCreateEveryAliasWhenAllPackagesAreInstalled(): void
+    {
+        if (!class_exists('AESKW\\A128KW') || !extension_loaded('sodium')) {
+            $this->markTestSkipped('Optional packages or extensions are not installed');
+        }
+
+        $hasExperimental = class_exists('Jose\\Experimental\\KeyEncryption\\RSAOAEP384');
+
+        $method = new ReflectionMethod($this->target, 'algorithmAliases');
+
+        foreach ($method->invoke($this->target) as $alias => $class) {
+            if (!$hasExperimental && str_starts_with($class, 'Jose\\Experimental\\')) {
+                continue;
+            }
+
+            $this->assertTrue($this->target->hasAlgorithm($alias), "Alias '$alias' cannot be created");
+        }
+    }
+
+    private function createAlgorithmStub(string $name): Algorithm
+    {
+        $stub = $this->createStub(Algorithm::class);
+        $stub->method('name')->willReturn($name);
+
+        return $stub;
     }
 }

@@ -4,6 +4,7 @@ namespace Tests\Unit\Jwt;
 
 use InvalidArgumentException;
 use Jose\Component\Checker\InvalidHeaderException;
+use Jose\Component\Core\Algorithm;
 use Jose\Component\Core\Util\JsonConverter;
 use Jose\Component\Encryption\Algorithm\ContentEncryption\A128GCM;
 use Jose\Component\Encryption\Algorithm\ContentEncryption\A192CBCHS384;
@@ -12,25 +13,97 @@ use Jose\Component\Signature\Algorithm\ES256;
 use Jose\Component\Signature\Algorithm\RS256;
 use Jose\Component\Signature\Serializer\CompactSerializer;
 use OpenIDConnect\Jwt\Factory as JwtFactory;
-use OutOfRangeException;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class JwtFactoryTest extends TestCase
 {
     #[Test]
-    public function shouldThrowExceptionWhenAlgorithmIsNotDefine(): void
+    public function shouldIgnoreAlgorithmWhenProviderAnnounceUnknownAlgorithm(): void
     {
-        $this->expectException(OutOfRangeException::class);
-
         $target = new JwtFactory($this->createConfig([
-            'id_token_signing_alg_values_supported' => ['Whatever'],
+            'id_token_signing_alg_values_supported' => ['RS256', 'Whatever'],
+            'id_token_encryption_alg_values_supported' => ['RSA-OAEP', 'Whatever-KW'],
         ]));
 
         $actual = $target->createAlgorithmManager();
 
         $this->assertInstanceOf(RS256::class, $actual->get('RS256'));
-        $this->assertInstanceOf(ES256::class, $actual->get('ES256'));
+        $this->assertTrue($actual->has('RSA-OAEP'));
+        $this->assertFalse($actual->has('Whatever'));
+        $this->assertFalse($actual->has('Whatever-KW'));
+    }
+
+    #[Test]
+    public function shouldRejectUnknownAlgorithmInHeaderCheckerManager(): void
+    {
+        $this->expectException(InvalidHeaderException::class);
+        $this->expectExceptionMessage('Unsupported algorithm');
+
+        $target = new JwtFactory($this->createConfig([
+            'id_token_signing_alg_values_supported' => ['RS256', 'Whatever'],
+        ]));
+
+        $actual = $target->createHeaderCheckerManager()->getCheckers()['alg'];
+
+        $this->assertNull($actual->checkHeader('RS256'));
+
+        $actual->checkHeader('Whatever');
+    }
+
+    #[Test]
+    public function shouldUseRegisteredAlgorithmWhenProviderAnnounceIt(): void
+    {
+        $algorithm = $this->createStub(Algorithm::class);
+        $algorithm->method('name')->willReturn('Whatever');
+
+        $target = new JwtFactory($this->createConfig([
+            'id_token_signing_alg_values_supported' => ['RS256', 'Whatever'],
+        ]));
+
+        $target->withAlgorithm($algorithm);
+
+        $this->assertSame($algorithm, $target->createAlgorithmManager()->get('Whatever'));
+        $this->assertNull($target->createHeaderCheckerManager()->getCheckers()['alg']->checkHeader('Whatever'));
+    }
+
+    #[Test]
+    public function shouldNotAllowRegisteredAlgorithmWhenProviderDoesNotAnnounceIt(): void
+    {
+        $algorithm = $this->createStub(Algorithm::class);
+        $algorithm->method('name')->willReturn('Whatever');
+
+        $target = new JwtFactory($this->createConfig());
+
+        $target->withAlgorithm($algorithm);
+
+        $this->assertFalse($target->createAlgorithmManager()->has('Whatever'));
+    }
+
+    /**
+     * @see https://github.com/oidcphp/core/issues/10
+     */
+    #[Test]
+    public function shouldSignAndLoadUsingRS256WhenProviderAnnounceExperimentalAlgorithm(): void
+    {
+        $target = new JwtFactory($this->createConfig([
+            'id_token_signing_alg_values_supported' => ['RS256', 'EdDSA'],
+            'id_token_encryption_alg_values_supported' => ['RSA-OAEP', 'RSA-OAEP-256', 'RSA-OAEP-384'],
+            'id_token_encryption_enc_values_supported' => ['A256GCM'],
+        ]));
+
+        $jwk = JWKFactory::createRSAKey(1024, ['alg' => 'RS256']);
+
+        $jws = $target->createJwsBuilder()
+            ->withPayload(JsonConverter::encode([]))
+            ->addSignature($jwk, ['alg' => 'RS256'])
+            ->build();
+
+        $token = (new CompactSerializer())->serialize($jws);
+
+        $actual = $target->createJwsLoader()->loadAndVerifyWithKey($token, $jwk, $sign);
+
+        $this->assertSame('[]', $actual->getPayload());
     }
 
     #[Test]
