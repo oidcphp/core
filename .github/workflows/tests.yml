@@ -13,10 +13,11 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        php: [ 8.4, 8.3, 8.2 ]
+        php: [ 8.5, 8.4, 8.3, 8.2 ]
         stability: [ prefer-lowest, prefer-stable ]
+        jwt-library: [ 3, 4 ]
 
-    name: PHP ${{ matrix.php }} - ${{ matrix.stability }}
+    name: PHP ${{ matrix.php }} - ${{ matrix.stability }} - jwt-library ${{ matrix.jwt-library }}.x
 
     steps:
       - name: Checkout code
@@ -34,7 +35,8 @@ jobs:
         with:
           timeout_minutes: 5
           max_attempts: 5
-          command: composer update --${{ matrix.stability }} --prefer-dist --no-interaction --no-progress
+          # `--with` narrows the constraint in composer.json to one major version of web-token/jwt-library
+          command: composer update --${{ matrix.stability }} --with web-token/jwt-library:^${{ matrix.jwt-library }} --prefer-dist --no-interaction --no-progress
 
       - name: Audit dependencies
         if: matrix.stability == 'prefer-stable'
@@ -44,9 +46,9 @@ jobs:
         uses: actions/cache@v6
         with:
           path: .cache
-          key: static-analysis-php${{ matrix.php }}-${{ matrix.stability }}-${{ hashFiles('composer.json') }}-${{ github.sha }}
+          key: static-analysis-php${{ matrix.php }}-${{ matrix.stability }}-jwt${{ matrix.jwt-library }}-${{ hashFiles('composer.json') }}-${{ github.sha }}
           restore-keys: |
-            static-analysis-php${{ matrix.php }}-${{ matrix.stability }}-${{ hashFiles('composer.json') }}-
+            static-analysis-php${{ matrix.php }}-${{ matrix.stability }}-jwt${{ matrix.jwt-library }}-${{ hashFiles('composer.json') }}-
             static-analysis-php${{ matrix.php }}-
 
       - name: Execute phpcs
