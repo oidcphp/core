@@ -77,7 +77,8 @@ HTML;
      */
     private static function formFields(array $parameters): array
     {
-        $query = Query::build($parameters);
+        // buildUriQuery() encodes per RFC 3986, which rawurldecode() reverses
+        $query = Query::buildUriQuery($parameters);
 
         if ($query === '') {
             return [];

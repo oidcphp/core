@@ -56,6 +56,18 @@ class HtmlTest extends TestCase
     }
 
     #[Test]
+    public function shouldKeepSpacesAndPlusSignsInFieldValues(): void
+    {
+        $actual = Html::formPost('https://somewhere/auth', [
+            'scope' => 'openid profile',
+            'login_hint' => 'a+b@example.com',
+        ]);
+
+        $this->assertStringContainsString('name="scope" value="openid profile"', $actual);
+        $this->assertStringContainsString('name="login_hint" value="a+b@example.com"', $actual);
+    }
+
+    #[Test]
     public function shouldBuildFormPostWithoutFields(): void
     {
         $actual = Html::formPost('https://somewhere/auth');
