@@ -4,6 +4,13 @@ declare(strict_types=1);
 
 namespace OpenIDConnect\Http;
 
+use function array_map;
+use function array_pad;
+use function explode;
+use function htmlspecialchars;
+use function implode;
+use function rawurldecode;
+
 /**
  * HTML helpers for the responses built by the library
  *
