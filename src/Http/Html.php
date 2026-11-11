@@ -11,6 +11,10 @@ use function htmlspecialchars;
 use function implode;
 use function rawurldecode;
 
+use const ENT_HTML5;
+use const ENT_QUOTES;
+use const ENT_SUBSTITUTE;
+
 /**
  * HTML helpers for the responses built by the library
  *
