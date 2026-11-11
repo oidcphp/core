@@ -1,7 +1,7 @@
 # OpenID Connect Core Library for PHP
 
 ![tests](https://github.com/oidcphp/core/workflows/tests/badge.svg)
-[![Coverage Status](https://codecov.io/gh/oidcphp/core/branch/master/graph/badge.svg)](https://codecov.io/gh/oidcphp/core)
+[![Coverage Status](https://codecov.io/gh/oidcphp/core/branch/0.x/graph/badge.svg)](https://codecov.io/gh/oidcphp/core)
 [![Latest Stable Version](https://poser.pugx.org/oidc/core/v/stable)](https://packagist.org/packages/oidc/core)
 [![Total Downloads](https://poser.pugx.org/oidc/core/d/total.svg)](https://packagist.org/packages/oidc/core)
 [![License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://github.com/oidcphp/core/blob/master/LICENSE)
