@@ -3,6 +3,7 @@
 namespace OpenIDConnect\Traits;
 
 use MilesChou\Psr\Http\Client\HttpClientAwareTrait;
+use OpenIDConnect\Http\Html;
 use OpenIDConnect\Http\Query;
 use Psr\Http\Message\UriInterface;
 
@@ -28,11 +29,11 @@ trait Psr7ResponseBuilder
     protected function generateFormPostHtml(string $uri, array $parameters = []): string
     {
         $formInput = implode('', array_map(function (array $field) {
-            return '<input type="hidden" name="' . $this->escapeHtml($field[0])
-                . '" value="' . $this->escapeHtml($field[1]) . '"/>';
+            return '<input type="hidden" name="' . Html::escape($field[0])
+                . '" value="' . Html::escape($field[1]) . '"/>';
         }, $this->formFields($parameters)));
 
-        $action = $this->escapeHtml($uri);
+        $action = Html::escape($uri);
 
         return <<< HTML
 <!DOCTYPE html>
@@ -64,11 +65,6 @@ HTML;
 
             return [rawurldecode($name), rawurldecode($value)];
         }, explode('&', $query));
-    }
-
-    private function escapeHtml(string $value): string
-    {
-        return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, 'UTF-8');
     }
 
     /**
