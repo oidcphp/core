@@ -4,7 +4,8 @@ on:
   pull_request:
   push:
     branches:
-      - master
+      - 0.x
+      - 1.x
 
 jobs:
   linux_tests:
